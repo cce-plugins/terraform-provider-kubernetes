@@ -4518,7 +4518,7 @@ func (s *BackendServicesScopedListWarningData) MarshalJSON() ([]byte, error) {
 // Binding: Associates `members` with a `role`.
 type Binding struct {
 	// Condition: The condition that is associated with this binding. NOTE:
-	// an unsatisfied condition will not allow user access via current
+	// An unsatisfied condition will not allow user access via current
 	// binding. Different bindings, including their conditions, are examined
 	// independently.
 	Condition *Expr `json:"condition,omitempty"`
@@ -7316,7 +7316,7 @@ type FixedOrPercent struct {
 	// based on the specific mode.
 	//
 	//
-	// - If the value is fixed, then the caculated value is equal to the
+	// - If the value is fixed, then the calculated value is equal to the
 	// fixed value.
 	// - If the value is a percent, then the calculated value is percent/100
 	// * targetSize. For example, the calculated value of a 80% of a managed
@@ -8506,10 +8506,10 @@ type HealthCheck struct {
 	// greater value than checkIntervalSec.
 	TimeoutSec int64 `json:"timeoutSec,omitempty"`
 
-	// Type: Specifies the type of the healthCheck, either TCP, SSL, HTTP or
-	// HTTPS. If not specified, the default is TCP. Exactly one of the
-	// protocol-specific health check field must be specified, which must
-	// match type field.
+	// Type: Specifies the type of the healthCheck, either TCP, SSL, HTTP,
+	// HTTPS or HTTP2. If not specified, the default is TCP. Exactly one of
+	// the protocol-specific health check field must be specified, which
+	// must match type field.
 	//
 	// Possible values:
 	//   "HTTP"
@@ -10597,12 +10597,12 @@ type InstanceGroupManager struct {
 	// Versions: Specifies the instance templates used by this managed
 	// instance group to create instances.
 	//
-	// Each version is defined by an instanceTemplate. Every template can
-	// appear at most once per instance group. This field overrides the
-	// top-level instanceTemplate field. Read more about the relationships
-	// between these fields. Exactly one version must leave the targetSize
-	// field unset. That version will be applied to all remaining instances.
-	// For more information, read about canary updates.
+	// Each version is defined by an instanceTemplate and a name. Every
+	// version can appear at most once per instance group. This field
+	// overrides the top-level instanceTemplate field. Read more about the
+	// relationships between these fields. Exactly one version must leave
+	// the targetSize field unset. That version will be applied to all
+	// remaining instances. For more information, read about canary updates.
 	Versions []*InstanceGroupManagerVersion `json:"versions,omitempty"`
 
 	// Zone: [Output Only] The URL of the zone where the managed instance
@@ -11172,6 +11172,10 @@ func (s *InstanceGroupManagerUpdatePolicy) MarshalJSON() ([]byte, error) {
 }
 
 type InstanceGroupManagerVersion struct {
+	// InstanceTemplate: The URL of the instance template that is specified
+	// for this managed instance group. The group uses this template to
+	// create new instances in the managed instance group until the
+	// `targetSize` for this version is reached.
 	InstanceTemplate string `json:"instanceTemplate,omitempty"`
 
 	// Name: Name of the version. Unique among all versions in the scope of
@@ -17500,8 +17504,10 @@ func (s *NetworksRemovePeeringRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// NodeGroup: A NodeGroup resource. (== resource_for beta.nodeGroups ==)
-// (== resource_for v1.nodeGroups ==)
+// NodeGroup: A NodeGroup resource. To create a node group, you must
+// first create a node templates. To learn more about node groups and
+// sole-tenant nodes, read the Sole-tenant nodes documentation. (==
+// resource_for beta.nodeGroups ==) (== resource_for v1.nodeGroups ==)
 type NodeGroup struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -18302,7 +18308,10 @@ func (s *NodeGroupsSetNodeTemplateRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// NodeTemplate: A Node Template resource.
+// NodeTemplate: A Node Template resource. To learn more about node
+// templates and sole-tenant nodes, read the Sole-tenant nodes
+// documentation. (== resource_for beta.nodeTemplates ==) (==
+// resource_for v1.nodeTemplates ==)
 type NodeTemplate struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -31065,7 +31074,7 @@ func (s *XpnResourceId) MarshalJSON() ([]byte, error) {
 }
 
 // Zone: A Zone resource. (== resource_for beta.zones ==) (==
-// resource_for v1.zones ==)
+// resource_for v1.zones ==) Next ID: 17
 type Zone struct {
 	// AvailableCpuPlatforms: [Output Only] Available cpu/platform
 	// selections for the zone.

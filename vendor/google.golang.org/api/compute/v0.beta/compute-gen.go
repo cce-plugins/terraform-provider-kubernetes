@@ -2480,6 +2480,11 @@ type AttachedDiskInitializeParams struct {
 	// persistent disks.
 	Labels map[string]string `json:"labels,omitempty"`
 
+	// ResourcePolicies: Resource policies applied to this disk for
+	// automatic snapshot creations. Specified using the full or partial
+	// URL. For instance template, specify only the resource policy name.
+	ResourcePolicies []string `json:"resourcePolicies,omitempty"`
+
 	// SourceImage: The source image to create this disk. When creating a
 	// new instance, one of initializeParams.sourceImage or disks.source is
 	// required except for local SSD.
@@ -2522,6 +2527,23 @@ type AttachedDiskInitializeParams struct {
 	// you cannot create disks for instances in a managed instance group if
 	// the source images are encrypted with your own keys.
 	SourceImageEncryptionKey *CustomerEncryptionKey `json:"sourceImageEncryptionKey,omitempty"`
+
+	// SourceSnapshot: The source snapshot to create this disk. When
+	// creating a new instance, one of initializeParams.sourceSnapshot or
+	// disks.source is required except for local SSD.
+	//
+	// To create a disk with a snapshot that you created, specify the
+	// snapshot name in the following
+	// format:
+	// global/snapshots/my-backup
+	//
+	//
+	// If the source snapshot is deleted later, this field will not be set.
+	SourceSnapshot string `json:"sourceSnapshot,omitempty"`
+
+	// SourceSnapshotEncryptionKey: The customer-supplied encryption key of
+	// the source snapshot.
+	SourceSnapshotEncryptionKey *CustomerEncryptionKey `json:"sourceSnapshotEncryptionKey,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Description") to
 	// unconditionally include in API requests. By default, fields with
@@ -4899,7 +4921,7 @@ func (s *BackendServicesScopedListWarningData) MarshalJSON() ([]byte, error) {
 // Binding: Associates `members` with a `role`.
 type Binding struct {
 	// Condition: The condition that is associated with this binding. NOTE:
-	// an unsatisfied condition will not allow user access via current
+	// An unsatisfied condition will not allow user access via current
 	// binding. Different bindings, including their conditions, are examined
 	// independently.
 	Condition *Expr `json:"condition,omitempty"`
@@ -8307,7 +8329,7 @@ type FixedOrPercent struct {
 	// based on the specific mode.
 	//
 	//
-	// - If the value is fixed, then the caculated value is equal to the
+	// - If the value is fixed, then the calculated value is equal to the
 	// fixed value.
 	// - If the value is a percent, then the calculated value is percent/100
 	// * targetSize. For example, the calculated value of a 80% of a managed
@@ -9643,10 +9665,10 @@ type HealthCheck struct {
 	// greater value than checkIntervalSec.
 	TimeoutSec int64 `json:"timeoutSec,omitempty"`
 
-	// Type: Specifies the type of the healthCheck, either TCP, SSL, HTTP or
-	// HTTPS. If not specified, the default is TCP. Exactly one of the
-	// protocol-specific health check field must be specified, which must
-	// match type field.
+	// Type: Specifies the type of the healthCheck, either TCP, SSL, HTTP,
+	// HTTPS or HTTP2. If not specified, the default is TCP. Exactly one of
+	// the protocol-specific health check field must be specified, which
+	// must match type field.
 	//
 	// Possible values:
 	//   "HTTP"
@@ -11726,9 +11748,12 @@ type InstanceGroupManager struct {
 	// complementary to this Instance Group Manager.
 	NamedPorts []*NamedPort `json:"namedPorts,omitempty"`
 
-	// PendingActions: [Output Only] The list of instance actions and the
-	// number of instances in this managed instance group that are pending
-	// for each of those actions.
+	// PendingActions: [Deprecated] This field is deprecated and will be
+	// removed. Prefer using the status field instead. Please contact
+	// cloud-updater-feedback@google.com to leave feedback if your workload
+	// relies on this field. [Output Only] The list of instance actions and
+	// the number of instances in this managed instance group that are
+	// pending for each of those actions.
 	PendingActions *InstanceGroupManagerPendingActionsSummary `json:"pendingActions,omitempty"`
 
 	// Region: [Output Only] The URL of the region where the managed
@@ -11765,12 +11790,12 @@ type InstanceGroupManager struct {
 	// Versions: Specifies the instance templates used by this managed
 	// instance group to create instances.
 	//
-	// Each version is defined by an instanceTemplate. Every template can
-	// appear at most once per instance group. This field overrides the
-	// top-level instanceTemplate field. Read more about the relationships
-	// between these fields. Exactly one version must leave the targetSize
-	// field unset. That version will be applied to all remaining instances.
-	// For more information, read about canary updates.
+	// Each version is defined by an instanceTemplate and a name. Every
+	// version can appear at most once per instance group. This field
+	// overrides the top-level instanceTemplate field. Read more about the
+	// relationships between these fields. Exactly one version must leave
+	// the targetSize field unset. That version will be applied to all
+	// remaining instances. For more information, read about canary updates.
 	Versions []*InstanceGroupManagerVersion `json:"versions,omitempty"`
 
 	// Zone: [Output Only] The URL of the zone where the managed instance
@@ -12236,20 +12261,32 @@ func (s *InstanceGroupManagerListWarningData) MarshalJSON() ([]byte, error) {
 }
 
 type InstanceGroupManagerPendingActionsSummary struct {
-	// Creating: [Output Only] The number of instances in the managed
-	// instance group that are pending to be created.
+	// Creating: [Deprecated] This field is deprecated and will be removed.
+	// Prefer using the status field instead. Please contact
+	// cloud-updater-feedback@google.com to leave feedback if your workload
+	// relies on this field. [Output Only] The number of instances in the
+	// managed instance group that are pending to be created.
 	Creating int64 `json:"creating,omitempty"`
 
-	// Deleting: [Output Only] The number of instances in the managed
-	// instance group that are pending to be deleted.
+	// Deleting: [Deprecated] This field is deprecated and will be removed.
+	// Prefer using the status field instead. Please contact
+	// cloud-updater-feedback@google.com to leave feedback if your workload
+	// relies on this field. [Output Only] The number of instances in the
+	// managed instance group that are pending to be deleted.
 	Deleting int64 `json:"deleting,omitempty"`
 
-	// Recreating: [Output Only] The number of instances in the managed
-	// instance group that are pending to be recreated.
+	// Recreating: [Deprecated] This field is deprecated and will be
+	// removed. Prefer using the status field instead. Please contact
+	// cloud-updater-feedback@google.com to leave feedback if your workload
+	// relies on this field. [Output Only] The number of instances in the
+	// managed instance group that are pending to be recreated.
 	Recreating int64 `json:"recreating,omitempty"`
 
-	// Restarting: [Output Only] The number of instances in the managed
-	// instance group that are pending to be restarted.
+	// Restarting: [Deprecated] This field is deprecated and will be
+	// removed. Prefer using the status field instead. Please contact
+	// cloud-updater-feedback@google.com to leave feedback if your workload
+	// relies on this field. [Output Only] The number of instances in the
+	// managed instance group that are pending to be restarted.
 	Restarting int64 `json:"restarting,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Creating") to
@@ -12343,6 +12380,11 @@ func (s *InstanceGroupManagerStatusVersionTarget) MarshalJSON() ([]byte, error) 
 }
 
 type InstanceGroupManagerUpdatePolicy struct {
+	// Possible values:
+	//   "NONE"
+	//   "PROACTIVE"
+	InstanceRedistributionType string `json:"instanceRedistributionType,omitempty"`
+
 	// MaxSurge: The maximum number of instances that can be created above
 	// the specified targetSize during the update process. By default, a
 	// fixed value of 1 is used. This value can be either a fixed number or
@@ -12396,20 +12438,22 @@ type InstanceGroupManagerUpdatePolicy struct {
 	//   "PROACTIVE"
 	Type string `json:"type,omitempty"`
 
-	// ForceSendFields is a list of field names (e.g. "MaxSurge") to
-	// unconditionally include in API requests. By default, fields with
-	// empty values are omitted from API requests. However, any non-pointer,
-	// non-interface field appearing in ForceSendFields will be sent to the
-	// server regardless of whether the field is empty or not. This may be
-	// used to include empty fields in Patch requests.
+	// ForceSendFields is a list of field names (e.g.
+	// "InstanceRedistributionType") to unconditionally include in API
+	// requests. By default, fields with empty values are omitted from API
+	// requests. However, any non-pointer, non-interface field appearing in
+	// ForceSendFields will be sent to the server regardless of whether the
+	// field is empty or not. This may be used to include empty fields in
+	// Patch requests.
 	ForceSendFields []string `json:"-"`
 
-	// NullFields is a list of field names (e.g. "MaxSurge") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
+	// NullFields is a list of field names (e.g.
+	// "InstanceRedistributionType") to include in API requests with the
+	// JSON null value. By default, fields with empty values are omitted
+	// from API requests. However, any field with an empty value appearing
+	// in NullFields will be sent to the server as null. It is an error if a
+	// field in this list has a non-empty value. This may be used to include
+	// null fields in Patch requests.
 	NullFields []string `json:"-"`
 }
 
@@ -12420,6 +12464,10 @@ func (s *InstanceGroupManagerUpdatePolicy) MarshalJSON() ([]byte, error) {
 }
 
 type InstanceGroupManagerVersion struct {
+	// InstanceTemplate: The URL of the instance template that is specified
+	// for this managed instance group. The group uses this template to
+	// create new instances in the managed instance group until the
+	// `targetSize` for this version is reached.
 	InstanceTemplate string `json:"instanceTemplate,omitempty"`
 
 	// Name: Name of the version. Unique among all versions in the scope of
@@ -19023,8 +19071,10 @@ func (s *NetworksUpdatePeeringRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// NodeGroup: A NodeGroup resource. (== resource_for beta.nodeGroups ==)
-// (== resource_for v1.nodeGroups ==)
+// NodeGroup: A NodeGroup resource. To create a node group, you must
+// first create a node templates. To learn more about node groups and
+// sole-tenant nodes, read the Sole-tenant nodes documentation. (==
+// resource_for beta.nodeGroups ==) (== resource_for v1.nodeGroups ==)
 type NodeGroup struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -19828,7 +19878,10 @@ func (s *NodeGroupsSetNodeTemplateRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// NodeTemplate: A Node Template resource.
+// NodeTemplate: A Node Template resource. To learn more about node
+// templates and sole-tenant nodes, read the Sole-tenant nodes
+// documentation. (== resource_for beta.nodeTemplates ==) (==
+// resource_for v1.nodeTemplates ==)
 type NodeTemplate struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -24672,6 +24725,15 @@ type ResourcePolicy struct {
 	// creating snapshots.
 	SnapshotSchedulePolicy *ResourcePolicySnapshotSchedulePolicy `json:"snapshotSchedulePolicy,omitempty"`
 
+	// Status: [Output Only] The status of resource policy creation.
+	//
+	// Possible values:
+	//   "CREATING"
+	//   "DELETING"
+	//   "INVALID"
+	//   "READY"
+	Status string `json:"status,omitempty"`
+
 	// ServerResponse contains the HTTP response code and headers from the
 	// server.
 	googleapi.ServerResponse `json:"-"`
@@ -25390,6 +25452,12 @@ type Route struct {
 	// https://www.googleapis.com/compute/v1/projects/project/zones/
 	// zone/instances/
 	NextHopInstance string `json:"nextHopInstance,omitempty"`
+
+	// NextHopInterconnectAttachment: [Output Only] The URL to an
+	// InterconnectAttachment which is the next hop for the route. This
+	// field will only be populated for the dynamic routes generated by
+	// Cloud Router with a linked interconnectAttachment.
+	NextHopInterconnectAttachment string `json:"nextHopInterconnectAttachment,omitempty"`
 
 	// NextHopIp: The network IP address of an instance that should handle
 	// matching packets. Only IPv4 is supported.
@@ -35588,7 +35656,7 @@ func (s *XpnResourceId) MarshalJSON() ([]byte, error) {
 }
 
 // Zone: A Zone resource. (== resource_for beta.zones ==) (==
-// resource_for v1.zones ==)
+// resource_for v1.zones ==) Next ID: 17
 type Zone struct {
 	// AvailableCpuPlatforms: [Output Only] Available cpu/platform
 	// selections for the zone.
