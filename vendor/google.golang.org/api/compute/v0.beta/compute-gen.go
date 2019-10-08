@@ -76,7 +76,7 @@ var _ = context.Canceled
 const apiId = "compute:beta"
 const apiName = "compute"
 const apiVersion = "beta"
-const basePath = "https://www.googleapis.com/compute/beta/projects/"
+const basePath = "https://compute.googleapis.com/compute/beta/projects/"
 
 // OAuth2 scopes used by this API.
 const (
@@ -173,9 +173,14 @@ func New(client *http.Client) (*Service, error) {
 	s.RegionCommitments = NewRegionCommitmentsService(s)
 	s.RegionDiskTypes = NewRegionDiskTypesService(s)
 	s.RegionDisks = NewRegionDisksService(s)
+	s.RegionHealthChecks = NewRegionHealthChecksService(s)
 	s.RegionInstanceGroupManagers = NewRegionInstanceGroupManagersService(s)
 	s.RegionInstanceGroups = NewRegionInstanceGroupsService(s)
 	s.RegionOperations = NewRegionOperationsService(s)
+	s.RegionSslCertificates = NewRegionSslCertificatesService(s)
+	s.RegionTargetHttpProxies = NewRegionTargetHttpProxiesService(s)
+	s.RegionTargetHttpsProxies = NewRegionTargetHttpsProxiesService(s)
+	s.RegionUrlMaps = NewRegionUrlMapsService(s)
 	s.Regions = NewRegionsService(s)
 	s.Reservations = NewReservationsService(s)
 	s.ResourcePolicies = NewResourcePoliciesService(s)
@@ -282,11 +287,21 @@ type Service struct {
 
 	RegionDisks *RegionDisksService
 
+	RegionHealthChecks *RegionHealthChecksService
+
 	RegionInstanceGroupManagers *RegionInstanceGroupManagersService
 
 	RegionInstanceGroups *RegionInstanceGroupsService
 
 	RegionOperations *RegionOperationsService
+
+	RegionSslCertificates *RegionSslCertificatesService
+
+	RegionTargetHttpProxies *RegionTargetHttpProxiesService
+
+	RegionTargetHttpsProxies *RegionTargetHttpsProxiesService
+
+	RegionUrlMaps *RegionUrlMapsService
 
 	Regions *RegionsService
 
@@ -682,6 +697,15 @@ type RegionDisksService struct {
 	s *Service
 }
 
+func NewRegionHealthChecksService(s *Service) *RegionHealthChecksService {
+	rs := &RegionHealthChecksService{s: s}
+	return rs
+}
+
+type RegionHealthChecksService struct {
+	s *Service
+}
+
 func NewRegionInstanceGroupManagersService(s *Service) *RegionInstanceGroupManagersService {
 	rs := &RegionInstanceGroupManagersService{s: s}
 	return rs
@@ -706,6 +730,42 @@ func NewRegionOperationsService(s *Service) *RegionOperationsService {
 }
 
 type RegionOperationsService struct {
+	s *Service
+}
+
+func NewRegionSslCertificatesService(s *Service) *RegionSslCertificatesService {
+	rs := &RegionSslCertificatesService{s: s}
+	return rs
+}
+
+type RegionSslCertificatesService struct {
+	s *Service
+}
+
+func NewRegionTargetHttpProxiesService(s *Service) *RegionTargetHttpProxiesService {
+	rs := &RegionTargetHttpProxiesService{s: s}
+	return rs
+}
+
+type RegionTargetHttpProxiesService struct {
+	s *Service
+}
+
+func NewRegionTargetHttpsProxiesService(s *Service) *RegionTargetHttpsProxiesService {
+	rs := &RegionTargetHttpsProxiesService{s: s}
+	return rs
+}
+
+type RegionTargetHttpsProxiesService struct {
+	s *Service
+}
+
+func NewRegionUrlMapsService(s *Service) *RegionUrlMapsService {
+	rs := &RegionUrlMapsService{s: s}
+	return rs
+}
+
+type RegionUrlMapsService struct {
 	s *Service
 }
 
@@ -946,7 +1006,12 @@ func (s *AcceleratorConfig) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// AcceleratorType: An Accelerator Type resource. (== resource_for
+// AcceleratorType: Represents an Accelerator Type resource.
+//
+// Google Cloud Platform provides graphics processing units
+// (accelerators) that you can add to VM instances to improve or
+// accelerate performance when working with intensive workloads. For
+// more information, read GPUs on Compute Engine. (== resource_for
 // beta.acceleratorTypes ==) (== resource_for v1.acceleratorTypes ==)
 type AcceleratorType struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
@@ -1469,8 +1534,8 @@ type AccessConfig struct {
 	Kind string `json:"kind,omitempty"`
 
 	// Name: The name of this access configuration. The default and
-	// recommended name is External NAT but you can use any arbitrary string
-	// you would like. For example, My external IP or Network Access.
+	// recommended name is External NAT, but you can use any arbitrary
+	// string, such as My external IP or Network Access.
 	Name string `json:"name,omitempty"`
 
 	// NatIP: An external IP address associated with this instance. Specify
@@ -1497,10 +1562,10 @@ type AccessConfig struct {
 	NetworkTier string `json:"networkTier,omitempty"`
 
 	// PublicPtrDomainName: The DNS domain name for the public PTR record.
-	// This field can only be set when the set_public_ptr field is enabled.
+	// You can set this field only if the `setPublicPtr` field is enabled.
 	PublicPtrDomainName string `json:"publicPtrDomainName,omitempty"`
 
-	// SetPublicPtr: Specifies whether a public DNS ?PTR? record should be
+	// SetPublicPtr: Specifies whether a public DNS 'PTR' record should be
 	// created to map the external IP address of the instance to a DNS
 	// domain name.
 	SetPublicPtr bool `json:"setPublicPtr,omitempty"`
@@ -1535,9 +1600,25 @@ func (s *AccessConfig) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Address: A reserved address resource. (== resource_for beta.addresses
-// ==) (== resource_for v1.addresses ==) (== resource_for
-// beta.globalAddresses ==) (== resource_for v1.globalAddresses ==)
+// Address: Represents an IP Address resource.
+//
+// An address resource represents a regional internal IP address.
+// Regional internal IP addresses are RFC 1918 addresses that come from
+// either a primary or secondary IP range of a subnet in a VPC network.
+// Regional external IP addresses can be assigned to GCP VM instances,
+// Cloud VPN gateways, regional external forwarding rules for network
+// load balancers (in either Standard or Premium Tier), and regional
+// external forwarding rules for HTTP(S), SSL Proxy, and TCP Proxy load
+// balancers in Standard Tier. For more information, read IP
+// addresses.
+//
+// A globalAddresses resource represent a global external IP address.
+// Global external IP addresses are IPv4 or IPv6 addresses. They can
+// only be assigned to global forwarding rules for HTTP(S), SSL Proxy,
+// or TCP Proxy load balancers in Premium Tier. For more information,
+// read Global resources. (== resource_for beta.addresses ==) (==
+// resource_for v1.addresses ==) (== resource_for beta.globalAddresses
+// ==) (== resource_for v1.globalAddresses ==)
 type Address struct {
 	// Address: The static IP address represented by this resource.
 	Address string `json:"address,omitempty"`
@@ -1556,14 +1637,14 @@ type Address struct {
 	CreationTimestamp string `json:"creationTimestamp,omitempty"`
 
 	// Description: An optional description of this resource. Provide this
-	// property when you create the resource.
+	// field when you create the resource.
 	Description string `json:"description,omitempty"`
 
 	// Id: [Output Only] The unique identifier for the resource. This
 	// identifier is defined by the server.
 	Id uint64 `json:"id,omitempty,string"`
 
-	// IpVersion: The IP Version that will be used by this address. Valid
+	// IpVersion: The IP version that will be used by this address. Valid
 	// options are IPV4 or IPV6. This can only be specified for a global
 	// address.
 	//
@@ -1597,23 +1678,24 @@ type Address struct {
 	// Name: Name of the resource. Provided by the client when the resource
 	// is created. The name must be 1-63 characters long, and comply with
 	// RFC1035. Specifically, the name must be 1-63 characters long and
-	// match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
-	// the first character must be a lowercase letter, and all following
-	// characters must be a dash, lowercase letter, or digit, except the
-	// last character, which cannot be a dash.
+	// match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?`. The first
+	// character must be a lowercase letter, and all following characters
+	// (except for the last character) must be a dash, lowercase letter, or
+	// digit. The last character must be a lowercase letter or digit.
 	Name string `json:"name,omitempty"`
 
 	// Network: The URL of the network in which to reserve the address. This
-	// field can only be used with INTERNAL type with VPC_PEERING purpose.
+	// field can only be used with INTERNAL type with the VPC_PEERING
+	// purpose.
 	Network string `json:"network,omitempty"`
 
 	// NetworkTier: This signifies the networking tier used for configuring
-	// this Address and can only take the following values: PREMIUM,
+	// this address and can only take the following values: PREMIUM or
 	// STANDARD. Global forwarding rules can only be Premium Tier. Regional
 	// forwarding rules can be either Premium or Standard Tier. Standard
 	// Tier addresses applied to regional forwarding rules can be used with
 	// any external load balancer. Regional forwarding rules in Premium Tier
-	// can only be used with a Network load balancer.
+	// can only be used with a network load balancer.
 	//
 	// If this field is not specified, it is assumed to be PREMIUM.
 	//
@@ -1626,7 +1708,15 @@ type Address struct {
 	// range.
 	PrefixLength int64 `json:"prefixLength,omitempty"`
 
-	// Purpose: The purpose of resource, only used with INTERNAL type.
+	// Purpose: The purpose of this resource, which can be one of the
+	// following values:
+	// - `GCE_ENDPOINT` for addresses that are used by VM instances, alias
+	// IP ranges, internal load balancers, and similar resources.
+	// - `DNS_RESOLVER` for a DNS resolver address in a subnetwork
+	// - `VPC_PEERING` for addresses that are reserved for VPC peer
+	// networks.
+	// - `NAT_AUTO` for addresses that are external IP addresses
+	// automatically reserved for Cloud NAT.
 	//
 	// Possible values:
 	//   "DNS_RESOLVER"
@@ -1635,10 +1725,9 @@ type Address struct {
 	//   "VPC_PEERING"
 	Purpose string `json:"purpose,omitempty"`
 
-	// Region: [Output Only] URL of the region where the regional address
-	// resides. This field is not applicable to global addresses. You must
-	// specify this field as part of the HTTP request URL. You cannot set
-	// this field in the request body.
+	// Region: [Output Only] The URL of the region where the regional
+	// address resides. This field is not applicable to global addresses.
+	// You must specify this field as part of the HTTP request URL.
 	Region string `json:"region,omitempty"`
 
 	// SelfLink: [Output Only] Server-defined URL for the resource.
@@ -1659,7 +1748,7 @@ type Address struct {
 	// Subnetwork: The URL of the subnetwork in which to reserve the
 	// address. If an IP address is specified, it must be within the
 	// subnetwork's IP range. This field can only be used with INTERNAL type
-	// with GCE_ENDPOINT/DNS_RESOLVER purposes.
+	// with a GCE_ENDPOINT or DNS_RESOLVER purpose.
 	Subnetwork string `json:"subnetwork,omitempty"`
 
 	// Users: [Output Only] The URLs of the resources that are using this
@@ -2139,17 +2228,17 @@ func (s *AddressesScopedListWarningData) MarshalJSON() ([]byte, error) {
 // AliasIpRange: An alias IP range attached to an instance's network
 // interface.
 type AliasIpRange struct {
-	// IpCidrRange: The IP CIDR range represented by this alias IP range.
-	// This IP CIDR range must belong to the specified subnetwork and cannot
+	// IpCidrRange: The IP alias ranges to allocate for this interface. This
+	// IP CIDR range must belong to the specified subnetwork and cannot
 	// contain IP addresses reserved by system or used by other network
-	// interfaces. This range may be a single IP address (e.g. 10.2.3.4), a
-	// netmask (e.g. /24) or a CIDR format string (e.g. 10.1.2.0/24).
+	// interfaces. This range may be a single IP address (such as 10.2.3.4),
+	// a netmask (such as /24) or a CIDR-formatted string (such as
+	// 10.1.2.0/24).
 	IpCidrRange string `json:"ipCidrRange,omitempty"`
 
-	// SubnetworkRangeName: Optional subnetwork secondary range name
-	// specifying the secondary range from which to allocate the IP CIDR
-	// range for this alias IP range. If left unspecified, the primary range
-	// of the subnetwork will be used.
+	// SubnetworkRangeName: The name of a subnetwork secondary IP range from
+	// which to allocate an IP alias range. If not specified, the primary
+	// range of the subnetwork is used.
 	SubnetworkRangeName string `json:"subnetworkRangeName,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "IpCidrRange") to
@@ -2361,7 +2450,8 @@ type AttachedDisk struct {
 	// disks must always use SCSI and the request will fail if you attempt
 	// to attach a persistent disk in any other format than SCSI. Local SSDs
 	// can use either NVME or SCSI. For performance characteristics of SCSI
-	// over NVMe, see Local SSD performance.
+	// over NVMe, see Local SSD performance. TODO(b/131765817): Update
+	// documentation when NVME is supported.
 	//
 	// Possible values:
 	//   "NVME"
@@ -2712,13 +2802,21 @@ func (s *AuthorizationLoggingOptions) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Autoscaler: Represents an Autoscaler resource. Autoscalers allow you
-// to automatically scale virtual machine instances in managed instance
-// groups according to an autoscaling policy that you define. For more
-// information, read Autoscaling Groups of Instances. (== resource_for
-// beta.autoscalers ==) (== resource_for v1.autoscalers ==) (==
-// resource_for beta.regionAutoscalers ==) (== resource_for
-// v1.regionAutoscalers ==)
+// Autoscaler: Represents an Autoscaler resource.
+//
+//
+//
+// Use autoscalers to automatically add or delete instances from a
+// managed instance group according to your defined autoscaling policy.
+// For more information, read Autoscaling Groups of Instances.
+//
+// For zonal managed instance groups resource, use the autoscaler
+// resource.
+//
+// For regional managed instance groups, use the regionAutoscalers
+// resource. (== resource_for beta.autoscalers ==) (== resource_for
+// v1.autoscalers ==) (== resource_for beta.regionAutoscalers ==) (==
+// resource_for v1.regionAutoscalers ==)
 type Autoscaler struct {
 	// AutoscalingPolicy: The configuration parameters for the autoscaling
 	// algorithm. You can define one or more of the policies for an
@@ -3590,13 +3688,41 @@ func (s *AutoscalingPolicyLoadBalancingUtilization) UnmarshalJSON(data []byte) e
 
 // Backend: Message containing information of one individual backend.
 type Backend struct {
-	// BalancingMode: Specifies the balancing mode for this backend. For
-	// global HTTP(S) or TCP/SSL load balancing, the default is UTILIZATION.
-	// Valid values are UTILIZATION, RATE (for HTTP(S)) and CONNECTION (for
-	// TCP/SSL).
+	// BalancingMode: Specifies the balancing mode for the backend.
 	//
-	// For Internal Load Balancing, the default and only supported mode is
-	// CONNECTION.
+	// When choosing a balancing mode, you need to consider the
+	// loadBalancingScheme, and protocol for the backend service, as well as
+	// the type of backend (instance group or NEG).
+	//
+	//
+	// - If the load balancing mode is CONNECTION, then the load is spread
+	// based on how many concurrent connections the backend can handle.
+	// The CONNECTION balancing mode is only available if the protocol for
+	// the backend service is SSL, TCP, or UDP.
+	//
+	// If the loadBalancingScheme for the backend service is EXTERNAL (SSL
+	// Proxy and TCP Proxy load balancers), you must also specify exactly
+	// one of the following parameters: maxConnections,
+	// maxConnectionsPerInstance, or maxConnectionsPerEndpoint.
+	//
+	// If the loadBalancingScheme for the backend service is INTERNAL
+	// (internal TCP/UDP load balancers), you cannot specify any additional
+	// parameters.
+	//
+	// - If the load balancing mode is RATE, then the load is spread based
+	// on the rate of HTTP requests per second (RPS).
+	// The RATE balancing mode is only available if the protocol for the
+	// backend service is HTTP or HTTPS. You must specify exactly one of the
+	// following parameters: maxRate, maxRatePerInstance, or
+	// maxRatePerEndpoint.
+	//
+	// - If the load balancing mode is UTILIZATION, then the load is spread
+	// based on the CPU utilization of instances in an instance group.
+	// The UTILIZATION balancing mode is only available if the
+	// loadBalancingScheme of the backend service is EXTERNAL,
+	// INTERNAL_SELF_MANAGED, or INTERNAL_MANAGED and the backend is made up
+	// of instance groups. There are no restrictions on the backend service
+	// protocol.
 	//
 	// Possible values:
 	//   "CONNECTION"
@@ -3623,54 +3749,72 @@ type Backend struct {
 	// BackendService.
 	Failover bool `json:"failover,omitempty"`
 
-	// Group: The fully-qualified URL of an Instance Group or Network
-	// Endpoint Group resource. In case of instance group this defines the
-	// list of instances that serve traffic. Member virtual machine
-	// instances from each instance group must live in the same zone as the
-	// instance group itself. No two backends in a backend service are
-	// allowed to use same Instance Group resource.
+	// Group: The fully-qualified URL of an instance group or network
+	// endpoint group (NEG) resource. The type of backend that a backend
+	// service supports depends on the backend service's
+	// loadBalancingScheme.
 	//
-	// For Network Endpoint Groups this defines list of endpoints. All
-	// endpoints of Network Endpoint Group must be hosted on instances
-	// located in the same zone as the Network Endpoint Group.
 	//
-	// Backend service can not contain mix of Instance Group and Network
-	// Endpoint Group backends.
+	// - When the loadBalancingScheme for the backend service is EXTERNAL,
+	// INTERNAL_SELF_MANAGED, or INTERNAL_MANAGED, the backend can be either
+	// an instance group or a NEG. The backends on the backend service must
+	// be either all instance groups or all NEGs. You cannot mix instance
+	// group and NEG backends on the same backend service.
 	//
-	// Note that you must specify an Instance Group or Network Endpoint
-	// Group resource using the fully-qualified URL, rather than a partial
-	// URL.
 	//
-	// When the BackendService has load balancing scheme INTERNAL, the
-	// instance group must be within the same region as the BackendService.
-	// Network Endpoint Groups are not supported for INTERNAL load balancing
-	// scheme.
+	// - When the loadBalancingScheme for the backend service is INTERNAL,
+	// the backend must be an instance group in the same region as the
+	// backend service. NEGs are not supported.
+	//
+	// You must use the fully-qualified URL (starting with
+	// https://www.googleapis.com/) to specify the instance group or NEG.
+	// Partial URLs are not supported.
 	Group string `json:"group,omitempty"`
 
-	// MaxConnections: The max number of simultaneous connections for the
-	// group. Can be used with either CONNECTION or UTILIZATION balancing
-	// modes. For CONNECTION mode, either maxConnections or
-	// maxConnectionsPerInstance must be set.
+	// MaxConnections: Defines a maximum target for simultaneous connections
+	// for the entire backend (instance group or NEG). If the backend's
+	// balancingMode is UTILIZATION, this is an optional parameter. If the
+	// backend's balancingMode is CONNECTION, and backend is attached to a
+	// backend service whose loadBalancingScheme is EXTERNAL, you must
+	// specify either this parameter, maxConnectionsPerInstance, or
+	// maxConnectionsPerEndpoint.
 	//
-	// This cannot be used for internal load balancing.
+	// Not available if the backend's balancingMode is RATE. If the
+	// loadBalancingScheme is INTERNAL, then maxConnections is not
+	// supported, even though the backend requires a balancing mode of
+	// CONNECTION.
 	MaxConnections int64 `json:"maxConnections,omitempty"`
 
-	// MaxConnectionsPerEndpoint: The max number of simultaneous connections
-	// that a single backend network endpoint can handle. This is used to
-	// calculate the capacity of the group. Can be used in either CONNECTION
-	// or UTILIZATION balancing modes. For CONNECTION mode, either
-	// maxConnections or maxConnectionsPerEndpoint must be set.
+	// MaxConnectionsPerEndpoint: Defines a maximum target for simultaneous
+	// connections for an endpoint of a NEG. This is multiplied by the
+	// number of endpoints in the NEG to implicitly calculate a maximum
+	// number of target maximum simultaneous connections for the NEG. If the
+	// backend's balancingMode is CONNECTION, and the backend is attached to
+	// a backend service whose loadBalancingScheme is EXTERNAL, you must
+	// specify either this parameter, maxConnections, or
+	// maxConnectionsPerInstance.
 	//
-	// This cannot be used for internal load balancing.
+	// Not available if the backend's balancingMode is RATE. Internal
+	// TCP/UDP load balancing does not support setting
+	// maxConnectionsPerEndpoint even though its backends require a
+	// balancing mode of CONNECTION.
 	MaxConnectionsPerEndpoint int64 `json:"maxConnectionsPerEndpoint,omitempty"`
 
-	// MaxConnectionsPerInstance: The max number of simultaneous connections
-	// that a single backend instance can handle. This is used to calculate
-	// the capacity of the group. Can be used in either CONNECTION or
-	// UTILIZATION balancing modes. For CONNECTION mode, either
-	// maxConnections or maxConnectionsPerInstance must be set.
+	// MaxConnectionsPerInstance: Defines a maximum target for simultaneous
+	// connections for a single VM in a backend instance group. This is
+	// multiplied by the number of instances in the instance group to
+	// implicitly calculate a target maximum number of simultaneous
+	// connections for the whole instance group. If the backend's
+	// balancingMode is UTILIZATION, this is an optional parameter. If the
+	// backend's balancingMode is CONNECTION, and backend is attached to a
+	// backend service whose loadBalancingScheme is EXTERNAL, you must
+	// specify either this parameter, maxConnections, or
+	// maxConnectionsPerEndpoint.
 	//
-	// This cannot be used for internal load balancing.
+	// Not available if the backend's balancingMode is RATE. Internal
+	// TCP/UDP load balancing does not support setting
+	// maxConnectionsPerInstance even though its backends require a
+	// balancing mode of CONNECTION.
 	MaxConnectionsPerInstance int64 `json:"maxConnectionsPerInstance,omitempty"`
 
 	// MaxRate: The max requests per second (RPS) of the group. Can be used
@@ -3681,27 +3825,36 @@ type Backend struct {
 	// This cannot be used for internal load balancing.
 	MaxRate int64 `json:"maxRate,omitempty"`
 
-	// MaxRatePerEndpoint: The max requests per second (RPS) that a single
-	// backend network endpoint can handle. This is used to calculate the
-	// capacity of the group. Can be used in either balancing mode. For RATE
-	// mode, either maxRate or maxRatePerEndpoint must be set.
+	// MaxRatePerEndpoint: Defines a maximum target for requests per second
+	// (RPS) for an endpoint of a NEG. This is multiplied by the number of
+	// endpoints in the NEG to implicitly calculate a target maximum rate
+	// for the NEG.
 	//
-	// This cannot be used for internal load balancing.
+	// If the backend's balancingMode is RATE, you must specify either this
+	// parameter, maxRate, or maxRatePerInstance.
+	//
+	// Not available if the backend's balancingMode is CONNECTION.
 	MaxRatePerEndpoint float64 `json:"maxRatePerEndpoint,omitempty"`
 
-	// MaxRatePerInstance: The max requests per second (RPS) that a single
-	// backend instance can handle. This is used to calculate the capacity
-	// of the group. Can be used in either balancing mode. For RATE mode,
-	// either maxRate or maxRatePerInstance must be set.
+	// MaxRatePerInstance: Defines a maximum target for requests per second
+	// (RPS) for a single VM in a backend instance group. This is multiplied
+	// by the number of instances in the instance group to implicitly
+	// calculate a target maximum rate for the whole instance group.
 	//
-	// This cannot be used for internal load balancing.
+	// If the backend's balancingMode is UTILIZATION, this is an optional
+	// parameter. If the backend's balancingMode is RATE, you must specify
+	// either this parameter, maxRate, or maxRatePerEndpoint.
+	//
+	// Not available if the backend's balancingMode is CONNECTION.
 	MaxRatePerInstance float64 `json:"maxRatePerInstance,omitempty"`
 
-	// MaxUtilization: Used when balancingMode is UTILIZATION. This ratio
-	// defines the CPU utilization target for the group. The default is 0.8.
-	// Valid range is [0.0, 1.0].
+	// MaxUtilization: Defines the maximum average CPU utilization of a
+	// backend VM in an instance group. The valid range is [0.0, 1.0]. This
+	// is an optional parameter if the backend's balancingMode is
+	// UTILIZATION.
 	//
-	// This cannot be used for internal load balancing.
+	// This parameter can be used in conjunction with maxRate,
+	// maxRatePerInstance, maxConnections, or maxConnectionsPerInstance.
 	MaxUtilization float64 `json:"maxUtilization,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "BalancingMode") to
@@ -3747,8 +3900,10 @@ func (s *Backend) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// BackendBucket: A BackendBucket resource. This resource defines a
-// Cloud Storage bucket.
+// BackendBucket: Represents a Cloud Storage Bucket resource.
+//
+// This Cloud Storage bucket resource is referenced by a URL map of a
+// load balancer. For more information, read Backend Buckets.
 type BackendBucket struct {
 	// BucketName: Cloud Storage bucket name.
 	BucketName string `json:"bucketName,omitempty"`
@@ -4010,17 +4165,27 @@ func (s *BackendBucketListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// BackendService: A BackendService resource. This resource defines a
-// group of backend virtual machines and their serving capacity. (==
-// resource_for v1.backendService ==) (== resource_for
+// BackendService: Represents a Backend Service resource.
+//
+//
+//
+// Backend services must have an associated health check. Backend
+// services also store information about session affinity. For more
+// information, read Backend Services.
+//
+// A backendServices resource represents a global backend service.
+// Global backend services are used for HTTP(S), SSL Proxy, TCP Proxy
+// load balancing and Traffic Director.
+//
+// A regionBackendServices resource represents a regional backend
+// service. Regional backend services are used for internal TCP/UDP load
+// balancing. For more information, read Internal TCP/UDP Load
+// balancing. (== resource_for v1.backendService ==) (== resource_for
 // beta.backendService ==)
 type BackendService struct {
-	// AffinityCookieTtlSec: Lifetime of cookies in seconds if
-	// session_affinity is GENERATED_COOKIE. If set to 0, the cookie is
-	// non-persistent and lasts only until the end of the browser session
-	// (or equivalent). The maximum allowed value for TTL is one day.
-	//
-	// When the load balancing scheme is INTERNAL, this field is not used.
+	// AffinityCookieTtlSec: If set to 0, the cookie is non-persistent and
+	// lasts only until the end of the browser session (or equivalent). The
+	// maximum allowed value is one day (86,400).
 	AffinityCookieTtlSec int64 `json:"affinityCookieTtlSec,omitempty"`
 
 	// Backends: The list of backends that serve this BackendService.
@@ -4029,7 +4194,35 @@ type BackendService struct {
 	// CdnPolicy: Cloud CDN configuration for this BackendService.
 	CdnPolicy *BackendServiceCdnPolicy `json:"cdnPolicy,omitempty"`
 
+	// CircuitBreakers: Settings controlling the volume of connections to a
+	// backend service.
+	//
+	// This field is applicable to either:
+	// - A regional backend service with the service_protocol set to HTTP,
+	// HTTPS, or HTTP2, and load_balancing_scheme set to INTERNAL_MANAGED.
+	//
+	// - A global backend service with the load_balancing_scheme set to
+	// INTERNAL_SELF_MANAGED.
+	CircuitBreakers *CircuitBreakers `json:"circuitBreakers,omitempty"`
+
 	ConnectionDraining *ConnectionDraining `json:"connectionDraining,omitempty"`
+
+	// ConsistentHash: Consistent Hash-based load balancing can be used to
+	// provide soft session affinity based on HTTP headers, cookies or other
+	// properties. This load balancing policy is applicable only for HTTP
+	// connections. The affinity to a particular destination host will be
+	// lost when one or more hosts are added/removed from the destination
+	// service. This field specifies parameters that control consistent
+	// hashing. This field is only applicable when localityLbPolicy is set
+	// to MAGLEV or RING_HASH.
+	//
+	// This field is applicable to either:
+	// - A regional backend service with the service_protocol set to HTTP,
+	// HTTPS, or HTTP2, and load_balancing_scheme set to INTERNAL_MANAGED.
+	//
+	// - A global backend service with the load_balancing_scheme set to
+	// INTERNAL_SELF_MANAGED.
+	ConsistentHash *ConsistentHashLoadBalancerSettings `json:"consistentHash,omitempty"`
 
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -4043,11 +4236,14 @@ type BackendService struct {
 	// property when you create the resource.
 	Description string `json:"description,omitempty"`
 
-	// EnableCDN: If true, enable Cloud CDN for this BackendService.
-	//
-	// When the load balancing scheme is INTERNAL, this field is not used.
+	// EnableCDN: If true, enables Cloud CDN for the backend service. Only
+	// applicable if the loadBalancingScheme is EXTERNAL and the protocol is
+	// HTTP or HTTPS.
 	EnableCDN bool `json:"enableCDN,omitempty"`
 
+	// FailoverPolicy: Applicable only to Failover for Internal TCP/UDP Load
+	// Balancing. Requires at least one backend instance group to be defined
+	// as a backup (failover) backend.
 	FailoverPolicy *BackendServiceFailoverPolicy `json:"failoverPolicy,omitempty"`
 
 	// Fingerprint: Fingerprint of this resource. A hash of the contents
@@ -4089,9 +4285,48 @@ type BackendService struct {
 	// Possible values:
 	//   "EXTERNAL"
 	//   "INTERNAL"
+	//   "INTERNAL_MANAGED"
 	//   "INTERNAL_SELF_MANAGED"
 	//   "INVALID_LOAD_BALANCING_SCHEME"
 	LoadBalancingScheme string `json:"loadBalancingScheme,omitempty"`
+
+	// LocalityLbPolicy: The load balancing algorithm used within the scope
+	// of the locality. The possible values are:
+	// - ROUND_ROBIN: This is a simple policy in which each healthy backend
+	// is selected in round robin order. This is the default.
+	// - LEAST_REQUEST: An O(1) algorithm which selects two random healthy
+	// hosts and picks the host which has fewer active requests.
+	// - RING_HASH: The ring/modulo hash load balancer implements consistent
+	// hashing to backends. The algorithm has the property that the
+	// addition/removal of a host from a set of N hosts only affects 1/N of
+	// the requests.
+	// - RANDOM: The load balancer selects a random healthy host.
+	// - ORIGINAL_DESTINATION: Backend host is selected based on the client
+	// connection metadata, i.e., connections are opened to the same address
+	// as the destination address of the incoming connection before the
+	// connection was redirected to the load balancer.
+	// - MAGLEV: used as a drop in replacement for the ring hash load
+	// balancer. Maglev is not as stable as ring hash but has faster table
+	// lookup build times and host selection times. For more information
+	// about Maglev, refer to https://ai.google/research/pubs/pub44824
+	//
+	//
+	// This field is applicable to either:
+	// - A regional backend service with the service_protocol set to HTTP,
+	// HTTPS, or HTTP2, and load_balancing_scheme set to INTERNAL_MANAGED.
+	//
+	// - A global backend service with the load_balancing_scheme set to
+	// INTERNAL_SELF_MANAGED.
+	//
+	// Possible values:
+	//   "INVALID_LB_POLICY"
+	//   "LEAST_REQUEST"
+	//   "MAGLEV"
+	//   "ORIGINAL_DESTINATION"
+	//   "RANDOM"
+	//   "RING_HASH"
+	//   "ROUND_ROBIN"
+	LocalityLbPolicy string `json:"localityLbPolicy,omitempty"`
 
 	// LogConfig: This field denotes the logging options for the load
 	// balancer traffic served by this backend service. If logging is
@@ -4107,27 +4342,42 @@ type BackendService struct {
 	// last character, which cannot be a dash.
 	Name string `json:"name,omitempty"`
 
+	// OutlierDetection: Settings controlling eviction of unhealthy hosts
+	// from the load balancing pool. This field is applicable to either:
+	// - A regional backend service with the service_protocol set to HTTP,
+	// HTTPS, or HTTP2, and load_balancing_scheme set to INTERNAL_MANAGED.
+	//
+	// - A global backend service with the load_balancing_scheme set to
+	// INTERNAL_SELF_MANAGED.
+	OutlierDetection *OutlierDetection `json:"outlierDetection,omitempty"`
+
 	// Port: Deprecated in favor of portName. The TCP port to connect on the
 	// backend. The default value is 80.
 	//
-	// This cannot be used for internal load balancing.
+	// This cannot be used if the loadBalancingScheme is INTERNAL (Internal
+	// TCP/UDP Load Balancing).
 	Port int64 `json:"port,omitempty"`
 
-	// PortName: Name of backend port. The same name should appear in the
-	// instance groups referenced by this service. Required when the load
-	// balancing scheme is EXTERNAL.
+	// PortName: A named port on a backend instance group representing the
+	// port for communication to the backend VMs in that group. Required
+	// when the loadBalancingScheme is EXTERNAL and the backends are
+	// instance groups. The named port must be defined on each backend
+	// instance group. This parameter has no meaning if the backends are
+	// NEGs.
 	//
-	// When the load balancing scheme is INTERNAL, this field is not used.
+	//
+	//
+	// Must be omitted when the loadBalancingScheme is INTERNAL (Internal
+	// TCP/UDP Load Blaancing).
 	PortName string `json:"portName,omitempty"`
 
 	// Protocol: The protocol this BackendService uses to communicate with
 	// backends.
 	//
-	// Possible values are HTTP, HTTPS, TCP, and SSL. The default is
-	// HTTP.
-	//
-	// For internal load balancing, the possible values are TCP and UDP, and
-	// the default is TCP.
+	// Possible values are HTTP, HTTPS, TCP, SSL, or UDP, depending on the
+	// chosen load balancer or Traffic Director configuration. Refer to the
+	// documentation for the load balancer or for Traffic director for more
+	// information.
 	//
 	// Possible values:
 	//   "HTTP"
@@ -4152,26 +4402,33 @@ type BackendService struct {
 	SelfLink string `json:"selfLink,omitempty"`
 
 	// SessionAffinity: Type of session affinity to use. The default is
-	// NONE.
+	// NONE. Session affinity is not applicable if the --protocol is
+	// UDP.
 	//
-	// When the load balancing scheme is EXTERNAL, can be NONE, CLIENT_IP,
-	// or GENERATED_COOKIE.
+	// When the loadBalancingScheme is EXTERNAL, possible values are NONE,
+	// CLIENT_IP, or GENERATED_COOKIE. GENERATED_COOKIE is only available if
+	// the protocol is HTTP or HTTPS.
 	//
-	// When the load balancing scheme is INTERNAL, can be NONE, CLIENT_IP,
-	// CLIENT_IP_PROTO, or CLIENT_IP_PORT_PROTO.
+	// When the loadBalancingScheme is INTERNAL, possible values are NONE,
+	// CLIENT_IP, CLIENT_IP_PROTO, or CLIENT_IP_PORT_PROTO.
 	//
-	// When the protocol is UDP, this field is not used.
+	// When the loadBalancingScheme is INTERNAL_SELF_MANAGED, possible
+	// values are NONE, CLIENT_IP, GENERATED_COOKIE, HEADER_FIELD, or
+	// HTTP_COOKIE.
 	//
 	// Possible values:
 	//   "CLIENT_IP"
 	//   "CLIENT_IP_PORT_PROTO"
 	//   "CLIENT_IP_PROTO"
 	//   "GENERATED_COOKIE"
+	//   "HEADER_FIELD"
+	//   "HTTP_COOKIE"
 	//   "NONE"
 	SessionAffinity string `json:"sessionAffinity,omitempty"`
 
-	// TimeoutSec: How many seconds to wait for the backend before
-	// considering it a failed request. Default is 30 seconds.
+	// TimeoutSec: The backend service timeout has a different meaning
+	// depending on the type of load balancer. For more information read,
+	// Backend service settings The default is 30 seconds.
 	TimeoutSec int64 `json:"timeoutSec,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -4404,39 +4661,28 @@ func (s *BackendServiceCdnPolicy) MarshalJSON() ([]byte, error) {
 }
 
 type BackendServiceFailoverPolicy struct {
-	// DisableConnectionDrainOnFailover: On failover or failback, this field
-	// indicates whether connection drain will be honored. Setting this to
-	// true has the following effect: connections to the old active pool are
-	// not drained. Connections to the new active pool use the timeout of 10
-	// min (currently fixed). Setting to false has the following effect:
-	// both old and new connections will have a drain timeout of 10
-	// min.
-	//
-	// This can be set to true only if the protocol is TCP.
+	// DisableConnectionDrainOnFailover: This can be set to true only if the
+	// protocol is TCP.
 	//
 	// The default is false.
 	DisableConnectionDrainOnFailover bool `json:"disableConnectionDrainOnFailover,omitempty"`
 
-	// DropTrafficIfUnhealthy: This option is used only when no healthy VMs
-	// are detected in the primary and backup instance groups. When set to
-	// true, traffic is dropped. When set to false, new connections are sent
-	// across all VMs in the primary group.
+	// DropTrafficIfUnhealthy: Applicable only to Failover for Internal
+	// TCP/UDP Load Balancing. If set to true, connections to the load
+	// balancer are dropped when all primary and all backup backend VMs are
+	// unhealthy. If set to false, connections are distributed among all
+	// primary VMs when all primary and all backup backend VMs are
+	// unhealthy.
 	//
 	// The default is false.
 	DropTrafficIfUnhealthy bool `json:"dropTrafficIfUnhealthy,omitempty"`
 
-	// FailoverRatio: The value of the field must be in [0, 1]. If the ratio
-	// of the healthy VMs in the primary backend is at or below this number,
-	// traffic arriving at the load-balanced IP will be directed to the
-	// failover backend.
-	//
-	// In case where 'failoverRatio' is not set or all the VMs in the backup
-	// backend are unhealthy, the traffic will be directed back to the
-	// primary backend in the "force" mode, where traffic will be spread to
-	// the healthy VMs with the best effort, or to all VMs when no VM is
-	// healthy.
-	//
-	// This field is only used with l4 load balancing.
+	// FailoverRatio: Applicable only to Failover for Internal TCP/UDP Load
+	// Balancing. The value of the field must be in the range [0, 1]. If the
+	// value is 0, the load balancer performs a failover when the number of
+	// healthy primary VMs equals zero. For all other values, the load
+	// balancer performs a failover when the total number of healthy primary
+	// VMs is less than this ratio.
 	FailoverRatio float64 `json:"failoverRatio,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g.
@@ -5064,17 +5310,66 @@ func (s *CacheKeyPolicy) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Commitment: Represents a Commitment resource. Creating a Commitment
-// resource means that you are purchasing a committed use contract with
-// an explicit start and end time. You can create commitments based on
-// vCPUs and memory usage and receive discounted rates. For full
-// details, read Signing Up for Committed Use Discounts.
+// CircuitBreakers: Settings controlling the volume of connections to a
+// backend service.
+type CircuitBreakers struct {
+	// ConnectTimeout: The timeout for new network connections to hosts.
+	ConnectTimeout *Duration `json:"connectTimeout,omitempty"`
+
+	// MaxConnections: The maximum number of connections to the backend
+	// cluster. If not specified, the default is 1024.
+	MaxConnections int64 `json:"maxConnections,omitempty"`
+
+	// MaxPendingRequests: The maximum number of pending requests allowed to
+	// the backend cluster. If not specified, the default is 1024.
+	MaxPendingRequests int64 `json:"maxPendingRequests,omitempty"`
+
+	// MaxRequests: The maximum number of parallel requests that allowed to
+	// the backend cluster. If not specified, the default is 1024.
+	MaxRequests int64 `json:"maxRequests,omitempty"`
+
+	// MaxRequestsPerConnection: Maximum requests for a single backend
+	// connection. This parameter is respected by both the HTTP/1.1 and
+	// HTTP/2 implementations. If not specified, there is no limit. Setting
+	// this parameter to 1 will effectively disable keep alive.
+	MaxRequestsPerConnection int64 `json:"maxRequestsPerConnection,omitempty"`
+
+	// MaxRetries: The maximum number of parallel retries allowed to the
+	// backend cluster. If not specified, the default is 3.
+	MaxRetries int64 `json:"maxRetries,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "ConnectTimeout") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ConnectTimeout") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *CircuitBreakers) MarshalJSON() ([]byte, error) {
+	type NoMethod CircuitBreakers
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// Commitment: Represents a regional Commitment resource.
 //
-// Committed use discounts are subject to Google Cloud Platform's
-// Service Specific Terms. By purchasing a committed use discount, you
-// agree to these terms. Committed use discounts will not renew, so you
-// must purchase a new commitment to continue receiving discounts. (==
-// resource_for beta.commitments ==) (== resource_for v1.commitments ==)
+// Creating a commitment resource means that you are purchasing a
+// committed use contract with an explicit start and end time. You can
+// create commitments based on vCPUs and memory usage and receive
+// discounted rates. For full details, read Signing Up for Committed Use
+// Discounts. (== resource_for beta.regionCommitments ==) (==
+// resource_for v1.regionCommitments ==)
 type Commitment struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -5147,6 +5442,18 @@ type Commitment struct {
 	// StatusMessage: [Output Only] An optional, human-readable explanation
 	// of the status.
 	StatusMessage string `json:"statusMessage,omitempty"`
+
+	// Type: The type of commitment, which affects the discount rate and the
+	// eligible resources. Type MEMORY_OPTIMIZED specifies a commitment that
+	// will only apply to memory optimized machines.
+	//
+	// Possible values:
+	//   "COMPUTE_OPTIMIZED"
+	//   "GENERAL_PURPOSE"
+	//   "GENERAL_PURPOSE_N2"
+	//   "MEMORY_OPTIMIZED"
+	//   "TYPE_UNSPECIFIED"
+	Type string `json:"type,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
 	// server.
@@ -5688,8 +5995,9 @@ func (s *Condition) MarshalJSON() ([]byte, error) {
 // ConnectionDraining: Message containing connection draining
 // configuration.
 type ConnectionDraining struct {
-	// DrainingTimeoutSec: Time for which instance will be drained (not
-	// accept new connections, but still work to finish started).
+	// DrainingTimeoutSec: The amount of time in seconds to allow existing
+	// connections to persist while on unhealthy backend VMs. Only
+	// applicable if the protocol is not UDP. The valid range is [0, 3600].
 	DrainingTimeoutSec int64 `json:"drainingTimeoutSec,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "DrainingTimeoutSec")
@@ -5712,6 +6020,155 @@ type ConnectionDraining struct {
 
 func (s *ConnectionDraining) MarshalJSON() ([]byte, error) {
 	type NoMethod ConnectionDraining
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// ConsistentHashLoadBalancerSettings: This message defines settings for
+// a consistent hash style load balancer.
+type ConsistentHashLoadBalancerSettings struct {
+	// HttpCookie: Hash is based on HTTP Cookie. This field describes a HTTP
+	// cookie that will be used as the hash key for the consistent hash load
+	// balancer. If the cookie is not present, it will be generated. This
+	// field is applicable if the sessionAffinity is set to HTTP_COOKIE.
+	HttpCookie *ConsistentHashLoadBalancerSettingsHttpCookie `json:"httpCookie,omitempty"`
+
+	// HttpHeaderName: The hash based on the value of the specified header
+	// field. This field is applicable if the sessionAffinity is set to
+	// HEADER_FIELD.
+	HttpHeaderName string `json:"httpHeaderName,omitempty"`
+
+	// MinimumRingSize: The minimum number of virtual nodes to use for the
+	// hash ring. Defaults to 1024. Larger ring sizes result in more
+	// granular load distributions. If the number of hosts in the load
+	// balancing pool is larger than the ring size, each host will be
+	// assigned a single virtual node.
+	MinimumRingSize int64 `json:"minimumRingSize,omitempty,string"`
+
+	// ForceSendFields is a list of field names (e.g. "HttpCookie") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "HttpCookie") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *ConsistentHashLoadBalancerSettings) MarshalJSON() ([]byte, error) {
+	type NoMethod ConsistentHashLoadBalancerSettings
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// ConsistentHashLoadBalancerSettingsHttpCookie: The information about
+// the HTTP Cookie on which the hash function is based for load
+// balancing policies that use a consistent hash.
+type ConsistentHashLoadBalancerSettingsHttpCookie struct {
+	// Name: Name of the cookie.
+	Name string `json:"name,omitempty"`
+
+	// Path: Path to set for the cookie.
+	Path string `json:"path,omitempty"`
+
+	// Ttl: Lifetime of the cookie.
+	Ttl *Duration `json:"ttl,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Name") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Name") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *ConsistentHashLoadBalancerSettingsHttpCookie) MarshalJSON() ([]byte, error) {
+	type NoMethod ConsistentHashLoadBalancerSettingsHttpCookie
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// CorsPolicy: The specification for allowing client side cross-origin
+// requests. Please see W3C Recommendation for Cross Origin Resource
+// Sharing
+type CorsPolicy struct {
+	// AllowCredentials: In response to a preflight request, setting this to
+	// true indicates that the actual request can include user credentials.
+	// This translates to the Access-Control-Allow-Credentials
+	// header.
+	// Default is false.
+	AllowCredentials bool `json:"allowCredentials,omitempty"`
+
+	// AllowHeaders: Specifies the content for the
+	// Access-Control-Allow-Headers header.
+	AllowHeaders []string `json:"allowHeaders,omitempty"`
+
+	// AllowMethods: Specifies the content for the
+	// Access-Control-Allow-Methods header.
+	AllowMethods []string `json:"allowMethods,omitempty"`
+
+	// AllowOriginRegexes: Specifies the regualar expression patterns that
+	// match allowed origins. For regular expression grammar please see
+	// en.cppreference.com/w/cpp/regex/ecmascript
+	// An origin is allowed if it matches either allow_origins or
+	// allow_origin_regex.
+	AllowOriginRegexes []string `json:"allowOriginRegexes,omitempty"`
+
+	// AllowOrigins: Specifies the list of origins that will be allowed to
+	// do CORS requests.
+	// An origin is allowed if it matches either allow_origins or
+	// allow_origin_regex.
+	AllowOrigins []string `json:"allowOrigins,omitempty"`
+
+	// Disabled: If true, specifies the CORS policy is disabled. The default
+	// value of false, which indicates that the CORS policy is in effect.
+	Disabled bool `json:"disabled,omitempty"`
+
+	// ExposeHeaders: Specifies the content for the
+	// Access-Control-Expose-Headers header.
+	ExposeHeaders []string `json:"exposeHeaders,omitempty"`
+
+	// MaxAge: Specifies how long the results of a preflight request can be
+	// cached. This translates to the content for the Access-Control-Max-Age
+	// header.
+	MaxAge int64 `json:"maxAge,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "AllowCredentials") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "AllowCredentials") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *CorsPolicy) MarshalJSON() ([]byte, error) {
+	type NoMethod CorsPolicy
 	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
@@ -5865,8 +6322,20 @@ func (s *DeprecationStatus) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Disk: A Disk resource. (== resource_for beta.disks ==) (==
-// resource_for v1.disks ==)
+// Disk: Represents a Persistent Disk resource.
+//
+// Persistent disks are required for running your VM instances. Create
+// both boot and non-boot (data) persistent disks. For more information,
+// read Persistent Disks. For more storage options, read Storage
+// options.
+//
+// The disks resource represents a zonal persistent disk. For more
+// information, read Zonal persistent disks.
+//
+// The regionDisks resource represents a regional persistent disk. For
+// more information, read  Regional resources. (== resource_for
+// beta.disks ==) (== resource_for v1.disks ==) (== resource_for
+// v1.regionDisks ==) (== resource_for beta.regionDisks ==)
 type Disk struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -5881,8 +6350,8 @@ type Disk struct {
 	//
 	// After you encrypt a disk with a customer-supplied key, you must
 	// provide the same key if you use the disk later (e.g. to create a disk
-	// snapshot or an image, or to attach the disk to a virtual
-	// machine).
+	// snapshot, to create a disk image, to create a machine image, or to
+	// attach the disk to a virtual machine).
 	//
 	// Customer-supplied encryption keys do not protect access to metadata
 	// of the disk.
@@ -6069,11 +6538,11 @@ type Disk struct {
 
 	// Type: URL of the disk type resource describing which disk type to use
 	// to create the disk. Provide this when creating the disk. For example:
-	// project/zones/zone/diskTypes/pd-standard or pd-ssd
+	// projects/project/zones/zone/diskTypes/pd-standard or pd-ssd
 	Type string `json:"type,omitempty"`
 
 	// Users: [Output Only] Links to the users of the disk (attached
-	// instances) in form: project/zones/zone/instances/instance
+	// instances) in form: projects/project/zones/zone/instances/instance
 	Users []string `json:"users,omitempty"`
 
 	// Zone: [Output Only] URL of the zone where the disk resides. You must
@@ -6527,8 +6996,19 @@ func (s *DiskMoveRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// DiskType: A DiskType resource. (== resource_for beta.diskTypes ==)
-// (== resource_for v1.diskTypes ==)
+// DiskType: Represents a Disk Type resource.
+//
+// You can choose from a variety of disk types based on your needs. For
+// more information, read Storage options.
+//
+// The diskTypes resource represents disk types for a zonal persistent
+// disk. For more information, read Zonal persistent disks.
+//
+// The regionDiskTypes resource represents disk types for a regional
+// persistent disk. For more information, read Regional persistent
+// disks. (== resource_for beta.diskTypes ==) (== resource_for
+// v1.diskTypes ==) (== resource_for v1.regionDiskTypes ==) (==
+// resource_for beta.regionDiskTypes ==)
 type DiskType struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -7347,12 +7827,54 @@ func (s *DistributionPolicyZoneConfiguration) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+// Duration: A Duration represents a fixed-length span of time
+// represented as a count of seconds and fractions of seconds at
+// nanosecond resolution. It is independent of any calendar and concepts
+// like "day" or "month". Range is approximately 10,000 years.
+type Duration struct {
+	// Nanos: Span of time that's a fraction of a second at nanosecond
+	// resolution. Durations less than one second are represented with a 0
+	// `seconds` field and a positive `nanos` field. Must be from 0 to
+	// 999,999,999 inclusive.
+	Nanos int64 `json:"nanos,omitempty"`
+
+	// Seconds: Span of time at a resolution of a second. Must be from 0 to
+	// 315,576,000,000 inclusive. Note: these bounds are computed from: 60
+	// sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+	Seconds int64 `json:"seconds,omitempty,string"`
+
+	// ForceSendFields is a list of field names (e.g. "Nanos") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Nanos") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *Duration) MarshalJSON() ([]byte, error) {
+	type NoMethod Duration
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 type ExchangedPeeringRoute struct {
 	// DestRange: The destination range of the route.
 	DestRange string `json:"destRange,omitempty"`
 
-	// Imported: If the peering route is imported if there is no
-	// confliction.
+	// Imported: True if the peering route has been imported from a peer.
+	// The actual import happens if the field
+	// networkPeering.importCustomRoutes is true for this network, and
+	// networkPeering.exportCustomRoutes is true for the peer network, and
+	// the import does not result in a route conflict.
 	Imported bool `json:"imported,omitempty"`
 
 	// NextHopRegion: The region of peering route next hop, only applies to
@@ -7889,7 +8411,10 @@ func (s *ExternalVpnGatewayListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Firewall: Represents a Firewall resource.
+// Firewall: Represents a Firewall Rule resource.
+//
+// Firewall rules allow or deny ingress traffic to, and egress traffic
+// from your instances. For more information, read Firewall rules.
 type Firewall struct {
 	// Allowed: The list of ALLOW rules specified by this firewall. Each
 	// rule specifies a protocol and port-range tuple that describes a
@@ -7906,29 +8431,30 @@ type Firewall struct {
 	Denied []*FirewallDenied `json:"denied,omitempty"`
 
 	// Description: An optional description of this resource. Provide this
-	// property when you create the resource.
+	// field when you create the resource.
 	Description string `json:"description,omitempty"`
 
 	// DestinationRanges: If destination ranges are specified, the firewall
-	// will apply only to traffic that has destination IP address in these
+	// rule applies only to traffic that has destination IP address in these
 	// ranges. These ranges must be expressed in CIDR format. Only IPv4 is
 	// supported.
 	DestinationRanges []string `json:"destinationRanges,omitempty"`
 
-	// Direction: Direction of traffic to which this firewall applies;
-	// default is INGRESS. Note: For INGRESS traffic, it is NOT supported to
-	// specify destinationRanges; For EGRESS traffic, it is NOT supported to
-	// specify sourceRanges OR sourceTags.
+	// Direction: Direction of traffic to which this firewall applies,
+	// either `INGRESS` or `EGRESS`. The default is `INGRESS`. For `INGRESS`
+	// traffic, you cannot specify the destinationRanges field, and for
+	// `EGRESS` traffic, you cannot specify the sourceRanges or sourceTags
+	// fields.
 	//
 	// Possible values:
 	//   "EGRESS"
 	//   "INGRESS"
 	Direction string `json:"direction,omitempty"`
 
-	// Disabled: Denotes whether the firewall rule is disabled, i.e not
-	// applied to the network it is associated with. When set to true, the
-	// firewall rule is not enforced and the network behaves as if it did
-	// not exist. If this is unspecified, the firewall rule will be enabled.
+	// Disabled: Denotes whether the firewall rule is disabled. When set to
+	// true, the firewall rule is not enforced and the network behaves as if
+	// it did not exist. If this is unspecified, the firewall rule will be
+	// enabled.
 	Disabled bool `json:"disabled,omitempty"`
 
 	// EnableLogging: Deprecated in favor of enable in LogConfig. This field
@@ -7952,58 +8478,61 @@ type Firewall struct {
 	// Name: Name of the resource; provided by the client when the resource
 	// is created. The name must be 1-63 characters long, and comply with
 	// RFC1035. Specifically, the name must be 1-63 characters long and
-	// match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
-	// the first character must be a lowercase letter, and all following
-	// characters must be a dash, lowercase letter, or digit, except the
-	// last character, which cannot be a dash.
+	// match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?. The first
+	// character must be a lowercase letter, and all following characters
+	// (except for the last character) must be a dash, lowercase letter, or
+	// digit. The last character must be a lowercase letter or digit.
 	Name string `json:"name,omitempty"`
 
 	// Network: URL of the network resource for this firewall rule. If not
 	// specified when creating a firewall rule, the default network is
 	// used:
 	// global/networks/default
-	// If you choose to specify this property, you can specify the network
-	// as a full or partial URL. For example, the following are all valid
-	// URLs:
+	// If you choose to specify this field, you can specify the network as a
+	// full or partial URL. For example, the following are all valid URLs:
+	//
 	// -
 	// https://www.googleapis.com/compute/v1/projects/myproject/global/networks/my-network
 	// - projects/myproject/global/networks/my-network
 	// - global/networks/default
 	Network string `json:"network,omitempty"`
 
-	// Priority: Priority for this rule. This is an integer between 0 and
-	// 65535, both inclusive. When not specified, the value assumed is 1000.
-	// Relative priorities determine precedence of conflicting rules. Lower
-	// value of priority implies higher precedence (eg, a rule with priority
-	// 0 has higher precedence than a rule with priority 1). DENY rules take
-	// precedence over ALLOW rules having equal priority.
+	// Priority: Priority for this rule. This is an integer between `0` and
+	// `65535`, both inclusive. The default value is `1000`. Relative
+	// priorities determine which rule takes effect if multiple rules apply.
+	// Lower values indicate higher priority. For example, a rule with
+	// priority `0` has higher precedence than a rule with priority `1`.
+	// DENY rules take precedence over ALLOW rules if they have equal
+	// priority. Note that VPC networks have implied rules with a priority
+	// of `65535`. To avoid conflicts with the implied rules, use a priority
+	// number less than `65535`.
 	Priority int64 `json:"priority,omitempty"`
 
 	// SelfLink: [Output Only] Server-defined URL for the resource.
 	SelfLink string `json:"selfLink,omitempty"`
 
-	// SourceRanges: If source ranges are specified, the firewall will apply
-	// only to traffic that has source IP address in these ranges. These
-	// ranges must be expressed in CIDR format. One or both of sourceRanges
-	// and sourceTags may be set. If both properties are set, the firewall
-	// will apply to traffic that has source IP address within sourceRanges
-	// OR the source IP that belongs to a tag listed in the sourceTags
-	// property. The connection does not need to match both properties for
-	// the firewall to apply. Only IPv4 is supported.
+	// SourceRanges: If source ranges are specified, the firewall rule
+	// applies only to traffic that has a source IP address in these ranges.
+	// These ranges must be expressed in CIDR format. One or both of
+	// sourceRanges and sourceTags may be set. If both fields are set, the
+	// rule applies to traffic that has a source IP address within
+	// sourceRanges OR a source IP from a resource with a matching tag
+	// listed in the sourceTags field. The connection does not need to match
+	// both fields for the rule to apply. Only IPv4 is supported.
 	SourceRanges []string `json:"sourceRanges,omitempty"`
 
 	// SourceServiceAccounts: If source service accounts are specified, the
-	// firewall will apply only to traffic originating from an instance with
-	// a service account in this list. Source service accounts cannot be
-	// used to control traffic to an instance's external IP address because
-	// service accounts are associated with an instance, not an IP address.
-	// sourceRanges can be set at the same time as sourceServiceAccounts. If
-	// both are set, the firewall will apply to traffic that has source IP
-	// address within sourceRanges OR the source IP belongs to an instance
-	// with service account listed in sourceServiceAccount. The connection
-	// does not need to match both properties for the firewall to apply.
-	// sourceServiceAccounts cannot be used at the same time as sourceTags
-	// or targetTags.
+	// firewall rules apply only to traffic originating from an instance
+	// with a service account in this list. Source service accounts cannot
+	// be used to control traffic to an instance's external IP address
+	// because service accounts are associated with an instance, not an IP
+	// address. sourceRanges can be set at the same time as
+	// sourceServiceAccounts. If both are set, the firewall applies to
+	// traffic that has a source IP address within the sourceRanges OR a
+	// source IP that belongs to an instance with service account listed in
+	// sourceServiceAccount. The connection does not need to match both
+	// fields for the firewall to apply. sourceServiceAccounts cannot be
+	// used at the same time as sourceTags or targetTags.
 	SourceServiceAccounts []string `json:"sourceServiceAccounts,omitempty"`
 
 	// SourceTags: If source tags are specified, the firewall rule applies
@@ -8013,11 +8542,11 @@ type Firewall struct {
 	// instance's external IP address, it only applies to traffic between
 	// instances in the same virtual network. Because tags are associated
 	// with instances, not IP addresses. One or both of sourceRanges and
-	// sourceTags may be set. If both properties are set, the firewall will
-	// apply to traffic that has source IP address within sourceRanges OR
-	// the source IP that belongs to a tag listed in the sourceTags
-	// property. The connection does not need to match both properties for
-	// the firewall to apply.
+	// sourceTags may be set. If both fields are set, the firewall applies
+	// to traffic that has a source IP address within sourceRanges OR a
+	// source IP from a resource with a matching tag listed in the
+	// sourceTags field. The connection does not need to match both fields
+	// for the firewall to apply.
 	SourceTags []string `json:"sourceTags,omitempty"`
 
 	// TargetServiceAccounts: A list of service accounts indicating sets of
@@ -8066,13 +8595,13 @@ type FirewallAllowed struct {
 	// IPProtocol: The IP protocol to which this rule applies. The protocol
 	// type is required when creating a firewall rule. This value can either
 	// be one of the following well known protocol strings (tcp, udp, icmp,
-	// esp, ah, ipip, sctp), or the IP protocol number.
+	// esp, ah, ipip, sctp) or the IP protocol number.
 	IPProtocol string `json:"IPProtocol,omitempty"`
 
 	// Ports: An optional list of ports to which this rule applies. This
-	// field is only applicable for UDP or TCP protocol. Each entry must be
-	// either an integer or a range. If not specified, this rule applies to
-	// connections through any port.
+	// field is only applicable for the UDP or TCP protocol. Each entry must
+	// be either an integer or a range. If not specified, this rule applies
+	// to connections through any port.
 	//
 	// Example inputs include: ["22"], ["80","443"], and ["12345-12349"].
 	Ports []string `json:"ports,omitempty"`
@@ -8104,13 +8633,13 @@ type FirewallDenied struct {
 	// IPProtocol: The IP protocol to which this rule applies. The protocol
 	// type is required when creating a firewall rule. This value can either
 	// be one of the following well known protocol strings (tcp, udp, icmp,
-	// esp, ah, ipip, sctp), or the IP protocol number.
+	// esp, ah, ipip, sctp) or the IP protocol number.
 	IPProtocol string `json:"IPProtocol,omitempty"`
 
 	// Ports: An optional list of ports to which this rule applies. This
-	// field is only applicable for UDP or TCP protocol. Each entry must be
-	// either an integer or a range. If not specified, this rule applies to
-	// connections through any port.
+	// field is only applicable for the UDP or TCP protocol. Each entry must
+	// be either an integer or a range. If not specified, this rule applies
+	// to connections through any port.
 	//
 	// Example inputs include: ["22"], ["80","443"], and ["12345-12349"].
 	Ports []string `json:"ports,omitempty"`
@@ -8368,12 +8897,47 @@ func (s *FixedOrPercent) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// ForwardingRule: A ForwardingRule resource. A ForwardingRule resource
-// specifies which pool of target virtual machines to forward a packet
-// to if it matches the given [IPAddress, IPProtocol, ports] tuple. (==
-// resource_for beta.forwardingRules ==) (== resource_for
-// v1.forwardingRules ==) (== resource_for beta.globalForwardingRules
-// ==) (== resource_for v1.globalForwardingRules ==) (== resource_for
+// ForwardingRule: Represents a Forwarding Rule resource.
+//
+//
+//
+// A forwardingRules resource represents a regional forwarding
+// rule.
+//
+// Regional external forwarding rules can reference any of the following
+// resources:
+//
+// - A target instance
+// - A Cloud VPN Classic gateway (targetVpnGateway),
+// - A target pool for a Network Load Balancer
+// - A global target HTTP(S) proxy for an HTTP(S) load balancer using
+// Standard Tier
+// - A target SSL proxy for a SSL Proxy load balancer using Standard
+// Tier
+// - A target TCP proxy for a TCP Proxy load balancer using Standard
+// Tier.
+//
+// Regional internal forwarding rules can reference the backend service
+// of an internal TCP/UDP load balancer.
+//
+// For regional internal forwarding rules, the following applies:
+// - If the loadBalancingScheme for the load balancer is INTERNAL, then
+// the forwarding rule references a regional internal backend service.
+//
+// - If the loadBalancingScheme for the load balancer is
+// INTERNAL_MANAGED, then the forwarding rule must reference a regional
+// target HTTP(S) proxy.
+//
+// For more information, read Using Forwarding rules.
+//
+// A globalForwardingRules resource represents a global forwarding
+// rule.
+//
+// Global forwarding rules are only used by load balancers that use
+// Premium Tier. (== resource_for beta.forwardingRules ==) (==
+// resource_for v1.forwardingRules ==) (== resource_for
+// beta.globalForwardingRules ==) (== resource_for
+// v1.globalForwardingRules ==) (== resource_for
 // beta.regionForwardingRules ==) (== resource_for
 // v1.regionForwardingRules ==)
 type ForwardingRule struct {
@@ -8520,9 +9084,27 @@ type ForwardingRule struct {
 	// Possible values:
 	//   "EXTERNAL"
 	//   "INTERNAL"
+	//   "INTERNAL_MANAGED"
 	//   "INTERNAL_SELF_MANAGED"
 	//   "INVALID"
 	LoadBalancingScheme string `json:"loadBalancingScheme,omitempty"`
+
+	// MetadataFilters: Opaque filter criteria used by Loadbalancer to
+	// restrict routing configuration to a limited set xDS compliant
+	// clients. In their xDS requests to Loadbalancer, xDS clients present
+	// node metadata. If a match takes place, the relevant routing
+	// configuration is made available to those proxies.
+	// For each metadataFilter in this list, if its filterMatchCriteria is
+	// set to MATCH_ANY, at least one of the filterLabels must match the
+	// corresponding label provided in the metadata. If its
+	// filterMatchCriteria is set to MATCH_ALL, then all of its filterLabels
+	// must match with corresponding labels in the provided
+	// metadata.
+	// metadataFilters specified here can be overridden by those specified
+	// in the UrlMap that this ForwardingRule references.
+	// metadataFilters only applies to Loadbalancers that have their
+	// loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+	MetadataFilters []*MetadataFilter `json:"metadataFilters,omitempty"`
 
 	// Name: Name of the resource; provided by the client when the resource
 	// is created. The name must be 1-63 characters long, and comply with
@@ -9335,6 +9917,7 @@ type GuestOsFeature struct {
 	//
 	// Possible values:
 	//   "FEATURE_TYPE_UNSPECIFIED"
+	//   "GVNIC"
 	//   "MULTI_IP_SUBNET"
 	//   "SECURE_BOOT"
 	//   "UEFI_COMPATIBLE"
@@ -9611,9 +10194,14 @@ func (s *HTTPSHealthCheck) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// HealthCheck: An HealthCheck resource. This resource defines a
-// template for how individual virtual machines should be checked for
-// health, via one of the supported protocols.
+// HealthCheck: Represents a Health Check resource.
+//
+// Health checks are used for most GCP load balancers and managed
+// instance group auto-healing. For more information, read Health Check
+// Concepts.
+//
+// To perform health checks on network load balancers, you must use
+// either httpHealthChecks or httpsHealthChecks.
 type HealthCheck struct {
 	// CheckIntervalSec: How often (in seconds) to send a health check. The
 	// default value is 5 seconds.
@@ -9652,6 +10240,10 @@ type HealthCheck struct {
 	// characters must be a dash, lowercase letter, or digit, except the
 	// last character, which cannot be a dash.
 	Name string `json:"name,omitempty"`
+
+	// Region: [Output Only] Region where the health check resides. Not
+	// applicable to global health checks.
+	Region string `json:"region,omitempty"`
 
 	// SelfLink: [Output Only] Server-defined URL for the resource.
 	SelfLink string `json:"selfLink,omitempty"`
@@ -9898,6 +10490,293 @@ func (s *HealthCheckReference) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+type HealthChecksAggregatedList struct {
+	// Id: [Output Only] Unique identifier for the resource; defined by the
+	// server.
+	Id string `json:"id,omitempty"`
+
+	// Items: A list of HealthChecksScopedList resources.
+	Items map[string]HealthChecksScopedList `json:"items,omitempty"`
+
+	// Kind: Type of resource.
+	Kind string `json:"kind,omitempty"`
+
+	// NextPageToken: [Output Only] This token allows you to get the next
+	// page of results for list requests. If the number of results is larger
+	// than maxResults, use the nextPageToken as a value for the query
+	// parameter pageToken in the next list request. Subsequent list
+	// requests will have their own nextPageToken to continue paging through
+	// the results.
+	NextPageToken string `json:"nextPageToken,omitempty"`
+
+	// SelfLink: [Output Only] Server-defined URL for this resource.
+	SelfLink string `json:"selfLink,omitempty"`
+
+	// Warning: [Output Only] Informational warning message.
+	Warning *HealthChecksAggregatedListWarning `json:"warning,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "Id") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Id") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HealthChecksAggregatedList) MarshalJSON() ([]byte, error) {
+	type NoMethod HealthChecksAggregatedList
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// HealthChecksAggregatedListWarning: [Output Only] Informational
+// warning message.
+type HealthChecksAggregatedListWarning struct {
+	// Code: [Output Only] A warning code, if applicable. For example,
+	// Compute Engine returns NO_RESULTS_ON_PAGE if there are no results in
+	// the response.
+	//
+	// Possible values:
+	//   "CLEANUP_FAILED"
+	//   "DEPRECATED_RESOURCE_USED"
+	//   "DEPRECATED_TYPE_USED"
+	//   "DISK_SIZE_LARGER_THAN_IMAGE_SIZE"
+	//   "EXPERIMENTAL_TYPE_USED"
+	//   "EXTERNAL_API_WARNING"
+	//   "FIELD_VALUE_OVERRIDEN"
+	//   "INJECTED_KERNELS_DEPRECATED"
+	//   "MISSING_TYPE_DEPENDENCY"
+	//   "NEXT_HOP_ADDRESS_NOT_ASSIGNED"
+	//   "NEXT_HOP_CANNOT_IP_FORWARD"
+	//   "NEXT_HOP_INSTANCE_NOT_FOUND"
+	//   "NEXT_HOP_INSTANCE_NOT_ON_NETWORK"
+	//   "NEXT_HOP_NOT_RUNNING"
+	//   "NOT_CRITICAL_ERROR"
+	//   "NO_RESULTS_ON_PAGE"
+	//   "REQUIRED_TOS_AGREEMENT"
+	//   "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING"
+	//   "RESOURCE_NOT_DELETED"
+	//   "SCHEMA_VALIDATION_IGNORED"
+	//   "SINGLE_INSTANCE_PROPERTY_TEMPLATE"
+	//   "UNDECLARED_PROPERTIES"
+	//   "UNREACHABLE"
+	Code string `json:"code,omitempty"`
+
+	// Data: [Output Only] Metadata about this warning in key: value format.
+	// For example:
+	// "data": [ { "key": "scope", "value": "zones/us-east1-d" }
+	Data []*HealthChecksAggregatedListWarningData `json:"data,omitempty"`
+
+	// Message: [Output Only] A human-readable description of the warning
+	// code.
+	Message string `json:"message,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Code") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Code") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HealthChecksAggregatedListWarning) MarshalJSON() ([]byte, error) {
+	type NoMethod HealthChecksAggregatedListWarning
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type HealthChecksAggregatedListWarningData struct {
+	// Key: [Output Only] A key that provides more detail on the warning
+	// being returned. For example, for warnings where there are no results
+	// in a list request for a particular zone, this key might be scope and
+	// the key value might be the zone name. Other examples might be a key
+	// indicating a deprecated resource and a suggested replacement, or a
+	// warning about invalid network settings (for example, if an instance
+	// attempts to perform IP forwarding but is not enabled for IP
+	// forwarding).
+	Key string `json:"key,omitempty"`
+
+	// Value: [Output Only] A warning data value corresponding to the key.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Key") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Key") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HealthChecksAggregatedListWarningData) MarshalJSON() ([]byte, error) {
+	type NoMethod HealthChecksAggregatedListWarningData
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type HealthChecksScopedList struct {
+	// HealthChecks: A list of HealthChecks contained in this scope.
+	HealthChecks []*HealthCheck `json:"healthChecks,omitempty"`
+
+	// Warning: Informational warning which replaces the list of backend
+	// services when the list is empty.
+	Warning *HealthChecksScopedListWarning `json:"warning,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "HealthChecks") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "HealthChecks") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HealthChecksScopedList) MarshalJSON() ([]byte, error) {
+	type NoMethod HealthChecksScopedList
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// HealthChecksScopedListWarning: Informational warning which replaces
+// the list of backend services when the list is empty.
+type HealthChecksScopedListWarning struct {
+	// Code: [Output Only] A warning code, if applicable. For example,
+	// Compute Engine returns NO_RESULTS_ON_PAGE if there are no results in
+	// the response.
+	//
+	// Possible values:
+	//   "CLEANUP_FAILED"
+	//   "DEPRECATED_RESOURCE_USED"
+	//   "DEPRECATED_TYPE_USED"
+	//   "DISK_SIZE_LARGER_THAN_IMAGE_SIZE"
+	//   "EXPERIMENTAL_TYPE_USED"
+	//   "EXTERNAL_API_WARNING"
+	//   "FIELD_VALUE_OVERRIDEN"
+	//   "INJECTED_KERNELS_DEPRECATED"
+	//   "MISSING_TYPE_DEPENDENCY"
+	//   "NEXT_HOP_ADDRESS_NOT_ASSIGNED"
+	//   "NEXT_HOP_CANNOT_IP_FORWARD"
+	//   "NEXT_HOP_INSTANCE_NOT_FOUND"
+	//   "NEXT_HOP_INSTANCE_NOT_ON_NETWORK"
+	//   "NEXT_HOP_NOT_RUNNING"
+	//   "NOT_CRITICAL_ERROR"
+	//   "NO_RESULTS_ON_PAGE"
+	//   "REQUIRED_TOS_AGREEMENT"
+	//   "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING"
+	//   "RESOURCE_NOT_DELETED"
+	//   "SCHEMA_VALIDATION_IGNORED"
+	//   "SINGLE_INSTANCE_PROPERTY_TEMPLATE"
+	//   "UNDECLARED_PROPERTIES"
+	//   "UNREACHABLE"
+	Code string `json:"code,omitempty"`
+
+	// Data: [Output Only] Metadata about this warning in key: value format.
+	// For example:
+	// "data": [ { "key": "scope", "value": "zones/us-east1-d" }
+	Data []*HealthChecksScopedListWarningData `json:"data,omitempty"`
+
+	// Message: [Output Only] A human-readable description of the warning
+	// code.
+	Message string `json:"message,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Code") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Code") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HealthChecksScopedListWarning) MarshalJSON() ([]byte, error) {
+	type NoMethod HealthChecksScopedListWarning
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type HealthChecksScopedListWarningData struct {
+	// Key: [Output Only] A key that provides more detail on the warning
+	// being returned. For example, for warnings where there are no results
+	// in a list request for a particular zone, this key might be scope and
+	// the key value might be the zone name. Other examples might be a key
+	// indicating a deprecated resource and a suggested replacement, or a
+	// warning about invalid network settings (for example, if an instance
+	// attempts to perform IP forwarding but is not enabled for IP
+	// forwarding).
+	Key string `json:"key,omitempty"`
+
+	// Value: [Output Only] A warning data value corresponding to the key.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Key") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Key") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HealthChecksScopedListWarningData) MarshalJSON() ([]byte, error) {
+	type NoMethod HealthChecksScopedListWarningData
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 type HealthStatus struct {
 	// HealthState: Health state of the instance.
 	//
@@ -10025,9 +10904,318 @@ func (s *HostRule) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// HttpHealthCheck: An HttpHealthCheck resource. This resource defines a
-// template for how individual instances should be checked for health,
-// via HTTP.
+// HttpFaultAbort: Specification for how requests are aborted as part of
+// fault injection.
+type HttpFaultAbort struct {
+	// HttpStatus: The HTTP status code used to abort the request.
+	// The value must be between 200 and 599 inclusive.
+	HttpStatus int64 `json:"httpStatus,omitempty"`
+
+	// Percentage: The percentage of traffic
+	// (connections/operations/requests) which will be aborted as part of
+	// fault injection.
+	// The value must be between 0.0 and 100.0 inclusive.
+	Percentage float64 `json:"percentage,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "HttpStatus") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "HttpStatus") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpFaultAbort) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpFaultAbort
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+func (s *HttpFaultAbort) UnmarshalJSON(data []byte) error {
+	type NoMethod HttpFaultAbort
+	var s1 struct {
+		Percentage gensupport.JSONFloat64 `json:"percentage"`
+		*NoMethod
+	}
+	s1.NoMethod = (*NoMethod)(s)
+	if err := json.Unmarshal(data, &s1); err != nil {
+		return err
+	}
+	s.Percentage = float64(s1.Percentage)
+	return nil
+}
+
+// HttpFaultDelay: Specifies the delay introduced by Loadbalancer before
+// forwarding the request to the backend service as part of fault
+// injection.
+type HttpFaultDelay struct {
+	// FixedDelay: Specifies the value of the fixed delay interval.
+	FixedDelay *Duration `json:"fixedDelay,omitempty"`
+
+	// Percentage: The percentage of traffic
+	// (connections/operations/requests) on which delay will be introduced
+	// as part of fault injection.
+	// The value must be between 0.0 and 100.0 inclusive.
+	Percentage float64 `json:"percentage,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "FixedDelay") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "FixedDelay") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpFaultDelay) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpFaultDelay
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+func (s *HttpFaultDelay) UnmarshalJSON(data []byte) error {
+	type NoMethod HttpFaultDelay
+	var s1 struct {
+		Percentage gensupport.JSONFloat64 `json:"percentage"`
+		*NoMethod
+	}
+	s1.NoMethod = (*NoMethod)(s)
+	if err := json.Unmarshal(data, &s1); err != nil {
+		return err
+	}
+	s.Percentage = float64(s1.Percentage)
+	return nil
+}
+
+// HttpFaultInjection: The specification for fault injection introduced
+// into traffic to test the resiliency of clients to backend service
+// failure. As part of fault injection, when clients send requests to a
+// backend service, delays can be introduced by Loadbalancer on a
+// percentage of requests before sending those request to the backend
+// service. Similarly requests from clients can be aborted by the
+// Loadbalancer for a percentage of requests.
+type HttpFaultInjection struct {
+	// Abort: The specification for how client requests are aborted as part
+	// of fault injection.
+	Abort *HttpFaultAbort `json:"abort,omitempty"`
+
+	// Delay: The specification for how client requests are delayed as part
+	// of fault injection, before being sent to a backend service.
+	Delay *HttpFaultDelay `json:"delay,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Abort") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Abort") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpFaultInjection) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpFaultInjection
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// HttpHeaderAction: The request and response header transformations
+// that take effect before the request is passed along to the selected
+// backendService.
+type HttpHeaderAction struct {
+	// RequestHeadersToAdd: Headers to add to a matching request prior to
+	// forwarding the request to the backendService.
+	RequestHeadersToAdd []*HttpHeaderOption `json:"requestHeadersToAdd,omitempty"`
+
+	// RequestHeadersToRemove: A list of header names for headers that need
+	// to be removed from the request prior to forwarding the request to the
+	// backendService.
+	RequestHeadersToRemove []string `json:"requestHeadersToRemove,omitempty"`
+
+	// ResponseHeadersToAdd: Headers to add the response prior to sending
+	// the response back to the client.
+	ResponseHeadersToAdd []*HttpHeaderOption `json:"responseHeadersToAdd,omitempty"`
+
+	// ResponseHeadersToRemove: A list of header names for headers that need
+	// to be removed from the response prior to sending the response back to
+	// the client.
+	ResponseHeadersToRemove []string `json:"responseHeadersToRemove,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "RequestHeadersToAdd")
+	// to unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "RequestHeadersToAdd") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpHeaderAction) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpHeaderAction
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// HttpHeaderMatch: matchRule criteria for request header matches.
+type HttpHeaderMatch struct {
+	// ExactMatch: The value should exactly match contents of
+	// exactMatch.
+	// Only one of exactMatch, prefixMatch, suffixMatch, regexMatch,
+	// presentMatch or rangeMatch must be set.
+	ExactMatch string `json:"exactMatch,omitempty"`
+
+	// HeaderName: The name of the HTTP header to match.
+	// For matching against the HTTP request's authority, use a headerMatch
+	// with the header name ":authority".
+	// For matching a request's method, use the headerName ":method".
+	HeaderName string `json:"headerName,omitempty"`
+
+	// InvertMatch: If set to false, the headerMatch is considered a match
+	// if the match criteria above are met. If set to true, the headerMatch
+	// is considered a match if the match criteria above are NOT met.
+	// The default setting is false.
+	InvertMatch bool `json:"invertMatch,omitempty"`
+
+	// PrefixMatch: The value of the header must start with the contents of
+	// prefixMatch.
+	// Only one of exactMatch, prefixMatch, suffixMatch, regexMatch,
+	// presentMatch or rangeMatch must be set.
+	PrefixMatch string `json:"prefixMatch,omitempty"`
+
+	// PresentMatch: A header with the contents of headerName must exist.
+	// The match takes place whether or not the request's header has a value
+	// or not.
+	// Only one of exactMatch, prefixMatch, suffixMatch, regexMatch,
+	// presentMatch or rangeMatch must be set.
+	PresentMatch bool `json:"presentMatch,omitempty"`
+
+	// RangeMatch: The header value must be an integer and its value must be
+	// in the range specified in rangeMatch. If the header does not contain
+	// an integer, number or is empty, the match fails.
+	// For example for a range [-5, 0]
+	// - -3 will match.
+	// - 0 will not match.
+	// - 0.25 will not match.
+	// - -3someString will not match.
+	// Only one of exactMatch, prefixMatch, suffixMatch, regexMatch,
+	// presentMatch or rangeMatch must be set.
+	RangeMatch *Int64RangeMatch `json:"rangeMatch,omitempty"`
+
+	// RegexMatch: The value of the header must match the regualar
+	// expression specified in regexMatch. For regular expression grammar,
+	// please see:  en.cppreference.com/w/cpp/regex/ecmascript
+	// For matching against a port specified in the HTTP request, use a
+	// headerMatch with headerName set to PORT and a regular expression that
+	// satisfies the RFC2616 Host header's port specifier.
+	// Only one of exactMatch, prefixMatch, suffixMatch, regexMatch,
+	// presentMatch or rangeMatch must be set.
+	RegexMatch string `json:"regexMatch,omitempty"`
+
+	// SuffixMatch: The value of the header must end with the contents of
+	// suffixMatch.
+	// Only one of exactMatch, prefixMatch, suffixMatch, regexMatch,
+	// presentMatch or rangeMatch must be set.
+	SuffixMatch string `json:"suffixMatch,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "ExactMatch") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ExactMatch") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpHeaderMatch) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpHeaderMatch
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// HttpHeaderOption: Specification determining how headers are added to
+// requests or responses.
+type HttpHeaderOption struct {
+	// HeaderName: The name of the header.
+	HeaderName string `json:"headerName,omitempty"`
+
+	// HeaderValue: The value of the header to add.
+	HeaderValue string `json:"headerValue,omitempty"`
+
+	// Replace: If false, headerValue is appended to any values that already
+	// exist for the header. If true, headerValue is set for the header,
+	// discarding any values that were set for that header.
+	// The default value is false.
+	Replace bool `json:"replace,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "HeaderName") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "HeaderName") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpHeaderOption) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpHeaderOption
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// HttpHealthCheck: Represents a legacy HTTP Health Check
+// resource.
+//
+// Legacy health checks are required by network load balancers. For more
+// information, read Health Check Concepts.
 type HttpHealthCheck struct {
 	// CheckIntervalSec: How often (in seconds) to send a health check. The
 	// default value is 5 seconds.
@@ -10072,7 +11260,7 @@ type HttpHealthCheck struct {
 	Port int64 `json:"port,omitempty"`
 
 	// RequestPath: The request path of the HTTP health check request. The
-	// default value is /.
+	// default value is /. This field does not support query parameters.
 	RequestPath string `json:"requestPath,omitempty"`
 
 	// SelfLink: [Output Only] Server-defined URL for the resource.
@@ -10271,9 +11459,413 @@ func (s *HttpHealthCheckListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// HttpsHealthCheck: An HttpsHealthCheck resource. This resource defines
-// a template for how individual instances should be checked for health,
-// via HTTPS.
+// HttpQueryParameterMatch: HttpRouteRuleMatch criteria for a request's
+// query parameter.
+type HttpQueryParameterMatch struct {
+	// ExactMatch: The queryParameterMatch matches if the value of the
+	// parameter exactly matches the contents of exactMatch.
+	// Only one of presentMatch, exactMatch and regexMatch must be set.
+	ExactMatch string `json:"exactMatch,omitempty"`
+
+	// Name: The name of the query parameter to match. The query parameter
+	// must exist in the request, in the absence of which the request match
+	// fails.
+	Name string `json:"name,omitempty"`
+
+	// PresentMatch: Specifies that the queryParameterMatch matches if the
+	// request contains the query parameter, irrespective of whether the
+	// parameter has a value or not.
+	// Only one of presentMatch, exactMatch and regexMatch must be set.
+	PresentMatch bool `json:"presentMatch,omitempty"`
+
+	// RegexMatch: The queryParameterMatch matches if the value of the
+	// parameter matches the regular expression specified by regexMatch. For
+	// the regular expression grammar, please see
+	// en.cppreference.com/w/cpp/regex/ecmascript
+	// Only one of presentMatch, exactMatch and regexMatch must be set.
+	RegexMatch string `json:"regexMatch,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "ExactMatch") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "ExactMatch") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpQueryParameterMatch) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpQueryParameterMatch
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// HttpRedirectAction: Specifies settings for an HTTP redirect.
+type HttpRedirectAction struct {
+	// HostRedirect: The host that will be used in the redirect response
+	// instead of the one that was supplied in the request.
+	// The value must be between 1 and 255 characters.
+	HostRedirect string `json:"hostRedirect,omitempty"`
+
+	// HttpsRedirect: If set to true, the URL scheme in the redirected
+	// request is set to https. If set to false, the URL scheme of the
+	// redirected request will remain the same as that of the request.
+	// This must only be set for UrlMaps used in TargetHttpProxys. Setting
+	// this true for TargetHttpsProxy is not permitted.
+	// The default is set to false.
+	HttpsRedirect bool `json:"httpsRedirect,omitempty"`
+
+	// PathRedirect: The path that will be used in the redirect response
+	// instead of the one that was supplied in the request.
+	// Only one of pathRedirect or prefixRedirect must be specified.
+	// The value must be between 1 and 1024 characters.
+	PathRedirect string `json:"pathRedirect,omitempty"`
+
+	// PrefixRedirect: The prefix that replaces the prefixMatch specified in
+	// the HttpRouteRuleMatch, retaining the remaining portion of the URL
+	// before redirecting the request.
+	PrefixRedirect string `json:"prefixRedirect,omitempty"`
+
+	// RedirectResponseCode: The HTTP Status code to use for this
+	// RedirectAction.
+	// Supported values are:
+	// - MOVED_PERMANENTLY_DEFAULT, which is the default value and
+	// corresponds to 301.
+	// - FOUND, which corresponds to 302.
+	// - SEE_OTHER which corresponds to 303.
+	// - TEMPORARY_REDIRECT, which corresponds to 307. In this case, the
+	// request method will be retained.
+	// - PERMANENT_REDIRECT, which corresponds to 308. In this case, the
+	// request method will be retained.
+	//
+	// Possible values:
+	//   "FOUND"
+	//   "MOVED_PERMANENTLY_DEFAULT"
+	//   "PERMANENT_REDIRECT"
+	//   "SEE_OTHER"
+	//   "TEMPORARY_REDIRECT"
+	RedirectResponseCode string `json:"redirectResponseCode,omitempty"`
+
+	// StripQuery: If set to true, any accompanying query portion of the
+	// original URL is removed prior to redirecting the request. If set to
+	// false, the query portion of the original URL is retained.
+	// The default is set to false.
+	StripQuery bool `json:"stripQuery,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "HostRedirect") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "HostRedirect") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpRedirectAction) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpRedirectAction
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// HttpRetryPolicy: The retry policy associates with HttpRouteRule
+type HttpRetryPolicy struct {
+	// NumRetries: Specifies the allowed number retries. This number must be
+	// > 0.
+	NumRetries int64 `json:"numRetries,omitempty"`
+
+	// PerTryTimeout: Specifies a non-zero timeout per retry attempt.
+	PerTryTimeout *Duration `json:"perTryTimeout,omitempty"`
+
+	// RetryConditions: Specfies one or more conditions when this retry rule
+	// applies. Valid values are:
+	// - 5xx: Loadbalancer will attempt a retry if the backend service
+	// responds with any 5xx response code, or if the backend service does
+	// not respond at all, example: disconnects, reset, read timeout,
+	// connection failure, and refused streams.
+	// - gateway-error: Similar to 5xx, but only applies to response codes
+	// 502, 503 or 504.
+	// -
+	// - connect-failure: Loadbalancer will retry on failures connecting to
+	// backend services, for example due to connection timeouts.
+	// - retriable-4xx: Loadbalancer will retry for retriable 4xx response
+	// codes. Currently the only retriable error supported is 409.
+	// - refused-stream:Loadbalancer will retry if the backend service
+	// resets the stream with a REFUSED_STREAM error code. This reset type
+	// indicates that it is safe to retry.
+	// - cancelledLoadbalancer will retry if the gRPC status code in the
+	// response header is set to cancelled
+	// - deadline-exceeded: Loadbalancer will retry if the gRPC status code
+	// in the response header is set to deadline-exceeded
+	// - resource-exhausted: Loadbalancer will retry if the gRPC status code
+	// in the response header is set to resource-exhausted
+	// - unavailable: Loadbalancer will retry if the gRPC status code in the
+	// response header is set to unavailable
+	RetryConditions []string `json:"retryConditions,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "NumRetries") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "NumRetries") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpRetryPolicy) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpRetryPolicy
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type HttpRouteAction struct {
+	// CorsPolicy: The specification for allowing client side cross-origin
+	// requests. Please see W3C Recommendation for Cross Origin Resource
+	// Sharing
+	CorsPolicy *CorsPolicy `json:"corsPolicy,omitempty"`
+
+	// FaultInjectionPolicy: The specification for fault injection
+	// introduced into traffic to test the resiliency of clients to backend
+	// service failure. As part of fault injection, when clients send
+	// requests to a backend service, delays can be introduced by
+	// Loadbalancer on a percentage of requests before sending those request
+	// to the backend service. Similarly requests from clients can be
+	// aborted by the Loadbalancer for a percentage of requests.
+	// timeout and retry_policy will be ignored by clients that are
+	// configured with a fault_injection_policy.
+	FaultInjectionPolicy *HttpFaultInjection `json:"faultInjectionPolicy,omitempty"`
+
+	// RequestMirrorPolicy: Specifies the policy on how requests intended
+	// for the route's backends are shadowed to a separate mirrored backend
+	// service. Loadbalancer does not wait for responses from the shadow
+	// service. Prior to sending traffic to the shadow service, the host /
+	// authority header is suffixed with -shadow.
+	RequestMirrorPolicy *RequestMirrorPolicy `json:"requestMirrorPolicy,omitempty"`
+
+	// RetryPolicy: Specifies the retry policy associated with this route.
+	RetryPolicy *HttpRetryPolicy `json:"retryPolicy,omitempty"`
+
+	// Timeout: Specifies the timeout for the selected route. Timeout is
+	// computed from the time the request is has been fully processed (i.e.
+	// end-of-stream) up until the response has been completely processed.
+	// Timeout includes all retries.
+	// If not specified, the default value is 15 seconds.
+	Timeout *Duration `json:"timeout,omitempty"`
+
+	// UrlRewrite: The spec to modify the URL of the request, prior to
+	// forwarding the request to the matched service
+	UrlRewrite *UrlRewrite `json:"urlRewrite,omitempty"`
+
+	// WeightedBackendServices: A list of weighted backend services to send
+	// traffic to when a route match occurs. The weights determine the
+	// fraction of traffic that flows to their corresponding backend
+	// service. If all traffic needs to go to a single backend service,
+	// there must be one  weightedBackendService with weight set to a non 0
+	// number.
+	// Once a backendService is identified and before forwarding the request
+	// to the backend service, advanced routing actions like Url rewrites
+	// and header transformations are applied depending on additional
+	// settings specified in this HttpRouteAction.
+	WeightedBackendServices []*WeightedBackendService `json:"weightedBackendServices,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "CorsPolicy") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CorsPolicy") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpRouteAction) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpRouteAction
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// HttpRouteRule: An HttpRouteRule specifies how to match an HTTP
+// request and the corresponding routing action that load balancing
+// proxies will perform.
+type HttpRouteRule struct {
+	// HeaderAction: Specifies changes to request and response headers that
+	// need to take effect for the selected backendService.
+	// The headerAction specified here are applied before the matching
+	// pathMatchers[].headerAction and after
+	// pathMatchers[].routeRules[].routeAction.weightedBackendService.backend
+	// ServiceWeightAction[].headerAction
+	HeaderAction *HttpHeaderAction `json:"headerAction,omitempty"`
+
+	MatchRules []*HttpRouteRuleMatch `json:"matchRules,omitempty"`
+
+	// RouteAction: In response to a matching matchRule, the load balancer
+	// performs advanced routing actions like URL rewrites, header
+	// transformations, etc. prior to forwarding the request to the selected
+	// backend. If  routeAction specifies any  weightedBackendServices,
+	// service must not be set. Conversely if service is set, routeAction
+	// cannot contain any  weightedBackendServices.
+	// Only one of routeAction or urlRedirect must be set.
+	RouteAction *HttpRouteAction `json:"routeAction,omitempty"`
+
+	// Service: The full or partial URL of the backend service resource to
+	// which traffic is directed if this rule is matched. If routeAction is
+	// additionally specified, advanced routing actions like URL Rewrites,
+	// etc. take effect prior to sending the request to the backend.
+	// However, if service is specified, routeAction cannot contain any
+	// weightedBackendService s. Conversely, if routeAction specifies any
+	// weightedBackendServices, service must not be specified.
+	// Only one of urlRedirect, service or
+	// routeAction.weightedBackendService must be set.
+	Service string `json:"service,omitempty"`
+
+	// UrlRedirect: When this rule is matched, the request is redirected to
+	// a URL specified by urlRedirect.
+	// If urlRedirect is specified, service or routeAction must not be set.
+	UrlRedirect *HttpRedirectAction `json:"urlRedirect,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "HeaderAction") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "HeaderAction") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpRouteRule) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpRouteRule
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// HttpRouteRuleMatch: HttpRouteRuleMatch specifies a set of criteria
+// for matching requests to an HttpRouteRule. All specified criteria
+// must be satisfied for a match to occur.
+type HttpRouteRuleMatch struct {
+	// FullPathMatch: For satifying the matchRule condition, the path of the
+	// request must exactly match the value specified in fullPathMatch after
+	// removing any query parameters and anchor that may be part of the
+	// original URL.
+	// FullPathMatch must be between 1 and 1024 characters.
+	// Only one of prefixMatch, fullPathMatch or regexMatch must be
+	// specified.
+	FullPathMatch string `json:"fullPathMatch,omitempty"`
+
+	// HeaderMatches: Specifies a list of header match criteria, all of
+	// which must match corresponding headers in the request.
+	HeaderMatches []*HttpHeaderMatch `json:"headerMatches,omitempty"`
+
+	// IgnoreCase: Specifies that prefixMatch and fullPathMatch matches are
+	// case sensitive.
+	// The default value is false.
+	// caseSensitive must not be used with regexMatch.
+	IgnoreCase bool `json:"ignoreCase,omitempty"`
+
+	// MetadataFilters: Opaque filter criteria used by Loadbalancer to
+	// restrict routing configuration to a limited set xDS compliant
+	// clients. In their xDS requests to Loadbalancer, xDS clients present
+	// node metadata. If a match takes place, the relevant routing
+	// configuration is made available to those proxies.
+	// For each metadataFilter in this list, if its filterMatchCriteria is
+	// set to MATCH_ANY, at least one of the filterLabels must match the
+	// corresponding label provided in the metadata. If its
+	// filterMatchCriteria is set to MATCH_ALL, then all of its filterLabels
+	// must match with corresponding labels in the provided
+	// metadata.
+	// metadataFilters specified here can be overrides those specified in
+	// ForwardingRule that refers to this UrlMap.
+	// metadataFilters only applies to Loadbalancers that have their
+	// loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+	MetadataFilters []*MetadataFilter `json:"metadataFilters,omitempty"`
+
+	// PrefixMatch: For satifying the matchRule condition, the request's
+	// path must begin with the specified prefixMatch. prefixMatch must
+	// begin with a /.
+	// The value must be between 1 and 1024 characters.
+	// Only one of prefixMatch, fullPathMatch or regexMatch must be
+	// specified.
+	PrefixMatch string `json:"prefixMatch,omitempty"`
+
+	// QueryParameterMatches: Specifies a list of query parameter match
+	// criteria, all of which must match corresponding query parameters in
+	// the request.
+	QueryParameterMatches []*HttpQueryParameterMatch `json:"queryParameterMatches,omitempty"`
+
+	// RegexMatch: For satifying the matchRule condition, the path of the
+	// request must satisfy the regular expression specified in regexMatch
+	// after removing any query parameters and anchor supplied with the
+	// original URL. For regular expression grammar please see
+	// en.cppreference.com/w/cpp/regex/ecmascript
+	// Only one of prefixMatch, fullPathMatch or regexMatch must be
+	// specified.
+	RegexMatch string `json:"regexMatch,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "FullPathMatch") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "FullPathMatch") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpRouteRuleMatch) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpRouteRuleMatch
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// HttpsHealthCheck: Represents a legacy HTTPS Health Check
+// resource.
+//
+// Legacy health checks are required by network load balancers. For more
+// information, read Health Check Concepts.
 type HttpsHealthCheck struct {
 	// CheckIntervalSec: How often (in seconds) to send a health check. The
 	// default value is 5 seconds.
@@ -10516,7 +12108,10 @@ func (s *HttpsHealthCheckListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Image: An Image resource. (== resource_for beta.images ==) (==
+// Image: Represents an Image resource.
+//
+// You can use images to create boot disks for your VM instances. For
+// more information, read Images. (== resource_for beta.images ==) (==
 // resource_for v1.images ==)
 type Image struct {
 	// ArchiveSizeBytes: Size of the image tar.gz archive stored in Google
@@ -10688,6 +12283,10 @@ type Image struct {
 	//   "READY"
 	Status string `json:"status,omitempty"`
 
+	// StorageLocations: GCS bucket storage location of the image (regional
+	// or multi-regional).
+	StorageLocations []string `json:"storageLocations,omitempty"`
+
 	// ServerResponse contains the HTTP response code and headers from the
 	// server.
 	googleapi.ServerResponse `json:"-"`
@@ -10727,8 +12326,9 @@ type ImageRawDisk struct {
 	//   "TAR"
 	ContainerType string `json:"containerType,omitempty"`
 
-	// Sha1Checksum: An optional SHA1 checksum of the disk image before
-	// unpackaging provided by the client when the disk image is created.
+	// Sha1Checksum: [Deprecated] This field is deprecated. An optional SHA1
+	// checksum of the disk image before unpackaging provided by the client
+	// when the disk image is created.
 	Sha1Checksum string `json:"sha1Checksum,omitempty"`
 
 	// Source: The full Google Cloud Storage URL where the disk image is
@@ -10913,8 +12513,11 @@ func (s *ImageListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Instance: An Instance resource. (== resource_for beta.instances ==)
-// (== resource_for v1.instances ==)
+// Instance: Represents an Instance resource.
+//
+// An instance is a virtual machine that is hosted on Google Cloud
+// Platform. For more information, read Virtual Machine Instances. (==
+// resource_for beta.instances ==) (== resource_for v1.instances ==)
 type Instance struct {
 	// CanIpForward: Allows this instance to send and receive packets with
 	// non-matching destination or source IPs. This is required if you plan
@@ -11022,8 +12625,8 @@ type Instance struct {
 	// Multiple interfaces are supported per instance.
 	NetworkInterfaces []*NetworkInterface `json:"networkInterfaces,omitempty"`
 
-	// ReservationAffinity: The configuration of desired allocations which
-	// this Instance could consume capacity from.
+	// ReservationAffinity: Specifies the reservations that this instance
+	// can consume from.
 	ReservationAffinity *ReservationAffinity `json:"reservationAffinity,omitempty"`
 
 	// Scheduling: Sets the scheduling options for this instance.
@@ -11117,7 +12720,7 @@ type InstanceAggregatedList struct {
 	// server.
 	Id string `json:"id,omitempty"`
 
-	// Items: A list of InstancesScopedList resources.
+	// Items: An object that contains a list of instances scoped by zone.
 	Items map[string]InstancesScopedList `json:"items,omitempty"`
 
 	// Kind: [Output Only] Type of resource. Always
@@ -11268,10 +12871,18 @@ func (s *InstanceAggregatedListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// InstanceGroup: InstanceGroups (== resource_for beta.instanceGroups
-// ==) (== resource_for v1.instanceGroups ==) (== resource_for
-// beta.regionInstanceGroups ==) (== resource_for
-// v1.regionInstanceGroups ==)
+// InstanceGroup: Represents an unmanaged Instance Group resource.
+//
+// Use unmanaged instance groups if you need to apply load balancing to
+// groups of heterogeneous instances or if you need to manage the
+// instances yourself. For more information, read  Instance groups.
+//
+// For zonal unmanaged Instance Group, use instanceGroups resource.
+//
+// For regional unmanaged Instance Group, use regionInstanceGroups
+// resource. (== resource_for beta.instanceGroups ==) (== resource_for
+// v1.instanceGroups ==) (== resource_for beta.regionInstanceGroups ==)
+// (== resource_for v1.regionInstanceGroups ==)
 type InstanceGroup struct {
 	// CreationTimestamp: [Output Only] The creation timestamp for this
 	// instance group in RFC3339 text format.
@@ -11673,8 +13284,18 @@ func (s *InstanceGroupListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// InstanceGroupManager: An Instance Group Manager resource. (==
-// resource_for beta.instanceGroupManagers ==) (== resource_for
+// InstanceGroupManager: Represents a Managed Instance Group
+// resource.
+//
+// An instance group is a collection of VM instances that you can manage
+// as a single entity. For more information, read Instance groups.
+//
+// For zonal Managed Instance Group, use the instanceGroupManagers
+// resource.
+//
+// For regional Managed Instance Group, use the
+// regionInstanceGroupManagers resource. (== resource_for
+// beta.instanceGroupManagers ==) (== resource_for
 // v1.instanceGroupManagers ==) (== resource_for
 // beta.regionInstanceGroupManagers ==) (== resource_for
 // v1.regionInstanceGroupManagers ==)
@@ -12429,10 +14050,19 @@ type InstanceGroupManagerUpdatePolicy struct {
 	// disruptive action.
 	//
 	// Possible values:
+	//   "NONE"
+	//   "REFRESH"
 	//   "REPLACE"
 	//   "RESTART"
 	MinimalAction string `json:"minimalAction,omitempty"`
 
+	// Type: The type of update process. You can specify either PROACTIVE so
+	// that the instance group manager proactively executes actions in order
+	// to bring instances to their target versions or OPPORTUNISTIC so that
+	// no action is proactively executed but the update will be performed as
+	// part of other actions (for example, resizes or recreateInstances
+	// calls).
+	//
 	// Possible values:
 	//   "OPPORTUNISTIC"
 	//   "PROACTIVE"
@@ -12542,24 +14172,41 @@ func (s *InstanceGroupManagersAbandonInstancesRequest) MarshalJSON() ([]byte, er
 // InstanceGroupManagersApplyUpdatesRequest:
 // InstanceGroupManagers.applyUpdatesToInstances
 type InstanceGroupManagersApplyUpdatesRequest struct {
-	// Instances: The list of URLs of one or more instances for which we
-	// want to apply updates on this managed instance group. This can be a
-	// full URL or a partial URL, such as
-	// zones/[ZONE]/instances/[INSTANCE_NAME].
+	// Instances: The list of URLs of one or more instances for which you
+	// want to apply updates. Each URL can be a full URL or a partial URL,
+	// such as zones/[ZONE]/instances/[INSTANCE_NAME].
 	Instances []string `json:"instances,omitempty"`
 
-	// MinimalAction: The minimal action that should be perfomed on the
-	// instances. By default NONE.
+	// MinimalAction: The minimal action that you want to perform on each
+	// instance during the update:
+	// - REPLACE: At minimum, delete the instance and create it again.
+	// - RESTART: Stop the instance and start it again.
+	// - REFRESH: Do not stop the instance.
+	// - NONE: Do not disrupt the instance at all.  By default, the minimum
+	// action is NONE. If your update requires a more disruptive action than
+	// you set with this flag, the necessary action is performed to execute
+	// the update.
 	//
 	// Possible values:
+	//   "NONE"
+	//   "REFRESH"
 	//   "REPLACE"
 	//   "RESTART"
 	MinimalAction string `json:"minimalAction,omitempty"`
 
-	// MostDisruptiveAllowedAction: The most disruptive action that allowed
-	// to be performed on the instances. By default REPLACE.
+	// MostDisruptiveAllowedAction: The most disruptive action that you want
+	// to perform on each instance during the update:
+	// - REPLACE: Delete the instance and create it again.
+	// - RESTART: Stop the instance and start it again.
+	// - REFRESH: Do not stop the instance.
+	// - NONE: Do not disrupt the instance at all.  By default, the most
+	// disruptive allowed action is REPLACE. If your update requires a more
+	// disruptive action than you set with this flag, the update request
+	// will fail.
 	//
 	// Possible values:
+	//   "NONE"
+	//   "REFRESH"
 	//   "REPLACE"
 	//   "RESTART"
 	MostDisruptiveAllowedAction string `json:"mostDisruptiveAllowedAction,omitempty"`
@@ -13796,8 +15443,8 @@ type InstanceProperties struct {
 	// interface.
 	NetworkInterfaces []*NetworkInterface `json:"networkInterfaces,omitempty"`
 
-	// ReservationAffinity: The configuration of desired reservations which
-	// this Instance could consume capacity from.
+	// ReservationAffinity: Specifies the reservations that this instance
+	// can consume from.
 	ReservationAffinity *ReservationAffinity `json:"reservationAffinity,omitempty"`
 
 	// Scheduling: Specifies the scheduling options for the instances that
@@ -13872,8 +15519,12 @@ func (s *InstanceReference) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// InstanceTemplate: An Instance Template resource. (== resource_for
-// beta.instanceTemplates ==) (== resource_for v1.instanceTemplates ==)
+// InstanceTemplate: Represents an Instance Template resource.
+//
+// You can use instance templates to create VM instances and managed
+// instance groups. For more information, read Instance Templates. (==
+// resource_for beta.instanceTemplates ==) (== resource_for
+// v1.instanceTemplates ==)
 type InstanceTemplate struct {
 	// CreationTimestamp: [Output Only] The creation timestamp for this
 	// instance template in RFC3339 text format.
@@ -14507,11 +16158,46 @@ func (s *InstancesStartWithEncryptionKeyRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Interconnect: Represents an Interconnects resource. The Interconnects
-// resource is a dedicated connection between Google's network and your
-// on-premises network. For more information, see the  Dedicated
-// overview page. (== resource_for v1.interconnects ==) (== resource_for
-// beta.interconnects ==)
+// Int64RangeMatch: HttpRouteRuleMatch criteria for field values that
+// must stay within the specified integer range.
+type Int64RangeMatch struct {
+	// RangeEnd: The end of the range (exclusive) in signed long integer
+	// format.
+	RangeEnd int64 `json:"rangeEnd,omitempty,string"`
+
+	// RangeStart: The start of the range (inclusive) in signed long integer
+	// format.
+	RangeStart int64 `json:"rangeStart,omitempty,string"`
+
+	// ForceSendFields is a list of field names (e.g. "RangeEnd") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "RangeEnd") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *Int64RangeMatch) MarshalJSON() ([]byte, error) {
+	type NoMethod Int64RangeMatch
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// Interconnect: Represents an Interconnect resource.
+//
+// An Interconnect resource is a dedicated connection between the GCP
+// network and your on-premises network. For more information, read the
+// Dedicated Interconnect Overview. (== resource_for v1.interconnects
+// ==) (== resource_for beta.interconnects ==)
 type Interconnect struct {
 	// AdminEnabled: Administrative status of the interconnect. When this is
 	// set to true, the Interconnect is functional and can carry traffic.
@@ -14557,8 +16243,13 @@ type Interconnect struct {
 	// InterconnectAttachments configured to use this Interconnect.
 	InterconnectAttachments []string `json:"interconnectAttachments,omitempty"`
 
-	// InterconnectType: Type of interconnect. Note that "IT_PRIVATE" has
-	// been deprecated in favor of "DEDICATED"
+	// InterconnectType: Type of interconnect, which can take one of the
+	// following values:
+	// - PARTNER: A partner-managed interconnection shared between customers
+	// though a partner.
+	// - DEDICATED: A dedicated physical interconnection with the customer.
+	// Note that a value IT_PRIVATE has been deprecated in favor of
+	// DEDICATED.
 	//
 	// Possible values:
 	//   "DEDICATED"
@@ -14587,8 +16278,12 @@ type Interconnect struct {
 	// comply with RFC1035. Label values may be empty.
 	Labels map[string]string `json:"labels,omitempty"`
 
-	// LinkType: Type of link requested. This field indicates speed of each
-	// of the links in the bundle, not the entire bundle.
+	// LinkType: Type of link requested, which can take one of the following
+	// values:
+	// - LINK_TYPE_ETHERNET_10G_LR: A 10G Ethernet with LR optics
+	// - LINK_TYPE_ETHERNET_100G_LR: A 100G Ethernet with LR optics. Note
+	// that this field indicates the speed of each of the links in the
+	// bundle, not the speed of the entire bundle.
 	//
 	// Possible values:
 	//   "LINK_TYPE_ETHERNET_100G_LR"
@@ -14615,8 +16310,16 @@ type Interconnect struct {
 	// Notifications.
 	NocContactEmail string `json:"nocContactEmail,omitempty"`
 
-	// OperationalStatus: [Output Only] The current status of whether or not
-	// this Interconnect is functional.
+	// OperationalStatus: [Output Only] The current status of this
+	// Interconnect's functionality, which can take one of the following
+	// values:
+	// - OS_ACTIVE: A valid Interconnect, which is turned up and is ready to
+	// use. Attachments may be provisioned on this Interconnect.
+	// - OS_UNPROVISIONED: An Interconnect that has not completed turnup. No
+	// attachments may be provisioned on this Interconnect.
+	// - OS_UNDER_MAINTENANCE: An Interconnect that is undergoing internal
+	// maintenance. No attachments may be provisioned or updated on this
+	// Interconnect.
 	//
 	// Possible values:
 	//   "OS_ACTIVE"
@@ -14640,8 +16343,15 @@ type Interconnect struct {
 	// SelfLink: [Output Only] Server-defined URL for the resource.
 	SelfLink string `json:"selfLink,omitempty"`
 
-	// State: [Output Only] The current state of whether or not this
-	// Interconnect is functional.
+	// State: [Output Only] The current state of Interconnect functionality,
+	// which can take one of the following values:
+	// - ACTIVE: The Interconnect is valid, turned up and ready to use.
+	// Attachments may be provisioned on this Interconnect.
+	// - UNPROVISIONED: The Interconnect has not completed turnup. No
+	// attachments may be provisioned on this Interconnect.
+	// - UNDER_MAINTENANCE: The Interconnect is undergoing internal
+	// maintenance. No attachments may be provisioned or updated on this
+	// Interconnect.
 	//
 	// Possible values:
 	//   "ACTIVE"
@@ -14675,19 +16385,35 @@ func (s *Interconnect) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// InterconnectAttachment: Represents an InterconnectAttachment (VLAN
-// attachment) resource. For more information, see  Creating VLAN
-// Attachments. (== resource_for beta.interconnectAttachments ==) (==
-// resource_for v1.interconnectAttachments ==)
+// InterconnectAttachment: Represents an Interconnect Attachment (VLAN)
+// resource.
+//
+// You can use Interconnect attachments (VLANS) to connect your Virtual
+// Private Cloud networks to your on-premises networks through an
+// Interconnect. For more information, read  Creating VLAN Attachments.
+// (== resource_for beta.interconnectAttachments ==) (== resource_for
+// v1.interconnectAttachments ==)
 type InterconnectAttachment struct {
 	// AdminEnabled: Determines whether this Attachment will carry packets.
 	// Not present for PARTNER_PROVIDER.
 	AdminEnabled bool `json:"adminEnabled,omitempty"`
 
-	// Bandwidth: Provisioned bandwidth capacity for the
-	// interconnectAttachment. Can be set by the partner to update the
-	// customer's provisioned bandwidth. Output only for PARTNER type,
-	// mutable for PARTNER_PROVIDER and DEDICATED.
+	// Bandwidth: Provisioned bandwidth capacity for the interconnect
+	// attachment. For attachments of type DEDICATED, the user can set the
+	// bandwidth. For attachments of type PARTNER, the Google Partner that
+	// is operating the interconnect must set the bandwidth. Output only for
+	// PARTNER type, mutable for PARTNER_PROVIDER and DEDICATED, and can
+	// take one of the following values:
+	// - BPS_50M: 50 Mbit/s
+	// - BPS_100M: 100 Mbit/s
+	// - BPS_200M: 200 Mbit/s
+	// - BPS_300M: 300 Mbit/s
+	// - BPS_400M: 400 Mbit/s
+	// - BPS_500M: 500 Mbit/s
+	// - BPS_1G: 1 Gbit/s
+	// - BPS_2G: 2 Gbit/s
+	// - BPS_5G: 5 Gbit/s
+	// - BPS_10G: 10 Gbit/s
 	//
 	// Possible values:
 	//   "BPS_100M"
@@ -14730,12 +16456,16 @@ type InterconnectAttachment struct {
 	Description string `json:"description,omitempty"`
 
 	// EdgeAvailabilityDomain: Desired availability domain for the
-	// attachment. Only available for type PARTNER, at creation time. For
-	// improved reliability, customers should configure a pair of
-	// attachments with one per availability domain. The selected
-	// availability domain will be provided to the Partner via the pairing
-	// key so that the provisioned circuit will lie in the specified domain.
-	// If not specified, the value will default to AVAILABILITY_DOMAIN_ANY.
+	// attachment. Only available for type PARTNER, at creation time, and
+	// can take one of the following values:
+	// - AVAILABILITY_DOMAIN_ANY
+	// - AVAILABILITY_DOMAIN_1
+	// - AVAILABILITY_DOMAIN_2 For improved reliability, customers should
+	// configure a pair of attachments, one per availability domain. The
+	// selected availability domain will be provided to the Partner via the
+	// pairing key, so that the provisioned circuit will lie in the
+	// specified domain. If not specified, the value will default to
+	// AVAILABILITY_DOMAIN_ANY.
 	//
 	// Possible values:
 	//   "AVAILABILITY_DOMAIN_1"
@@ -14745,7 +16475,7 @@ type InterconnectAttachment struct {
 
 	// GoogleReferenceId: [Output Only] Google reference ID, to be used when
 	// raising support tickets with Google or otherwise to debug backend
-	// connectivity issues.
+	// connectivity issues. [Deprecated] This field is not used.
 	GoogleReferenceId string `json:"googleReferenceId,omitempty"`
 
 	// Id: [Output Only] The unique identifier for the resource. This
@@ -14787,7 +16517,12 @@ type InterconnectAttachment struct {
 	Name string `json:"name,omitempty"`
 
 	// OperationalStatus: [Output Only] The current status of whether or not
-	// this interconnect attachment is functional.
+	// this interconnect attachment is functional, which can take one of the
+	// following values:
+	// - OS_ACTIVE: The attachment has been turned up and is ready to use.
+	//
+	// - OS_UNPROVISIONED: The attachment is not ready to use yet, because
+	// turnup is not complete.
 	//
 	// Possible values:
 	//   "OS_ACTIVE"
@@ -14800,10 +16535,10 @@ type InterconnectAttachment struct {
 	// selected partner. Of the form "XXXXX/region/domain"
 	PairingKey string `json:"pairingKey,omitempty"`
 
-	// PartnerAsn: Optional BGP ASN for the router that should be supplied
-	// by a layer 3 Partner if they configured BGP on behalf of the
-	// customer. Output only for PARTNER type, input only for
-	// PARTNER_PROVIDER, not available for DEDICATED.
+	// PartnerAsn: Optional BGP ASN for the router supplied by a Layer 3
+	// Partner if they configured BGP on behalf of the customer. Output only
+	// for PARTNER type, input only for PARTNER_PROVIDER, not available for
+	// DEDICATED.
 	PartnerAsn int64 `json:"partnerAsn,omitempty,string"`
 
 	// PartnerMetadata: Informational metadata about Partner attachments
@@ -14832,7 +16567,26 @@ type InterconnectAttachment struct {
 	SelfLink string `json:"selfLink,omitempty"`
 
 	// State: [Output Only] The current state of this attachment's
-	// functionality.
+	// functionality. Enum values ACTIVE and UNPROVISIONED are shared by
+	// DEDICATED/PRIVATE, PARTNER, and PARTNER_PROVIDER interconnect
+	// attachments, while enum values PENDING_PARTNER,
+	// PARTNER_REQUEST_RECEIVED, and PENDING_CUSTOMER are used for only
+	// PARTNER and PARTNER_PROVIDER interconnect attachments. This state can
+	// take one of the following values:
+	// - ACTIVE: The attachment has been turned up and is ready to use.
+	// - UNPROVISIONED: The attachment is not ready to use yet, because
+	// turnup is not complete.
+	// - PENDING_PARTNER: A newly-created PARTNER attachment that has not
+	// yet been configured on the Partner side.
+	// - PARTNER_REQUEST_RECEIVED: A PARTNER attachment is in the process of
+	// provisioning after a PARTNER_PROVIDER attachment was created that
+	// references it.
+	// - PENDING_CUSTOMER: A PARTNER or PARTNER_PROVIDER attachment that is
+	// waiting for a customer to activate it.
+	// - DEFUNCT: The attachment was deleted externally and is no longer
+	// functional. This could be because the associated Interconnect was
+	// removed, or because the other side of a Partner attachment was
+	// deleted.
 	//
 	// Possible values:
 	//   "ACTIVE"
@@ -14844,6 +16598,14 @@ type InterconnectAttachment struct {
 	//   "UNPROVISIONED"
 	State string `json:"state,omitempty"`
 
+	// Type: The type of interconnect attachment this is, which can take one
+	// of the following values:
+	// - DEDICATED: an attachment to a Dedicated Interconnect.
+	// - PARTNER: an attachment to a Partner Interconnect, created by the
+	// customer.
+	// - PARTNER_PROVIDER: an attachment to a Partner Interconnect, created
+	// by the partner.
+	//
 	// Possible values:
 	//   "DEDICATED"
 	//   "PARTNER"
@@ -15212,7 +16974,7 @@ type InterconnectAttachmentPartnerMetadata struct {
 	PartnerName string `json:"partnerName,omitempty"`
 
 	// PortalUrl: URL of the Partner?s portal for this Attachment. Partners
-	// may customise this to be a deep-link to the specific resource on the
+	// may customise this to be a deep link to the specific resource on the
 	// Partner portal. This value may be validated to match approved Partner
 	// values.
 	PortalUrl string `json:"portalUrl,omitempty"`
@@ -15528,6 +17290,12 @@ type InterconnectDiagnosticsLinkLACPStatus struct {
 	// LACP exchange.
 	NeighborSystemId string `json:"neighborSystemId,omitempty"`
 
+	// State: The state of a LACP link, which can take one of the following
+	// values:
+	// - ACTIVE: The link is configured and active within the bundle.
+	// - DETACHED: The link is not configured within the bundle. This means
+	// that the rest of the object should be empty.
+	//
 	// Possible values:
 	//   "ACTIVE"
 	//   "DETACHED"
@@ -15826,10 +17594,12 @@ func (s *InterconnectListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// InterconnectLocation: Represents an InterconnectLocations resource.
-// The InterconnectLocations resource describes the locations where you
-// can connect to Google's networks. For more information, see
-// Colocation Facilities.
+// InterconnectLocation: Represents an Interconnect Attachment (VLAN)
+// Location resource.
+//
+// You can use this resource to find location details about an
+// Interconnect attachment (VLAN). For more information about
+// interconnect attachments, read  Creating VLAN Attachments.
 type InterconnectLocation struct {
 	// Address: [Output Only] The postal address of the Point of Presence,
 	// each line in the address is separated by a newline character.
@@ -15846,7 +17616,13 @@ type InterconnectLocation struct {
 	// "Amsterdam, Netherlands".
 	City string `json:"city,omitempty"`
 
-	// Continent: [Output Only] Continent for this location.
+	// Continent: [Output Only] Continent for this location, which can take
+	// one of the following values:
+	// - AFRICA
+	// - ASIA_PAC
+	// - EUROPE
+	// - NORTH_AMERICA
+	// - SOUTH_AMERICA
 	//
 	// Possible values:
 	//   "AFRICA"
@@ -15899,10 +17675,12 @@ type InterconnectLocation struct {
 	// SelfLink: [Output Only] Server-defined URL for the resource.
 	SelfLink string `json:"selfLink,omitempty"`
 
-	// Status: [Output Only] The status of this InterconnectLocation. If the
-	// status is AVAILABLE, new Interconnects may be provisioned in this
-	// InterconnectLocation. Otherwise, no new Interconnects may be
-	// provisioned.
+	// Status: [Output Only] The status of this InterconnectLocation, which
+	// can take one of the following values:
+	// - CLOSED: The InterconnectLocation is closed and is unavailable for
+	// provisioning new Interconnects.
+	// - AVAILABLE: The InterconnectLocation is available for provisioning
+	// new Interconnects.
 	//
 	// Possible values:
 	//   "AVAILABLE"
@@ -16150,9 +17928,14 @@ type InterconnectOutageNotification struct {
 	// epoch).
 	EndTime int64 `json:"endTime,omitempty,string"`
 
-	// IssueType: Form this outage is expected to take. Note that the "IT_"
-	// versions of this enum have been deprecated in favor of the unprefixed
-	// values.
+	// IssueType: Form this outage is expected to take, which can take one
+	// of the following values:
+	// - OUTAGE: The Interconnect may be completely out of service for some
+	// or all of the specified window.
+	// - PARTIAL_OUTAGE: Some circuits comprising the Interconnect as a
+	// whole should remain up, but with reduced bandwidth. Note that the
+	// versions of this enum prefixed with "IT_" have been deprecated in
+	// favor of the unprefixed values.
 	//
 	// Possible values:
 	//   "IT_OUTAGE"
@@ -16164,8 +17947,10 @@ type InterconnectOutageNotification struct {
 	// Name: Unique identifier for this outage notification.
 	Name string `json:"name,omitempty"`
 
-	// Source: The party that generated this notification. Note that
-	// "NSRC_GOOGLE" has been deprecated in favor of "GOOGLE"
+	// Source: The party that generated this notification, which can take
+	// the following value:
+	// - GOOGLE: this notification as generated by Google. Note that the
+	// value of NSRC_GOOGLE has been deprecated in favor of GOOGLE.
 	//
 	// Possible values:
 	//   "GOOGLE"
@@ -16176,12 +17961,20 @@ type InterconnectOutageNotification struct {
 	// Unix epoch).
 	StartTime int64 `json:"startTime,omitempty,string"`
 
-	// State: State of this notification. Note that the "NS_" versions of
-	// this enum have been deprecated in favor of the unprefixed values.
+	// State: State of this notification, which can take one of the
+	// following values:
+	// - ACTIVE: This outage notification is active. The event could be in
+	// the past, present, or future. See start_time and end_time for
+	// scheduling.
+	// - CANCELLED: The outage associated with this notification was
+	// cancelled before the outage was due to start. Note that the versions
+	// of this enum prefixed with "NS_" have been deprecated in favor of the
+	// unprefixed values.
 	//
 	// Possible values:
 	//   "ACTIVE"
 	//   "CANCELLED"
+	//   "COMPLETED"
 	//   "NS_ACTIVE"
 	//   "NS_CANCELED"
 	State string `json:"state,omitempty"`
@@ -16729,12 +18522,6 @@ type LogConfigDataAccessOptions struct {
 	// the caller. This is relevant only in the LocalIAM implementation, for
 	// now.
 	//
-	// NOTE: Logging to Gin in a fail-closed manner is currently unsupported
-	// while work is being done to satisfy the requirements of go/345.
-	// Currently, setting LOG_FAIL_CLOSED mode will have no effect, but
-	// still exists because there is active work being done to support it
-	// (b/115874152).
-	//
 	// Possible values:
 	//   "LOG_FAIL_CLOSED"
 	//   "LOG_MODE_UNSPECIFIED"
@@ -16763,8 +18550,12 @@ func (s *LogConfigDataAccessOptions) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// MachineType: A Machine Type resource. (== resource_for
-// v1.machineTypes ==) (== resource_for beta.machineTypes ==)
+// MachineType: Represents a Machine Type resource.
+//
+// You can use specific machine types for your VM instances based on
+// performance and pricing requirements. For more information, read
+// Machine Types. (== resource_for v1.machineTypes ==) (== resource_for
+// beta.machineTypes ==)
 type MachineType struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -17590,6 +19381,103 @@ func (s *MetadataItems) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+// MetadataFilter: Opaque filter criteria used by loadbalancers to
+// restrict routing configuration to a limited set of loadbalancing
+// proxies. Proxies and sidecars involved in loadbalancing would
+// typically present metadata to the loadbalancers which need to match
+// criteria specified here. If a match takes place, the relevant routing
+// configuration is made available to those proxies.
+// For each metadataFilter in this list, if its filterMatchCriteria is
+// set to MATCH_ANY, at least one of the filterLabels must match the
+// corresponding label provided in the metadata. If its
+// filterMatchCriteria is set to MATCH_ALL, then all of its filterLabels
+// must match with corresponding labels in the provided metadata.
+// An example for using metadataFilters would be: if loadbalancing
+// involves  Envoys, they will only receive routing configuration when
+// values in metadataFilters match values supplied in <a
+// href="https://www.envoyproxy.io/docs/envoy/latest/api-v2/api/v2/core/b
+// ase.proto#envoy-api-msg-core-node" Node metadata of their XDS
+// requests to loadbalancers.
+type MetadataFilter struct {
+	// FilterLabels: The list of label value pairs that must match labels in
+	// the provided metadata based on filterMatchCriteria
+	// This list must not be empty and can have at the most 64 entries.
+	FilterLabels []*MetadataFilterLabelMatch `json:"filterLabels,omitempty"`
+
+	// FilterMatchCriteria: Specifies how individual filterLabel matches
+	// within the list of filterLabels contribute towards the overall
+	// metadataFilter match.
+	// Supported values are:
+	// - MATCH_ANY: At least one of the filterLabels must have a matching
+	// label in the provided metadata.
+	// - MATCH_ALL: All filterLabels must have matching labels in the
+	// provided metadata.
+	//
+	// Possible values:
+	//   "MATCH_ALL"
+	//   "MATCH_ANY"
+	//   "NOT_SET"
+	FilterMatchCriteria string `json:"filterMatchCriteria,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "FilterLabels") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "FilterLabels") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *MetadataFilter) MarshalJSON() ([]byte, error) {
+	type NoMethod MetadataFilter
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// MetadataFilterLabelMatch: MetadataFilter label name value pairs that
+// are expected to match corresponding labels presented as metadata to
+// the loadbalancer.
+type MetadataFilterLabelMatch struct {
+	// Name: Name of metadata label.
+	// The name can have a maximum length of 1024 characters and must be at
+	// least 1 character long.
+	Name string `json:"name,omitempty"`
+
+	// Value: The value of the label must match the specified value.
+	// value can have a maximum length of 1024 characters.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Name") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Name") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *MetadataFilterLabelMatch) MarshalJSON() ([]byte, error) {
+	type NoMethod MetadataFilterLabelMatch
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 // NamedPort: The named port. For example: .
 type NamedPort struct {
 	// Name: The name for this named port. The name must be 1-63 characters
@@ -17622,9 +19510,11 @@ func (s *NamedPort) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Network: Represents a Network resource. Read Virtual Private Cloud
-// (VPC) Network Overview for more information. (== resource_for
-// v1.networks ==) (== resource_for beta.networks ==)
+// Network: Represents a VPC Network resource.
+//
+// Networks connect resources to each other and to the internet. For
+// more information, read Virtual Private Cloud (VPC) Network. (==
+// resource_for v1.networks ==) (== resource_for beta.networks ==)
 type Network struct {
 	// IPv4Range: Deprecated in favor of subnet mode networks. The range of
 	// internal addresses that are legal on this network. This range is a
@@ -17646,11 +19536,11 @@ type Network struct {
 	CreationTimestamp string `json:"creationTimestamp,omitempty"`
 
 	// Description: An optional description of this resource. Provide this
-	// property when you create the resource.
+	// field when you create the resource.
 	Description string `json:"description,omitempty"`
 
 	// GatewayIPv4: [Output Only] The gateway address for default routing
-	// out of the network. This value is read only and is selected by GCP.
+	// out of the network, selected by GCP.
 	GatewayIPv4 string `json:"gatewayIPv4,omitempty"`
 
 	// Id: [Output Only] The unique identifier for the resource. This
@@ -17664,10 +19554,10 @@ type Network struct {
 	// Name: Name of the resource. Provided by the client when the resource
 	// is created. The name must be 1-63 characters long, and comply with
 	// RFC1035. Specifically, the name must be 1-63 characters long and
-	// match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
-	// the first character must be a lowercase letter, and all following
-	// characters must be a dash, lowercase letter, or digit, except the
-	// last character, which cannot be a dash.
+	// match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?. The first
+	// character must be a lowercase letter, and all following characters
+	// (except for the last character) must be a dash, lowercase letter, or
+	// digit. The last character must be a lowercase letter or digit.
 	Name string `json:"name,omitempty"`
 
 	// Peerings: [Output Only] A list of network peerings for the resource.
@@ -18622,8 +20512,8 @@ type NetworkInterface struct {
 	AccessConfigs []*AccessConfig `json:"accessConfigs,omitempty"`
 
 	// AliasIpRanges: An array of alias IP ranges for this network
-	// interface. Can only be specified for network interfaces on
-	// subnet-mode networks.
+	// interface. You can only specify this field for network interfaces in
+	// VPC networks.
 	AliasIpRanges []*AliasIpRange `json:"aliasIpRanges,omitempty"`
 
 	// Fingerprint: Fingerprint hash of contents stored in this network
@@ -18637,8 +20527,9 @@ type NetworkInterface struct {
 	// compute#networkInterface for network interfaces.
 	Kind string `json:"kind,omitempty"`
 
-	// Name: [Output Only] The name of the network interface, generated by
-	// the server. For network devices, these are eth0, eth1, etc.
+	// Name: [Output Only] The name of the network interface, which is
+	// generated by the server. For network devices, these are eth0, eth1,
+	// etc.
 	Name string `json:"name,omitempty"`
 
 	// Network: URL of the network resource for this instance. When creating
@@ -18646,10 +20537,6 @@ type NetworkInterface struct {
 	// the default network global/networks/default is used; if the network
 	// is not specified but the subnetwork is specified, the network is
 	// inferred.
-	//
-	// This field is optional when creating a firewall rule. If not
-	// specified when creating a firewall rule, the default network
-	// global/networks/default is used.
 	//
 	// If you specify this property, you can specify the network as a full
 	// or partial URL. For example, the following are all valid URLs:
@@ -18659,16 +20546,16 @@ type NetworkInterface struct {
 	// - global/networks/default
 	Network string `json:"network,omitempty"`
 
-	// NetworkIP: An IPv4 internal network address to assign to the instance
-	// for this network interface. If not specified by the user, an unused
+	// NetworkIP: An IPv4 internal IP address to assign to the instance for
+	// this network interface. If not specified by the user, an unused
 	// internal IP is assigned by the system.
 	NetworkIP string `json:"networkIP,omitempty"`
 
 	// Subnetwork: The URL of the Subnetwork resource for this instance. If
-	// the network resource is in legacy mode, do not provide this property.
-	// If the network is in auto subnet mode, providing the subnetwork is
-	// optional. If the network is in custom subnet mode, then this field
-	// should be specified. If you specify this property, you can specify
+	// the network resource is in legacy mode, do not specify this field. If
+	// the network is in auto subnet mode, specifying the subnetwork is
+	// optional. If the network is in custom subnet mode, specifying the
+	// subnetwork is required. If you specify this field, you can specify
 	// the subnetwork as a full or partial URL. For example, the following
 	// are all valid URLs:
 	// -
@@ -18859,19 +20746,19 @@ func (s *NetworkListWarningData) MarshalJSON() ([]byte, error) {
 // flag indicating whether Google Compute Engine should automatically
 // create routes for the peering.
 type NetworkPeering struct {
-	// AutoCreateRoutes: This field will be deprecated soon. Prefer using
-	// exchange_subnet_routes instead. Indicates whether full mesh
-	// connectivity is created and managed automatically. When it is set to
-	// true, Google Compute Engine will automatically create and manage the
-	// routes between two networks when the state is ACTIVE. Otherwise, user
-	// needs to create routes manually to route packets to peer network.
+	// AutoCreateRoutes: This field will be deprecated soon. Use the
+	// exchange_subnet_routes field instead. Indicates whether full mesh
+	// connectivity is created and managed automatically between peered
+	// networks. Currently this field should always be true since Google
+	// Compute Engine will automatically create and manage subnetwork routes
+	// between two networks when peering state is ACTIVE.
 	AutoCreateRoutes bool `json:"autoCreateRoutes,omitempty"`
 
-	// ExchangeSubnetRoutes: Whether full mesh connectivity is created and
-	// managed automatically. When it is set to true, Google Compute Engine
-	// will automatically create and manage the routes between two networks
-	// when the peering state is ACTIVE. Otherwise, user needs to create
-	// routes manually to route packets to peer network.
+	// ExchangeSubnetRoutes: Indicates whether full mesh connectivity is
+	// created and managed automatically between peered networks. Currently
+	// this field should always be true since Google Compute Engine will
+	// automatically create and manage subnetwork routes between two
+	// networks when peering state is ACTIVE.
 	ExchangeSubnetRoutes bool `json:"exchangeSubnetRoutes,omitempty"`
 
 	// ExportCustomRoutes: Whether to export the custom routes to peer
@@ -18885,10 +20772,9 @@ type NetworkPeering struct {
 	// Name: Name of this peering. Provided by the client when the peering
 	// is created. The name must comply with RFC1035. Specifically, the name
 	// must be 1-63 characters long and match regular expression
-	// `[a-z]([-a-z0-9]*[a-z0-9])?` which means the first character must be
-	// a lowercase letter, and all the following characters must be a dash,
-	// lowercase letter, or digit, except the last character, which cannot
-	// be a dash.
+	// `[a-z]([-a-z0-9]*[a-z0-9])?`. The first character must be a lowercase
+	// letter, and all the following characters must be a dash, lowercase
+	// letter, or digit, except the last character, which cannot be a dash.
 	Name string `json:"name,omitempty"`
 
 	// Network: The URL of the peer network. It can be either full URL or
@@ -18897,7 +20783,9 @@ type NetworkPeering struct {
 	// network is in the same project as the current network.
 	Network string `json:"network,omitempty"`
 
-	// State: [Output Only] State for the peering.
+	// State: [Output Only] State for the peering, either `ACTIVE` or
+	// `INACTIVE`. The peering is `ACTIVE` when there's a matching
+	// configuration in the peer network.
 	//
 	// Possible values:
 	//   "ACTIVE"
@@ -18938,9 +20826,9 @@ func (s *NetworkPeering) MarshalJSON() ([]byte, error) {
 // enforce network-wide.
 type NetworkRoutingConfig struct {
 	// RoutingMode: The network-wide routing mode to use. If set to
-	// REGIONAL, this network's cloud routers will only advertise routes
+	// REGIONAL, this network's Cloud Routers will only advertise routes
 	// with subnets of this network in the same region as the router. If set
-	// to GLOBAL, this network's cloud routers will advertise routes with
+	// to GLOBAL, this network's Cloud Routers will advertise routes with
 	// all subnets of this network, across regions.
 	//
 	// Possible values:
@@ -18972,19 +20860,23 @@ func (s *NetworkRoutingConfig) MarshalJSON() ([]byte, error) {
 }
 
 type NetworksAddPeeringRequest struct {
-	// AutoCreateRoutes: This field will be deprecated soon. Prefer using
-	// exchange_subnet_routes in network_peering instead. Whether Google
-	// Compute Engine manages the routes automatically.
+	// AutoCreateRoutes: This field will be deprecated soon. Use
+	// exchange_subnet_routes in network_peering instead. Indicates whether
+	// full mesh connectivity is created and managed automatically between
+	// peered networks. Currently this field should always be true since
+	// Google Compute Engine will automatically create and manage subnetwork
+	// routes between two networks when peering state is ACTIVE.
 	AutoCreateRoutes bool `json:"autoCreateRoutes,omitempty"`
 
 	// Name: Name of the peering, which should conform to RFC1035.
 	Name string `json:"name,omitempty"`
 
 	// NetworkPeering: Network peering parameters. In order to specify route
-	// policies for peering using import/export custom routes, you will have
-	// to fill all peering related parameters (name, peer network,
-	// exchange_subnet_routes) in network_peeringfield. Corresponding fields
-	// in NetworksAddPeeringRequest will be deprecated soon.
+	// policies for peering using import and export custom routes, you must
+	// specify all peering related parameters (name, peer network,
+	// exchange_subnet_routes) in the network_peering field. The
+	// corresponding fields in NetworksAddPeeringRequest will be deprecated
+	// soon.
 	NetworkPeering *NetworkPeering `json:"networkPeering,omitempty"`
 
 	// PeerNetwork: URL of the peer network. It can be either full URL or
@@ -19071,10 +20963,15 @@ func (s *NetworksUpdatePeeringRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// NodeGroup: A NodeGroup resource. To create a node group, you must
-// first create a node templates. To learn more about node groups and
-// sole-tenant nodes, read the Sole-tenant nodes documentation. (==
+// NodeGroup: Represent a sole-tenant Node Group resource.
+//
+// A sole-tenant node is a physical server that is dedicated to hosting
+// VM instances only for your specific project. Use sole-tenant nodes to
+// keep your instances physically separated from instances in other
+// projects, or to group your instances together on the same host
+// hardware. For more information, read Sole-tenant nodes. (==
 // resource_for beta.nodeGroups ==) (== resource_for v1.nodeGroups ==)
+// NextID: 15
 type NodeGroup struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -19878,10 +21775,12 @@ func (s *NodeGroupsSetNodeTemplateRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// NodeTemplate: A Node Template resource. To learn more about node
-// templates and sole-tenant nodes, read the Sole-tenant nodes
-// documentation. (== resource_for beta.nodeTemplates ==) (==
-// resource_for v1.nodeTemplates ==)
+// NodeTemplate: Represent a sole-tenant Node Template resource.
+//
+// You can use a template to define properties for nodes in a node
+// group. For more information, read Creating node groups and instances.
+// (== resource_for beta.nodeTemplates ==) (== resource_for
+// v1.nodeTemplates ==) (== NextID: 16 ==)
 type NodeTemplate struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -19932,7 +21831,14 @@ type NodeTemplate struct {
 	// SelfLink: [Output Only] Server-defined URL for the resource.
 	SelfLink string `json:"selfLink,omitempty"`
 
-	// ServerBinding: Binding properties for the physical server.
+	// ServerBinding: Sets the binding properties for the physical server.
+	// Valid values include:
+	// - [Default] RESTART_NODE_ON_ANY_SERVER: Restarts VMs on any available
+	// physical server
+	// - RESTART_NODE_ON_MINIMAL_SERVER: Restarts VMs on the same physical
+	// server whenever possible
+	//
+	// See Sole-tenant node options for more information.
 	ServerBinding *ServerBinding `json:"serverBinding,omitempty"`
 
 	// Status: [Output Only] The status of the node template. One of the
@@ -20452,7 +22358,14 @@ func (s *NodeTemplatesScopedListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// NodeType: A Node Type resource.
+// NodeType: Represent a sole-tenant Node Type resource.
+//
+// Each node within a node group must have a node type. A node type
+// specifies the total amount of cores and memory for that node.
+// Currently, the only available node type is n1-node-96-624 node type
+// that has 96 vCPUs and 624 GB of memory, available in multiple zones.
+// For more information read Node types. (== resource_for beta.nodeTypes
+// ==) (== resource_for v1.nodeTypes ==)
 type NodeType struct {
 	// CpuPlatform: [Output Only] The CPU platform used by this node type.
 	CpuPlatform string `json:"cpuPlatform,omitempty"`
@@ -20970,8 +22883,19 @@ func (s *NodeTypesScopedListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Operation: An Operation resource, used to manage asynchronous API
-// requests. (== resource_for v1.globalOperations ==) (== resource_for
+// Operation: Represents an Operation resource.
+//
+// You can use an operation resource to manage asynchronous API
+// requests. For more information, read Handling API
+// responses.
+//
+// Operations can be global, regional or zonal.
+// - For global operations, use the globalOperations resource.
+// - For regional operations, use the regionOperations resource.
+// - For zonal operations, use the zonalOperations resource.
+//
+// For more information, read  Global, Regional, and Zonal Resources.
+// (== resource_for v1.globalOperations ==) (== resource_for
 // beta.globalOperations ==) (== resource_for v1.regionOperations ==)
 // (== resource_for beta.regionOperations ==) (== resource_for
 // v1.zoneOperations ==) (== resource_for beta.zoneOperations ==)
@@ -21031,9 +22955,7 @@ type Operation struct {
 	Progress int64 `json:"progress,omitempty"`
 
 	// Region: [Output Only] The URL of the region where the operation
-	// resides. Only available when performing regional operations. You must
-	// specify this field as part of the HTTP request URL. It is not
-	// settable as a field in the request body.
+	// resides. Only applicable when performing regional operations.
 	Region string `json:"region,omitempty"`
 
 	// SelfLink: [Output Only] Server-defined URL for the resource.
@@ -21074,9 +22996,7 @@ type Operation struct {
 	Warnings []*OperationWarnings `json:"warnings,omitempty"`
 
 	// Zone: [Output Only] The URL of the zone where the operation resides.
-	// Only available when performing per-zone operations. You must specify
-	// this field as part of the HTTP request URL. It is not settable as a
-	// field in the request body.
+	// Only applicable when performing per-zone operations.
 	Zone string `json:"zone,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
@@ -21715,10 +23635,114 @@ func (s *OperationsScopedListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+// OutlierDetection: Settings controlling eviction of unhealthy hosts
+// from the load balancing pool.
+type OutlierDetection struct {
+	// BaseEjectionTime: The base time that a host is ejected for. The real
+	// time is equal to the base time multiplied by the number of times the
+	// host has been ejected. Defaults to 30000ms or 30s.
+	BaseEjectionTime *Duration `json:"baseEjectionTime,omitempty"`
+
+	// ConsecutiveErrors: Number of errors before a host is ejected from the
+	// connection pool. When the backend host is accessed over HTTP, a 5xx
+	// return code qualifies as an error. Defaults to 5.
+	ConsecutiveErrors int64 `json:"consecutiveErrors,omitempty"`
+
+	// ConsecutiveGatewayFailure: The number of consecutive gateway failures
+	// (502, 503, 504 status or connection errors that are mapped to one of
+	// those status codes) before a consecutive gateway failure ejection
+	// occurs. Defaults to 5.
+	ConsecutiveGatewayFailure int64 `json:"consecutiveGatewayFailure,omitempty"`
+
+	// EnforcingConsecutiveErrors: The percentage chance that a host will be
+	// actually ejected when an outlier status is detected through
+	// consecutive 5xx. This setting can be used to disable ejection or to
+	// ramp it up slowly. Defaults to 100.
+	EnforcingConsecutiveErrors int64 `json:"enforcingConsecutiveErrors,omitempty"`
+
+	// EnforcingConsecutiveGatewayFailure: The percentage chance that a host
+	// will be actually ejected when an outlier status is detected through
+	// consecutive gateway failures. This setting can be used to disable
+	// ejection or to ramp it up slowly. Defaults to 0.
+	EnforcingConsecutiveGatewayFailure int64 `json:"enforcingConsecutiveGatewayFailure,omitempty"`
+
+	// EnforcingSuccessRate: The percentage chance that a host will be
+	// actually ejected when an outlier status is detected through success
+	// rate statistics. This setting can be used to disable ejection or to
+	// ramp it up slowly. Defaults to 100.
+	EnforcingSuccessRate int64 `json:"enforcingSuccessRate,omitempty"`
+
+	// Interval: Time interval between ejection sweep analysis. This can
+	// result in both new ejections as well as hosts being returned to
+	// service. Defaults to 10 seconds.
+	Interval *Duration `json:"interval,omitempty"`
+
+	// MaxEjectionPercent: Maximum percentage of hosts in the load balancing
+	// pool for the backend service that can be ejected. Defaults to 10%.
+	MaxEjectionPercent int64 `json:"maxEjectionPercent,omitempty"`
+
+	// SuccessRateMinimumHosts: The number of hosts in a cluster that must
+	// have enough request volume to detect success rate outliers. If the
+	// number of hosts is less than this setting, outlier detection via
+	// success rate statistics is not performed for any host in the cluster.
+	// Defaults to 5.
+	SuccessRateMinimumHosts int64 `json:"successRateMinimumHosts,omitempty"`
+
+	// SuccessRateRequestVolume: The minimum number of total requests that
+	// must be collected in one interval (as defined by the interval
+	// duration above) to include this host in success rate based outlier
+	// detection. If the volume is lower than this setting, outlier
+	// detection via success rate statistics is not performed for that host.
+	// Defaults to 100.
+	SuccessRateRequestVolume int64 `json:"successRateRequestVolume,omitempty"`
+
+	// SuccessRateStdevFactor: This factor is used to determine the ejection
+	// threshold for success rate outlier ejection. The ejection threshold
+	// is the difference between the mean success rate, and the product of
+	// this factor and the standard deviation of the mean success rate: mean
+	// - (stdev * success_rate_stdev_factor). This factor is divided by a
+	// thousand to get a double. That is, if the desired factor is 1.9, the
+	// runtime value should be 1900. Defaults to 1900.
+	SuccessRateStdevFactor int64 `json:"successRateStdevFactor,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "BaseEjectionTime") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BaseEjectionTime") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *OutlierDetection) MarshalJSON() ([]byte, error) {
+	type NoMethod OutlierDetection
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 // PathMatcher: A matcher for the path portion of the URL. The
 // BackendService from the longest-matched rule will serve the URL. If
 // no rule was matched, the default service will be used.
 type PathMatcher struct {
+	// DefaultRouteAction: defaultRouteAction takes effect when none of the
+	// pathRules or routeRules match. The load balancer performs advanced
+	// routing actions like URL rewrites, header transformations, etc. prior
+	// to forwarding the request to the selected backend. If
+	// defaultRouteAction specifies any weightedBackendServices,
+	// defaultService must not be set. Conversely if defaultService is set,
+	// defaultRouteAction cannot contain any  weightedBackendServices.
+	// Only one of defaultRouteAction or defaultUrlRedirect must be set.
+	DefaultRouteAction *HttpRouteAction `json:"defaultRouteAction,omitempty"`
+
 	// DefaultService: The full or partial URL to the BackendService
 	// resource. This will be used if none of the pathRules or routeRules
 	// defined by this PathMatcher are matched. For example, the following
@@ -21742,9 +23766,22 @@ type PathMatcher struct {
 	// - compute.backendServices.use
 	DefaultService string `json:"defaultService,omitempty"`
 
+	// DefaultUrlRedirect: When when none of the specified pathRules or
+	// routeRules match, the request is redirected to a URL specified by
+	// defaultUrlRedirect.
+	// If defaultUrlRedirect is specified, defaultService or
+	// defaultRouteAction must not be set.
+	DefaultUrlRedirect *HttpRedirectAction `json:"defaultUrlRedirect,omitempty"`
+
 	// Description: An optional description of this resource. Provide this
 	// property when you create the resource.
 	Description string `json:"description,omitempty"`
+
+	// HeaderAction: Specifies changes to request and response headers that
+	// need to take effect for the selected backendService.
+	// HeaderAction specified here are applied after the matching
+	// HttpRouteRule HeaderAction and before the HeaderAction in the UrlMap
+	HeaderAction *HttpHeaderAction `json:"headerAction,omitempty"`
 
 	// Name: The name to which this PathMatcher is referred by the HostRule.
 	Name string `json:"name,omitempty"`
@@ -21759,15 +23796,23 @@ type PathMatcher struct {
 	// Only one of pathRules or routeRules must be set.
 	PathRules []*PathRule `json:"pathRules,omitempty"`
 
-	// ForceSendFields is a list of field names (e.g. "DefaultService") to
-	// unconditionally include in API requests. By default, fields with
+	// RouteRules: The list of ordered HTTP route rules. Use this list
+	// instead of pathRules when advanced route matching and routing actions
+	// are desired. The order of specifying routeRules matters: the first
+	// rule that matches will cause its specified routing action to take
+	// effect.
+	// Only one of pathRules or routeRules must be set.
+	RouteRules []*HttpRouteRule `json:"routeRules,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "DefaultRouteAction")
+	// to unconditionally include in API requests. By default, fields with
 	// empty values are omitted from API requests. However, any non-pointer,
 	// non-interface field appearing in ForceSendFields will be sent to the
 	// server regardless of whether the field is empty or not. This may be
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
 
-	// NullFields is a list of field names (e.g. "DefaultService") to
+	// NullFields is a list of field names (e.g. "DefaultRouteAction") to
 	// include in API requests with the JSON null value. By default, fields
 	// with empty values are omitted from API requests. However, any field
 	// with an empty value appearing in NullFields will be sent to the
@@ -21792,6 +23837,15 @@ type PathRule struct {
 	// or #, and those chars are not allowed here.
 	Paths []string `json:"paths,omitempty"`
 
+	// RouteAction: In response to a matching path, the load balancer
+	// performs advanced routing actions like URL rewrites, header
+	// transformations, etc. prior to forwarding the request to the selected
+	// backend. If routeAction specifies any  weightedBackendServices,
+	// service must not be set. Conversely if service is set, routeAction
+	// cannot contain any  weightedBackendServices.
+	// Only one of routeAction or urlRedirect must be set.
+	RouteAction *HttpRouteAction `json:"routeAction,omitempty"`
+
 	// Service: The full or partial URL of the backend service resource to
 	// which traffic is directed if this rule is matched. If routeAction is
 	// additionally specified, advanced routing actions like URL Rewrites,
@@ -21802,6 +23856,11 @@ type PathRule struct {
 	// Only one of urlRedirect, service or
 	// routeAction.weightedBackendService must be set.
 	Service string `json:"service,omitempty"`
+
+	// UrlRedirect: When a path pattern is matched, the request is
+	// redirected to a URL specified by urlRedirect.
+	// If urlRedirect is specified, service or routeAction must not be set.
+	UrlRedirect *HttpRedirectAction `json:"urlRedirect,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Paths") to
 	// unconditionally include in API requests. By default, fields with
@@ -21951,9 +24010,12 @@ func (s *PreconfiguredWafSet) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Project: A Project resource. For an overview of projects, see  Cloud
-// Platform Resource Hierarchy. (== resource_for v1.projects ==) (==
-// resource_for beta.projects ==)
+// Project: Represents a Project resource.
+//
+// A project is used to organize resources in a Google Cloud Platform
+// environment. For more information, read about the  Resource
+// Hierarchy. (== resource_for v1.projects ==) (== resource_for
+// beta.projects ==)
 type Project struct {
 	// CommonInstanceMetadata: Metadata key/value pairs available to all
 	// instances contained in this project. See Custom metadata for more
@@ -22214,7 +24276,15 @@ type Quota struct {
 	//   "AUTOSCALERS"
 	//   "BACKEND_BUCKETS"
 	//   "BACKEND_SERVICES"
+	//   "C2_CPUS"
 	//   "COMMITMENTS"
+	//   "COMMITTED_CPUS"
+	//   "COMMITTED_LOCAL_SSD_TOTAL_GB"
+	//   "COMMITTED_NVIDIA_K80_GPUS"
+	//   "COMMITTED_NVIDIA_P100_GPUS"
+	//   "COMMITTED_NVIDIA_P4_GPUS"
+	//   "COMMITTED_NVIDIA_T4_GPUS"
+	//   "COMMITTED_NVIDIA_V100_GPUS"
 	//   "CPUS"
 	//   "CPUS_ALL_REGIONS"
 	//   "DISKS_TOTAL_GB"
@@ -22237,6 +24307,7 @@ type Quota struct {
 	//   "IN_USE_BACKUP_SCHEDULES"
 	//   "IN_USE_SNAPSHOT_SCHEDULES"
 	//   "LOCAL_SSD_TOTAL_GB"
+	//   "N2_CPUS"
 	//   "NETWORKS"
 	//   "NETWORK_ENDPOINT_GROUPS"
 	//   "NVIDIA_K80_GPUS"
@@ -22259,6 +24330,7 @@ type Quota struct {
 	//   "PREEMPTIBLE_NVIDIA_V100_GPUS"
 	//   "REGIONAL_AUTOSCALERS"
 	//   "REGIONAL_INSTANCE_GROUP_MANAGERS"
+	//   "RESERVATIONS"
 	//   "RESOURCE_POLICIES"
 	//   "ROUTERS"
 	//   "ROUTES"
@@ -22367,8 +24439,11 @@ func (s *Reference) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Region: Region resource. (== resource_for beta.regions ==) (==
-// resource_for v1.regions ==)
+// Region: Represents a Region resource.
+//
+// A region is a geographical area where a resource is located. For more
+// information, read Regions and Zones. (== resource_for beta.regions
+// ==) (== resource_for v1.regions ==)
 type Region struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -23204,22 +25279,41 @@ func (s *RegionInstanceGroupManagersAbandonInstancesRequest) MarshalJSON() ([]by
 // RegionInstanceGroupManagersApplyUpdatesRequest:
 // InstanceGroupManagers.applyUpdatesToInstances
 type RegionInstanceGroupManagersApplyUpdatesRequest struct {
-	// Instances: The list of instances for which we want to apply changes
-	// on this managed instance group.
+	// Instances: The list of URLs of one or more instances for which you
+	// want to apply updates. Each URL can be a full URL or a partial URL,
+	// such as zones/[ZONE]/instances/[INSTANCE_NAME].
 	Instances []string `json:"instances,omitempty"`
 
-	// MinimalAction: The minimal action that should be perfomed on the
-	// instances. By default NONE.
+	// MinimalAction: The minimal action that you want to perform on each
+	// instance during the update:
+	// - REPLACE: At minimum, delete the instance and create it again.
+	// - RESTART: Stop the instance and start it again.
+	// - REFRESH: Do not stop the instance.
+	// - NONE: Do not disrupt the instance at all.  By default, the minimum
+	// action is NONE. If your update requires a more disruptive action than
+	// you set with this flag, the necessary action is performed to execute
+	// the update.
 	//
 	// Possible values:
+	//   "NONE"
+	//   "REFRESH"
 	//   "REPLACE"
 	//   "RESTART"
 	MinimalAction string `json:"minimalAction,omitempty"`
 
-	// MostDisruptiveAllowedAction: The most disruptive action that allowed
-	// to be performed on the instances. By default REPLACE.
+	// MostDisruptiveAllowedAction: The most disruptive action that you want
+	// to perform on each instance during the update:
+	// - REPLACE: Delete the instance and create it again.
+	// - RESTART: Stop the instance and start it again.
+	// - REFRESH: Do not stop the instance.
+	// - NONE: Do not disrupt the instance at all.  By default, the most
+	// disruptive allowed action is REPLACE. If your update requires a more
+	// disruptive action than you set with this flag, the update request
+	// will fail.
 	//
 	// Possible values:
+	//   "NONE"
+	//   "REFRESH"
 	//   "REPLACE"
 	//   "RESTART"
 	MostDisruptiveAllowedAction string `json:"mostDisruptiveAllowedAction,omitempty"`
@@ -23891,7 +25985,102 @@ func (s *RegionSetPolicyRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Reservation: Reservation resource
+type RegionTargetHttpsProxiesSetSslCertificatesRequest struct {
+	// SslCertificates: New set of SslCertificate resources to associate
+	// with this TargetHttpsProxy resource. Currently exactly one
+	// SslCertificate resource must be specified.
+	SslCertificates []string `json:"sslCertificates,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "SslCertificates") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "SslCertificates") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *RegionTargetHttpsProxiesSetSslCertificatesRequest) MarshalJSON() ([]byte, error) {
+	type NoMethod RegionTargetHttpsProxiesSetSslCertificatesRequest
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type RegionUrlMapsValidateRequest struct {
+	// Resource: Content of the UrlMap to be validated.
+	Resource *UrlMap `json:"resource,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Resource") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Resource") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *RegionUrlMapsValidateRequest) MarshalJSON() ([]byte, error) {
+	type NoMethod RegionUrlMapsValidateRequest
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// RequestMirrorPolicy: A policy that specifies how requests intended
+// for the route's backends are shadowed to a separate mirrored backend
+// service. Loadbalancer does not wait for responses from the shadow
+// service. Prior to sending traffic to the shadow service, the host /
+// authority header is suffixed with -shadow.
+type RequestMirrorPolicy struct {
+	// BackendService: The full or partial URL to the BackendService
+	// resource being mirrored to.
+	BackendService string `json:"backendService,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "BackendService") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BackendService") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *RequestMirrorPolicy) MarshalJSON() ([]byte, error) {
+	type NoMethod RequestMirrorPolicy
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// Reservation: Represents a reservation resource. A reservation ensures
+// that capacity is held in a specific zone even if the reserved VMs are
+// not running. For more information, read  Reserving zonal resources.
+// (== resource_for beta.reservations ==) (== resource_for
+// v1.reservations ==) (== NextID: 13 ==)
 type Reservation struct {
 	// Commitment: [OutputOnly] Full or partial url for parent commitment
 	// for reservations which are tied to a commitment.
@@ -23932,10 +26121,20 @@ type Reservation struct {
 	SpecificReservation *AllocationSpecificSKUReservation `json:"specificReservation,omitempty"`
 
 	// SpecificReservationRequired: Indicates whether the reservation can be
-	// consumed by VMs with "any reservation" defined. If the field is set,
-	// then only VMs that target the reservation by name using
-	// --reservation-affinity can consume this reservation.
+	// consumed by VMs with affinity for "any" reservation. If the field is
+	// set, then only VMs that target the reservation by name can consume
+	// from this reservation.
 	SpecificReservationRequired bool `json:"specificReservationRequired,omitempty"`
+
+	// Status: [Output Only] The status of the reservation.
+	//
+	// Possible values:
+	//   "CREATING"
+	//   "DELETING"
+	//   "INVALID"
+	//   "READY"
+	//   "UPDATING"
+	Status string `json:"status,omitempty"`
 
 	// Zone: Zone in which the reservation resides, must be provided if
 	// reservation is created with commitment creation.
@@ -23968,9 +26167,14 @@ func (s *Reservation) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// ReservationAffinity: AllocationAffinity is the configuration of
-// desired allocation which this instance could take capacity from.
+// ReservationAffinity: Specifies the reservations that this instance
+// can consume from.
 type ReservationAffinity struct {
+	// ConsumeReservationType: Specifies the type of reservation from which
+	// this instance can consume resources: ANY_RESERVATION (default),
+	// SPECIFIC_RESERVATION, or NO_RESERVATION. See  Consuming reserved
+	// instances for examples.
+	//
 	// Possible values:
 	//   "ANY_RESERVATION"
 	//   "NO_RESERVATION"
@@ -23978,10 +26182,13 @@ type ReservationAffinity struct {
 	//   "UNSPECIFIED"
 	ConsumeReservationType string `json:"consumeReservationType,omitempty"`
 
-	// Key: Corresponds to the label key of reservation resource.
+	// Key: Corresponds to the label key of a reservation resource. To
+	// target a SPECIFIC_RESERVATION by name, specify
+	// googleapis.com/reservation-name as the key and specify the name of
+	// your reservation as its value.
 	Key string `json:"key,omitempty"`
 
-	// Values: Corresponds to the label values of reservation resource.
+	// Values: Corresponds to the label values of a reservation resource.
 	Values []string `json:"values,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g.
@@ -25376,32 +27583,19 @@ func (s *ResourcePolicyWeeklyCycleDayOfWeek) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Route: Represents a Route resource. A route specifies how certain
-// packets should be handled by the network. Routes are associated with
-// instances by tags and the set of routes for a particular instance is
-// called its routing table.
+// Route: Represents a Route resource.
 //
-// For each packet leaving an instance, the system searches that
-// instance's routing table for a single best matching route. Routes
-// match packets by destination IP address, preferring smaller or more
-// specific ranges over larger ones. If there is a tie, the system
-// selects the route with the smallest priority value. If there is still
-// a tie, it uses the layer three and four packet headers to select just
-// one of the remaining matching routes. The packet is then forwarded as
-// specified by the nextHop field of the winning route - either to
-// another instance destination, an instance gateway, or a Google
-// Compute Engine-operated gateway.
-//
-// Packets that do not match any route in the sending instance's routing
-// table are dropped. (== resource_for beta.routes ==) (== resource_for
-// v1.routes ==)
+// A route defines a path from VM instances in the VPC network to a
+// specific destination. This destination can be inside or outside the
+// VPC network. For more information, read the Routes overview. (==
+// resource_for beta.routes ==) (== resource_for v1.routes ==)
 type Route struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
 	CreationTimestamp string `json:"creationTimestamp,omitempty"`
 
 	// Description: An optional description of this resource. Provide this
-	// property when you create the resource.
+	// field when you create the resource.
 	Description string `json:"description,omitempty"`
 
 	// DestRange: The destination range of outgoing packets that this route
@@ -25419,10 +27613,10 @@ type Route struct {
 	// Name: Name of the resource. Provided by the client when the resource
 	// is created. The name must be 1-63 characters long, and comply with
 	// RFC1035. Specifically, the name must be 1-63 characters long and
-	// match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
-	// the first character must be a lowercase letter, and all following
-	// characters must be a dash, lowercase letter, or digit, except the
-	// last character, which cannot be a dash.
+	// match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?`. The first
+	// character must be a lowercase letter, and all following characters
+	// (except for the last character) must be a dash, lowercase letter, or
+	// digit. The last character must be a lowercase letter or digit.
 	Name string `json:"name,omitempty"`
 
 	// Network: Fully-qualified URL of the network that this route applies
@@ -25432,7 +27626,7 @@ type Route struct {
 	// NextHopGateway: The URL to a gateway that should handle matching
 	// packets. You can only specify the internet gateway using a full or
 	// partial valid URL:
-	// projects/<project-id>/global/gateways/default-internet-gateway
+	// projects/project/global/gateways/default-internet-gateway
 	NextHopGateway string `json:"nextHopGateway,omitempty"`
 
 	// NextHopIlb: The URL to a forwarding rule of type
@@ -25477,9 +27671,9 @@ type Route struct {
 
 	// Priority: The priority of this route. Priority is used to break ties
 	// in cases where there is more than one matching route of equal prefix
-	// length. In the case of two routes with equal prefix length, the one
-	// with the lowest-numbered priority value wins. Default value is 1000.
-	// Valid range is 0 through 65535.
+	// length. In cases where multiple routes have equal prefix length, the
+	// one with the lowest-numbered priority value wins. The default value
+	// is `1000`. The priority value must be from `0` to `65535`, inclusive.
 	Priority int64 `json:"priority,omitempty"`
 
 	// SelfLink: [Output Only] Server-defined fully-qualified URL for this
@@ -25775,14 +27969,18 @@ func (s *RouteListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Router: Router resource.
+// Router: Represents a Cloud Router resource.
+//
+// For more information about Cloud Router, read the the Cloud Router
+// overview.
 type Router struct {
 	// Bgp: BGP information specific to this router.
 	Bgp *RouterBgp `json:"bgp,omitempty"`
 
-	// BgpPeers: BGP information that needs to be configured into the
-	// routing stack to establish the BGP peering. It must specify peer ASN
-	// and either interface name, IP, or peer IP. Please refer to RFC4273.
+	// BgpPeers: BGP information that must be configured into the routing
+	// stack to establish BGP peering. This information must specify the
+	// peer ASN and either the interface name, IP address, or peer IP
+	// address. Please refer to RFC4273.
 	BgpPeers []*RouterBgpPeer `json:"bgpPeers,omitempty"`
 
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
@@ -25798,8 +27996,8 @@ type Router struct {
 	Id uint64 `json:"id,omitempty,string"`
 
 	// Interfaces: Router interfaces. Each interface requires either one
-	// linked resource (e.g. linkedVpnTunnel), or IP address and IP address
-	// range (e.g. ipRange), or both.
+	// linked resource, (for example, linkedVpnTunnel), or IP address and IP
+	// address range (for example, ipRange), or both.
 	Interfaces []*RouterInterface `json:"interfaces,omitempty"`
 
 	// Kind: [Output Only] Type of resource. Always compute#router for
@@ -25815,7 +28013,7 @@ type Router struct {
 	// last character, which cannot be a dash.
 	Name string `json:"name,omitempty"`
 
-	// Nats: A list of Nat services created in this router.
+	// Nats: A list of NAT services created in this router.
 	Nats []*RouterNat `json:"nats,omitempty"`
 
 	// Network: URI of the network to which this router belongs.
@@ -26046,7 +28244,7 @@ func (s *RouterAggregatedListWarningData) MarshalJSON() ([]byte, error) {
 
 type RouterBgp struct {
 	// AdvertiseMode: User-specified flag to indicate which mode to use for
-	// advertisement.
+	// advertisement. The options are DEFAULT or CUSTOM.
 	//
 	// Possible values:
 	//   "CUSTOM"
@@ -26110,11 +28308,15 @@ type RouterBgpPeer struct {
 	AdvertiseMode string `json:"advertiseMode,omitempty"`
 
 	// AdvertisedGroups: User-specified list of prefix groups to advertise
-	// in custom mode. This field can only be populated if advertise_mode is
-	// CUSTOM and overrides the list defined for the router (in Bgp
-	// message). These groups will be advertised in addition to any
-	// specified prefixes. Leave this field blank to advertise no custom
-	// groups.
+	// in custom mode, which can take one of the following options:
+	// - ALL_SUBNETS: Advertises all available subnets, including peer VPC
+	// subnets.
+	// - ALL_VPC_SUBNETS: Advertises the router's own VPC subnets.
+	// - ALL_PEER_VPC_SUBNETS: Advertises peer subnets of the router's VPC
+	// network. Note that this field can only be populated if advertise_mode
+	// is CUSTOM and overrides the list defined for the router (in the "bgp"
+	// message). These groups are advertised in addition to any specified
+	// prefixes. Leave this field blank to advertise no custom groups.
 	//
 	// Possible values:
 	//   "ALL_SUBNETS"
@@ -26123,14 +28325,14 @@ type RouterBgpPeer struct {
 	// AdvertisedIpRanges: User-specified list of individual IP ranges to
 	// advertise in custom mode. This field can only be populated if
 	// advertise_mode is CUSTOM and overrides the list defined for the
-	// router (in Bgp message). These IP ranges will be advertised in
+	// router (in the "bgp" message). These IP ranges are advertised in
 	// addition to any specified groups. Leave this field blank to advertise
 	// no custom IP ranges.
 	AdvertisedIpRanges []*RouterAdvertisedIpRange `json:"advertisedIpRanges,omitempty"`
 
 	// AdvertisedRoutePriority: The priority of routes advertised to this
-	// BGP peer. In the case where there is more than one matching route of
-	// maximum length, the routes with lowest priority value win.
+	// BGP peer. Where there is more than one matching route of maximum
+	// length, the routes with the lowest priority value win.
 	AdvertisedRoutePriority int64 `json:"advertisedRoutePriority,omitempty"`
 
 	// InterfaceName: Name of the interface the BGP peer is associated with.
@@ -26141,12 +28343,14 @@ type RouterBgpPeer struct {
 	IpAddress string `json:"ipAddress,omitempty"`
 
 	// ManagementType: [Output Only] The resource that configures and
-	// manages this BGP peer. MANAGED_BY_USER is the default value and can
-	// be managed by you or other users; MANAGED_BY_ATTACHMENT is a BGP peer
-	// that is configured and managed by Cloud Interconnect, specifically by
-	// an InterconnectAttachment of type PARTNER. Google will automatically
-	// create, update, and delete this type of BGP peer when the PARTNER
-	// InterconnectAttachment is created, updated, or deleted.
+	// manages this BGP peer.
+	// - MANAGED_BY_USER is the default value and can be managed by you or
+	// other users
+	// - MANAGED_BY_ATTACHMENT is a BGP peer that is configured and managed
+	// by Cloud Interconnect, specifically by an InterconnectAttachment of
+	// type PARTNER. Google automatically creates, updates, and deletes this
+	// type of BGP peer when the PARTNER InterconnectAttachment is created,
+	// updated, or deleted.
 	//
 	// Possible values:
 	//   "MANAGED_BY_ATTACHMENT"
@@ -26157,12 +28361,12 @@ type RouterBgpPeer struct {
 	// and comply with RFC1035.
 	Name string `json:"name,omitempty"`
 
-	// PeerAsn: Peer BGP Autonomous System Number (ASN). For VPN use case,
-	// this value can be different for every tunnel.
+	// PeerAsn: Peer BGP Autonomous System Number (ASN). Each BGP interface
+	// may use a different value.
 	PeerAsn int64 `json:"peerAsn,omitempty"`
 
-	// PeerIpAddress: IP address of the BGP interface outside Google cloud.
-	// Only IPv4 is supported.
+	// PeerIpAddress: IP address of the BGP interface outside Google Cloud
+	// Platform. Only IPv4 is supported.
 	PeerIpAddress string `json:"peerIpAddress,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "AdvertiseMode") to
@@ -26190,32 +28394,33 @@ func (s *RouterBgpPeer) MarshalJSON() ([]byte, error) {
 
 type RouterInterface struct {
 	// IpRange: IP address and range of the interface. The IP range must be
-	// in the RFC3927 link-local IP space. The value must be a
+	// in the RFC3927 link-local IP address space. The value must be a
 	// CIDR-formatted string, for example: 169.254.0.1/30. NOTE: Do not
 	// truncate the address as it represents the IP address of the
 	// interface.
 	IpRange string `json:"ipRange,omitempty"`
 
-	// LinkedInterconnectAttachment: URI of the linked interconnect
+	// LinkedInterconnectAttachment: URI of the linked Interconnect
 	// attachment. It must be in the same region as the router. Each
-	// interface can have at most one linked resource and it could either be
-	// a VPN Tunnel or an interconnect attachment.
+	// interface can have one linked resource, which can be either be a VPN
+	// tunnel or an Interconnect attachment.
 	LinkedInterconnectAttachment string `json:"linkedInterconnectAttachment,omitempty"`
 
-	// LinkedVpnTunnel: URI of the linked VPN tunnel. It must be in the same
-	// region as the router. Each interface can have at most one linked
-	// resource and it could either be a VPN Tunnel or an interconnect
+	// LinkedVpnTunnel: URI of the linked VPN tunnel, which must be in the
+	// same region as the router. Each interface can have one linked
+	// resource, which can be either a VPN tunnel or an Interconnect
 	// attachment.
 	LinkedVpnTunnel string `json:"linkedVpnTunnel,omitempty"`
 
 	// ManagementType: [Output Only] The resource that configures and
-	// manages this interface. MANAGED_BY_USER is the default value and can
-	// be managed by you or other users; MANAGED_BY_ATTACHMENT is an
-	// interface that is configured and managed by Cloud Interconnect,
-	// specifically by an InterconnectAttachment of type PARTNER. Google
-	// will automatically create, update, and delete this type of interface
-	// when the PARTNER InterconnectAttachment is created, updated, or
-	// deleted.
+	// manages this interface.
+	// - MANAGED_BY_USER is the default value and can be managed directly by
+	// users.
+	// - MANAGED_BY_ATTACHMENT is an interface that is configured and
+	// managed by Cloud Interconnect, specifically, by an
+	// InterconnectAttachment of type PARTNER. Google automatically creates,
+	// updates, and deletes this type of interface when the PARTNER
+	// InterconnectAttachment is created, updated, or deleted.
 	//
 	// Possible values:
 	//   "MANAGED_BY_ATTACHMENT"
@@ -26420,16 +28625,22 @@ type RouterNat struct {
 
 	// MinPortsPerVm: Minimum number of ports allocated to a VM from this
 	// NAT config. If not set, a default number of ports is allocated to a
-	// VM. This gets rounded up to the nearest power of 2. Eg. if the value
-	// of this field is 50, at least 64 ports will be allocated to a VM.
+	// VM. This is rounded up to the nearest power of 2. For example, if the
+	// value of this field is 50, at least 64 ports are allocated to a VM.
 	MinPortsPerVm int64 `json:"minPortsPerVm,omitempty"`
 
 	// Name: Unique name of this Nat service. The name must be 1-63
 	// characters long and comply with RFC1035.
 	Name string `json:"name,omitempty"`
 
-	// NatIpAllocateOption: Specify the NatIpAllocateOption. If it is
-	// AUTO_ONLY, then nat_ip should be empty.
+	// NatIpAllocateOption: Specify the NatIpAllocateOption, which can take
+	// one of the following values:
+	// - MANUAL_ONLY: Uses only Nat IP addresses provided by customers. When
+	// there are not enough specified Nat IPs, the Nat service fails for new
+	// VMs.
+	// - AUTO_ONLY: Nat IPs are allocated by Google Cloud Platform;
+	// customers can't specify any Nat IPs. When choosing AUTO_ONLY, then
+	// nat_ip should be empty.
 	//
 	// Possible values:
 	//   "AUTO_ONLY"
@@ -26437,12 +28648,20 @@ type RouterNat struct {
 	NatIpAllocateOption string `json:"natIpAllocateOption,omitempty"`
 
 	// NatIps: A list of URLs of the IP resources used for this Nat service.
-	// These IPs must be valid static external IP addresses assigned to the
-	// project. max_length is subject to change post alpha.
+	// These IP addresses must be valid static external IP addresses
+	// assigned to the project.
 	NatIps []string `json:"natIps,omitempty"`
 
-	// SourceSubnetworkIpRangesToNat: Specify the Nat option. If this field
-	// contains ALL_SUBNETWORKS_ALL_IP_RANGES or
+	// SourceSubnetworkIpRangesToNat: Specify the Nat option, which can take
+	// one of the following values:
+	// - ALL_SUBNETWORKS_ALL_IP_RANGES: All of the IP ranges in every
+	// Subnetwork are allowed to Nat.
+	// - ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES: All of the primary IP ranges
+	// in every Subnetwork are allowed to Nat.
+	// - LIST_OF_SUBNETWORKS: A list of Subnetworks are allowed to Nat
+	// (specified in the field subnetwork below) The default is
+	// SUBNETWORK_IP_RANGE_TO_NAT_OPTION_UNSPECIFIED. Note that if this
+	// field contains ALL_SUBNETWORKS_ALL_IP_RANGES or
 	// ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES, then there should not be any
 	// other Router.Nat section in any Router for this network in this
 	// region.
@@ -26536,7 +28755,7 @@ func (s *RouterNatLogConfig) MarshalJSON() ([]byte, error) {
 // RouterNatSubnetworkToNat: Defines the IP ranges that want to use NAT
 // for a subnetwork.
 type RouterNatSubnetworkToNat struct {
-	// Name: URL for the subnetwork resource to use NAT.
+	// Name: URL for the subnetwork resource that will use NAT.
 	Name string `json:"name,omitempty"`
 
 	// SecondaryIpRangeNames: A list of the secondary ranges of the
@@ -26546,7 +28765,7 @@ type RouterNatSubnetworkToNat struct {
 	SecondaryIpRangeNames []string `json:"secondaryIpRangeNames,omitempty"`
 
 	// SourceIpRangesToNat: Specify the options for NAT ranges in the
-	// Subnetwork. All usages of single value are valid except
+	// Subnetwork. All options of a single value are valid except
 	// NAT_IP_RANGE_OPTION_UNSPECIFIED. The only valid option with multiple
 	// values is: ["PRIMARY_IP_RANGE", "LIST_OF_SECONDARY_IP_RANGES"]
 	// Default: [ALL_IP_RANGES]
@@ -27067,7 +29286,7 @@ func (s *SSLHealthCheck) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Scheduling: Sets the scheduling options for an Instance.
+// Scheduling: Sets the scheduling options for an Instance. NextID: 9
 type Scheduling struct {
 	// AutomaticRestart: Specifies whether the instance should be
 	// automatically restarted if it is terminated by Compute Engine (not
@@ -27079,7 +29298,9 @@ type Scheduling struct {
 	// restarted if it is terminated by Compute Engine.
 	AutomaticRestart *bool `json:"automaticRestart,omitempty"`
 
-	// NodeAffinities: A set of node affinity and anti-affinity.
+	// NodeAffinities: A set of node affinity and anti-affinity
+	// configurations. Refer to Configuring node affinity for more
+	// information.
 	NodeAffinities []*SchedulingNodeAffinity `json:"nodeAffinities,omitempty"`
 
 	// OnHostMaintenance: Defines the maintenance behavior for this
@@ -27128,7 +29349,8 @@ type SchedulingNodeAffinity struct {
 	// Key: Corresponds to the label key of Node resource.
 	Key string `json:"key,omitempty"`
 
-	// Operator: Defines the operation of node selection.
+	// Operator: Defines the operation of node selection. Valid operators
+	// are IN for affinity and NOT_IN for anti-affinity.
 	//
 	// Possible values:
 	//   "IN"
@@ -27220,10 +29442,13 @@ func (s *SecurityPoliciesWafConfig) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// SecurityPolicy: A security policy is comprised of one or more rules.
-// It can also be associated with one or more 'targets'. (==
-// resource_for v1.securityPolicies ==) (== resource_for
-// beta.securityPolicies ==)
+// SecurityPolicy: Represents a Cloud Armor Security Policy
+// resource.
+//
+// Only external backend services that use load balancers can reference
+// a Security Policy. For more information, read  Cloud Armor Security
+// Policy Concepts. (== resource_for v1.securityPolicies ==) (==
+// resource_for beta.securityPolicies ==)
 type SecurityPolicy struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -28058,8 +30283,11 @@ func (s *SignedUrlKey) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Snapshot: A persistent disk snapshot resource. (== resource_for
-// beta.snapshots ==) (== resource_for v1.snapshots ==)
+// Snapshot: Represents a Persistent Disk Snapshot resource.
+//
+// You can use snapshots to back up data on a regular interval. For more
+// information, read  Creating persistent disk snapshots. (==
+// resource_for beta.snapshots ==) (== resource_for v1.snapshots ==)
 type Snapshot struct {
 	// AutoCreated: [Output Only] Set to true if snapshots are automatically
 	// by applying resource policy on the target disk.
@@ -28125,12 +30353,12 @@ type Snapshot struct {
 	// customer-supplied encryption key.
 	//
 	// After you encrypt a snapshot using a customer-supplied key, you must
-	// provide the same key if you use the image later For example, you must
-	// provide the encryption key when you create a disk from the encrypted
-	// snapshot in a future request.
+	// provide the same key if you use the snapshot later. For example, you
+	// must provide the encryption key when you create a disk from the
+	// encrypted snapshot in a future request.
 	//
 	// Customer-supplied encryption keys do not protect access to metadata
-	// of the disk.
+	// of the snapshot.
 	//
 	// If you do not provide an encryption key when creating the snapshot,
 	// then the snapshot will be encrypted using an automatically generated
@@ -28397,10 +30625,13 @@ func (s *SourceInstanceParams) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// SslCertificate: An SslCertificate resource. This resource provides a
-// mechanism to upload an SSL key and certificate to the load balancer
-// to serve secure connections from the user. (== resource_for
-// beta.sslCertificates ==) (== resource_for v1.sslCertificates ==)
+// SslCertificate: Represents an SSL Certificate resource.
+//
+// This SSL certificate resource also contains a private key. You can
+// use SSL keys and certificates to secure connections to a load
+// balancer. For more information, read  Creating and Using SSL
+// Certificates. (== resource_for beta.sslCertificates ==) (==
+// resource_for v1.sslCertificates ==)
 type SslCertificate struct {
 	// Certificate: A local certificate file. The certificate must be in PEM
 	// format. The certificate chain must be no greater than 5 certs long.
@@ -28441,6 +30672,11 @@ type SslCertificate struct {
 	// PrivateKey: A write-only private key in PEM format. Only insert
 	// requests will include this field.
 	PrivateKey string `json:"privateKey,omitempty"`
+
+	// Region: [Output Only] URL of the region where the regional SSL
+	// Certificate resides. This field is not applicable to global SSL
+	// Certificate.
+	Region string `json:"region,omitempty"`
 
 	// SelfLink: [Output only] Server-defined URL for the resource.
 	SelfLink string `json:"selfLink,omitempty"`
@@ -28486,6 +30722,161 @@ type SslCertificate struct {
 
 func (s *SslCertificate) MarshalJSON() ([]byte, error) {
 	type NoMethod SslCertificate
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type SslCertificateAggregatedList struct {
+	// Id: [Output Only] Unique identifier for the resource; defined by the
+	// server.
+	Id string `json:"id,omitempty"`
+
+	// Items: A list of SslCertificatesScopedList resources.
+	Items map[string]SslCertificatesScopedList `json:"items,omitempty"`
+
+	// Kind: [Output Only] Type of resource. Always
+	// compute#sslCertificateAggregatedList for lists of SSL Certificates.
+	Kind string `json:"kind,omitempty"`
+
+	// NextPageToken: [Output Only] This token allows you to get the next
+	// page of results for list requests. If the number of results is larger
+	// than maxResults, use the nextPageToken as a value for the query
+	// parameter pageToken in the next list request. Subsequent list
+	// requests will have their own nextPageToken to continue paging through
+	// the results.
+	NextPageToken string `json:"nextPageToken,omitempty"`
+
+	// SelfLink: [Output Only] Server-defined URL for this resource.
+	SelfLink string `json:"selfLink,omitempty"`
+
+	// Warning: [Output Only] Informational warning message.
+	Warning *SslCertificateAggregatedListWarning `json:"warning,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "Id") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Id") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *SslCertificateAggregatedList) MarshalJSON() ([]byte, error) {
+	type NoMethod SslCertificateAggregatedList
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// SslCertificateAggregatedListWarning: [Output Only] Informational
+// warning message.
+type SslCertificateAggregatedListWarning struct {
+	// Code: [Output Only] A warning code, if applicable. For example,
+	// Compute Engine returns NO_RESULTS_ON_PAGE if there are no results in
+	// the response.
+	//
+	// Possible values:
+	//   "CLEANUP_FAILED"
+	//   "DEPRECATED_RESOURCE_USED"
+	//   "DEPRECATED_TYPE_USED"
+	//   "DISK_SIZE_LARGER_THAN_IMAGE_SIZE"
+	//   "EXPERIMENTAL_TYPE_USED"
+	//   "EXTERNAL_API_WARNING"
+	//   "FIELD_VALUE_OVERRIDEN"
+	//   "INJECTED_KERNELS_DEPRECATED"
+	//   "MISSING_TYPE_DEPENDENCY"
+	//   "NEXT_HOP_ADDRESS_NOT_ASSIGNED"
+	//   "NEXT_HOP_CANNOT_IP_FORWARD"
+	//   "NEXT_HOP_INSTANCE_NOT_FOUND"
+	//   "NEXT_HOP_INSTANCE_NOT_ON_NETWORK"
+	//   "NEXT_HOP_NOT_RUNNING"
+	//   "NOT_CRITICAL_ERROR"
+	//   "NO_RESULTS_ON_PAGE"
+	//   "REQUIRED_TOS_AGREEMENT"
+	//   "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING"
+	//   "RESOURCE_NOT_DELETED"
+	//   "SCHEMA_VALIDATION_IGNORED"
+	//   "SINGLE_INSTANCE_PROPERTY_TEMPLATE"
+	//   "UNDECLARED_PROPERTIES"
+	//   "UNREACHABLE"
+	Code string `json:"code,omitempty"`
+
+	// Data: [Output Only] Metadata about this warning in key: value format.
+	// For example:
+	// "data": [ { "key": "scope", "value": "zones/us-east1-d" }
+	Data []*SslCertificateAggregatedListWarningData `json:"data,omitempty"`
+
+	// Message: [Output Only] A human-readable description of the warning
+	// code.
+	Message string `json:"message,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Code") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Code") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *SslCertificateAggregatedListWarning) MarshalJSON() ([]byte, error) {
+	type NoMethod SslCertificateAggregatedListWarning
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type SslCertificateAggregatedListWarningData struct {
+	// Key: [Output Only] A key that provides more detail on the warning
+	// being returned. For example, for warnings where there are no results
+	// in a list request for a particular zone, this key might be scope and
+	// the key value might be the zone name. Other examples might be a key
+	// indicating a deprecated resource and a suggested replacement, or a
+	// warning about invalid network settings (for example, if an instance
+	// attempts to perform IP forwarding but is not enabled for IP
+	// forwarding).
+	Key string `json:"key,omitempty"`
+
+	// Value: [Output Only] A warning data value corresponding to the key.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Key") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Key") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *SslCertificateAggregatedListWarningData) MarshalJSON() ([]byte, error) {
+	type NoMethod SslCertificateAggregatedListWarningData
 	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
@@ -28725,6 +31116,140 @@ func (s *SslCertificateSelfManagedSslCertificate) MarshalJSON() ([]byte, error) 
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+type SslCertificatesScopedList struct {
+	// SslCertificates: List of SslCertificates contained in this scope.
+	SslCertificates []*SslCertificate `json:"sslCertificates,omitempty"`
+
+	// Warning: Informational warning which replaces the list of backend
+	// services when the list is empty.
+	Warning *SslCertificatesScopedListWarning `json:"warning,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "SslCertificates") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "SslCertificates") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *SslCertificatesScopedList) MarshalJSON() ([]byte, error) {
+	type NoMethod SslCertificatesScopedList
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// SslCertificatesScopedListWarning: Informational warning which
+// replaces the list of backend services when the list is empty.
+type SslCertificatesScopedListWarning struct {
+	// Code: [Output Only] A warning code, if applicable. For example,
+	// Compute Engine returns NO_RESULTS_ON_PAGE if there are no results in
+	// the response.
+	//
+	// Possible values:
+	//   "CLEANUP_FAILED"
+	//   "DEPRECATED_RESOURCE_USED"
+	//   "DEPRECATED_TYPE_USED"
+	//   "DISK_SIZE_LARGER_THAN_IMAGE_SIZE"
+	//   "EXPERIMENTAL_TYPE_USED"
+	//   "EXTERNAL_API_WARNING"
+	//   "FIELD_VALUE_OVERRIDEN"
+	//   "INJECTED_KERNELS_DEPRECATED"
+	//   "MISSING_TYPE_DEPENDENCY"
+	//   "NEXT_HOP_ADDRESS_NOT_ASSIGNED"
+	//   "NEXT_HOP_CANNOT_IP_FORWARD"
+	//   "NEXT_HOP_INSTANCE_NOT_FOUND"
+	//   "NEXT_HOP_INSTANCE_NOT_ON_NETWORK"
+	//   "NEXT_HOP_NOT_RUNNING"
+	//   "NOT_CRITICAL_ERROR"
+	//   "NO_RESULTS_ON_PAGE"
+	//   "REQUIRED_TOS_AGREEMENT"
+	//   "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING"
+	//   "RESOURCE_NOT_DELETED"
+	//   "SCHEMA_VALIDATION_IGNORED"
+	//   "SINGLE_INSTANCE_PROPERTY_TEMPLATE"
+	//   "UNDECLARED_PROPERTIES"
+	//   "UNREACHABLE"
+	Code string `json:"code,omitempty"`
+
+	// Data: [Output Only] Metadata about this warning in key: value format.
+	// For example:
+	// "data": [ { "key": "scope", "value": "zones/us-east1-d" }
+	Data []*SslCertificatesScopedListWarningData `json:"data,omitempty"`
+
+	// Message: [Output Only] A human-readable description of the warning
+	// code.
+	Message string `json:"message,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Code") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Code") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *SslCertificatesScopedListWarning) MarshalJSON() ([]byte, error) {
+	type NoMethod SslCertificatesScopedListWarning
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type SslCertificatesScopedListWarningData struct {
+	// Key: [Output Only] A key that provides more detail on the warning
+	// being returned. For example, for warnings where there are no results
+	// in a list request for a particular zone, this key might be scope and
+	// the key value might be the zone name. Other examples might be a key
+	// indicating a deprecated resource and a suggested replacement, or a
+	// warning about invalid network settings (for example, if an instance
+	// attempts to perform IP forwarding but is not enabled for IP
+	// forwarding).
+	Key string `json:"key,omitempty"`
+
+	// Value: [Output Only] A warning data value corresponding to the key.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Key") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Key") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *SslCertificatesScopedListWarningData) MarshalJSON() ([]byte, error) {
+	type NoMethod SslCertificatesScopedListWarningData
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 type SslPoliciesList struct {
 	// Id: [Output Only] Unique identifier for the resource; defined by the
 	// server.
@@ -28909,11 +31434,12 @@ func (s *SslPoliciesListAvailableFeaturesResponse) MarshalJSON() ([]byte, error)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// SslPolicy: A SSL policy specifies the server-side support for SSL
-// features. This can be attached to a TargetHttpsProxy or a
-// TargetSslProxy. This affects connections between clients and the
-// HTTPS or SSL proxy load balancer. They do not affect the connection
-// between the load balancers and the backends.
+// SslPolicy: Represents a Cloud Armor Security Policy resource.
+//
+// Only external backend services used by HTTP or HTTPS load balancers
+// can reference a Security Policy. For more information, read read
+// Cloud Armor Security Policy Concepts. (== resource_for
+// beta.sslPolicies ==) (== resource_for v1.sslPolicies ==)
 type SslPolicy struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -29148,8 +31674,13 @@ func (s *SslPolicyReference) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Subnetwork: A Subnetwork resource. (== resource_for beta.subnetworks
-// ==) (== resource_for v1.subnetworks ==)
+// Subnetwork: Represents a Subnetwork resource.
+//
+// A subnetwork (also known as a subnet) is a logical partition of a
+// Virtual Private Cloud network with one primary IP range and zero or
+// more secondary IP ranges. For more information, read  Virtual Private
+// Cloud (VPC) Network. (== resource_for beta.subnetworks ==) (==
+// resource_for v1.subnetworks ==)
 type Subnetwork struct {
 	// AllowSubnetCidrRoutesOverlap: Whether this subnetwork can conflict
 	// with static routes. Setting this to true allows this subnetwork's
@@ -29211,9 +31742,8 @@ type Subnetwork struct {
 	// for Subnetwork resources.
 	Kind string `json:"kind,omitempty"`
 
-	// LogConfig: This field denotes the logging options for the load
-	// balancer traffic served by this backend service. If logging is
-	// enabled, logs will be exported to Stackdriver.
+	// LogConfig: This field denotes the VPC flow logging options for this
+	// subnetwork. If logging is enabled, logs are exported to Stackdriver.
 	LogConfig *SubnetworkLogConfig `json:"logConfig,omitempty"`
 
 	// Name: The name of the resource, provided by the client when initially
@@ -29237,9 +31767,33 @@ type Subnetwork struct {
 	// setPrivateIpGoogleAccess.
 	PrivateIpGoogleAccess bool `json:"privateIpGoogleAccess,omitempty"`
 
+	// Purpose: The purpose of the resource. This field can be either
+	// PRIVATE_RFC_1918 or INTERNAL_HTTPS_LOAD_BALANCER. A subnetwork with
+	// purpose set to INTERNAL_HTTPS_LOAD_BALANCER is a user-created
+	// subnetwork that is reserved for Internal HTTP(S) Load Balancing. If
+	// unspecified, the purpose defaults to PRIVATE_RFC_1918.
+	//
+	// Possible values:
+	//   "INTERNAL_HTTPS_LOAD_BALANCER"
+	//   "PRIVATE"
+	//   "PRIVATE_RFC_1918"
+	Purpose string `json:"purpose,omitempty"`
+
 	// Region: URL of the region where the Subnetwork resides. This field
 	// can be set only at resource creation time.
 	Region string `json:"region,omitempty"`
+
+	// Role: The role of subnetwork. Currenly, this field is only used when
+	// purpose = INTERNAL_HTTPS_LOAD_BALANCER. The value can be set to
+	// ACTIVE or BACKUP. An ACTIVE subnetwork is one that is currently being
+	// used for Internal HTTP(S) Load Balancing. A BACKUP subnetwork is one
+	// that is ready to be promoted to ACTIVE or is currently draining. This
+	// field can be updated with a patch request.
+	//
+	// Possible values:
+	//   "ACTIVE"
+	//   "BACKUP"
+	Role string `json:"role,omitempty"`
 
 	// SecondaryIpRanges: An array of configurations for secondary IP ranges
 	// for VM instances contained in this subnetwork. The primary IP of such
@@ -29250,6 +31804,19 @@ type Subnetwork struct {
 
 	// SelfLink: [Output Only] Server-defined URL for the resource.
 	SelfLink string `json:"selfLink,omitempty"`
+
+	// State: [Output Only] The state of the subnetwork, which can be one of
+	// READY or DRAINING. A subnetwork that is READY is ready to be used.
+	// The state of DRAINING is only applicable to subnetworks that have the
+	// purpose set to INTERNAL_HTTPS_LOAD_BALANCER and indicates that
+	// connections to the load balancer are being drained. A subnetwork that
+	// is draining cannot be used or modified until it reaches a status of
+	// READY.
+	//
+	// Possible values:
+	//   "DRAINING"
+	//   "READY"
+	State string `json:"state,omitempty"`
 
 	// ServerResponse contains the HTTP response code and headers from the
 	// server.
@@ -29617,13 +32184,14 @@ type SubnetworkLogConfig struct {
 	// subnetwork is enabled. The value of the field must be in [0, 1]. Set
 	// the sampling rate of VPC flow logs within the subnetwork where 1.0
 	// means all collected logs are reported and 0.0 means no logs are
-	// reported. Default is 0.5 which means half of all collected logs are
+	// reported. Default is 0.5, which means half of all collected logs are
 	// reported.
 	FlowSampling float64 `json:"flowSampling,omitempty"`
 
-	// Metadata: Can only be specified if VPC flow logging for this
-	// subnetwork is enabled. Configures whether metadata fields should be
-	// added to the reported VPC flow logs. Default is INCLUDE_ALL_METADATA.
+	// Metadata: Can only be specified if VPC flow logs for this subnetwork
+	// is enabled. Configures whether all, none or a subset of metadata
+	// fields should be added to the reported VPC flow logs. Default is
+	// INCLUDE_ALL_METADATA.
 	//
 	// Possible values:
 	//   "EXCLUDE_ALL_METADATA"
@@ -30017,9 +32585,148 @@ func (s *Tags) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// TargetHttpProxy: A TargetHttpProxy resource. This resource defines an
-// HTTP proxy. (== resource_for beta.targetHttpProxies ==) (==
-// resource_for v1.targetHttpProxies ==)
+type TargetHttpProxiesScopedList struct {
+	// TargetHttpProxies: A list of TargetHttpProxies contained in this
+	// scope.
+	TargetHttpProxies []*TargetHttpProxy `json:"targetHttpProxies,omitempty"`
+
+	// Warning: Informational warning which replaces the list of backend
+	// services when the list is empty.
+	Warning *TargetHttpProxiesScopedListWarning `json:"warning,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "TargetHttpProxies")
+	// to unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "TargetHttpProxies") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpProxiesScopedList) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpProxiesScopedList
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// TargetHttpProxiesScopedListWarning: Informational warning which
+// replaces the list of backend services when the list is empty.
+type TargetHttpProxiesScopedListWarning struct {
+	// Code: [Output Only] A warning code, if applicable. For example,
+	// Compute Engine returns NO_RESULTS_ON_PAGE if there are no results in
+	// the response.
+	//
+	// Possible values:
+	//   "CLEANUP_FAILED"
+	//   "DEPRECATED_RESOURCE_USED"
+	//   "DEPRECATED_TYPE_USED"
+	//   "DISK_SIZE_LARGER_THAN_IMAGE_SIZE"
+	//   "EXPERIMENTAL_TYPE_USED"
+	//   "EXTERNAL_API_WARNING"
+	//   "FIELD_VALUE_OVERRIDEN"
+	//   "INJECTED_KERNELS_DEPRECATED"
+	//   "MISSING_TYPE_DEPENDENCY"
+	//   "NEXT_HOP_ADDRESS_NOT_ASSIGNED"
+	//   "NEXT_HOP_CANNOT_IP_FORWARD"
+	//   "NEXT_HOP_INSTANCE_NOT_FOUND"
+	//   "NEXT_HOP_INSTANCE_NOT_ON_NETWORK"
+	//   "NEXT_HOP_NOT_RUNNING"
+	//   "NOT_CRITICAL_ERROR"
+	//   "NO_RESULTS_ON_PAGE"
+	//   "REQUIRED_TOS_AGREEMENT"
+	//   "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING"
+	//   "RESOURCE_NOT_DELETED"
+	//   "SCHEMA_VALIDATION_IGNORED"
+	//   "SINGLE_INSTANCE_PROPERTY_TEMPLATE"
+	//   "UNDECLARED_PROPERTIES"
+	//   "UNREACHABLE"
+	Code string `json:"code,omitempty"`
+
+	// Data: [Output Only] Metadata about this warning in key: value format.
+	// For example:
+	// "data": [ { "key": "scope", "value": "zones/us-east1-d" }
+	Data []*TargetHttpProxiesScopedListWarningData `json:"data,omitempty"`
+
+	// Message: [Output Only] A human-readable description of the warning
+	// code.
+	Message string `json:"message,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Code") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Code") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpProxiesScopedListWarning) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpProxiesScopedListWarning
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type TargetHttpProxiesScopedListWarningData struct {
+	// Key: [Output Only] A key that provides more detail on the warning
+	// being returned. For example, for warnings where there are no results
+	// in a list request for a particular zone, this key might be scope and
+	// the key value might be the zone name. Other examples might be a key
+	// indicating a deprecated resource and a suggested replacement, or a
+	// warning about invalid network settings (for example, if an instance
+	// attempts to perform IP forwarding but is not enabled for IP
+	// forwarding).
+	Key string `json:"key,omitempty"`
+
+	// Value: [Output Only] A warning data value corresponding to the key.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Key") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Key") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpProxiesScopedListWarningData) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpProxiesScopedListWarningData
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// TargetHttpProxy: Represents a Target HTTP Proxy resource.
+//
+// A target HTTP proxy is a component of certain types of load
+// balancers. Global forwarding rules reference a target HTTP proxy, and
+// the target proxy then references a URL map. For more information,
+// read Using Target Proxies. (== resource_for beta.targetHttpProxies
+// ==) (== resource_for v1.targetHttpProxies ==)
 type TargetHttpProxy struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -30045,6 +32752,11 @@ type TargetHttpProxy struct {
 	// characters must be a dash, lowercase letter, or digit, except the
 	// last character, which cannot be a dash.
 	Name string `json:"name,omitempty"`
+
+	// Region: [Output Only] URL of the region where the regional Target
+	// HTTP Proxy resides. This field is not applicable to global Target
+	// HTTP Proxies.
+	Region string `json:"region,omitempty"`
 
 	// SelfLink: [Output Only] Server-defined URL for the resource.
 	SelfLink string `json:"selfLink,omitempty"`
@@ -30077,6 +32789,162 @@ type TargetHttpProxy struct {
 
 func (s *TargetHttpProxy) MarshalJSON() ([]byte, error) {
 	type NoMethod TargetHttpProxy
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type TargetHttpProxyAggregatedList struct {
+	// Id: [Output Only] Unique identifier for the resource; defined by the
+	// server.
+	Id string `json:"id,omitempty"`
+
+	// Items: A list of TargetHttpProxiesScopedList resources.
+	Items map[string]TargetHttpProxiesScopedList `json:"items,omitempty"`
+
+	// Kind: [Output Only] Type of resource. Always
+	// compute#targetHttpProxyAggregatedList for lists of Target HTTP
+	// Proxies.
+	Kind string `json:"kind,omitempty"`
+
+	// NextPageToken: [Output Only] This token allows you to get the next
+	// page of results for list requests. If the number of results is larger
+	// than maxResults, use the nextPageToken as a value for the query
+	// parameter pageToken in the next list request. Subsequent list
+	// requests will have their own nextPageToken to continue paging through
+	// the results.
+	NextPageToken string `json:"nextPageToken,omitempty"`
+
+	// SelfLink: [Output Only] Server-defined URL for this resource.
+	SelfLink string `json:"selfLink,omitempty"`
+
+	// Warning: [Output Only] Informational warning message.
+	Warning *TargetHttpProxyAggregatedListWarning `json:"warning,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "Id") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Id") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpProxyAggregatedList) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpProxyAggregatedList
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// TargetHttpProxyAggregatedListWarning: [Output Only] Informational
+// warning message.
+type TargetHttpProxyAggregatedListWarning struct {
+	// Code: [Output Only] A warning code, if applicable. For example,
+	// Compute Engine returns NO_RESULTS_ON_PAGE if there are no results in
+	// the response.
+	//
+	// Possible values:
+	//   "CLEANUP_FAILED"
+	//   "DEPRECATED_RESOURCE_USED"
+	//   "DEPRECATED_TYPE_USED"
+	//   "DISK_SIZE_LARGER_THAN_IMAGE_SIZE"
+	//   "EXPERIMENTAL_TYPE_USED"
+	//   "EXTERNAL_API_WARNING"
+	//   "FIELD_VALUE_OVERRIDEN"
+	//   "INJECTED_KERNELS_DEPRECATED"
+	//   "MISSING_TYPE_DEPENDENCY"
+	//   "NEXT_HOP_ADDRESS_NOT_ASSIGNED"
+	//   "NEXT_HOP_CANNOT_IP_FORWARD"
+	//   "NEXT_HOP_INSTANCE_NOT_FOUND"
+	//   "NEXT_HOP_INSTANCE_NOT_ON_NETWORK"
+	//   "NEXT_HOP_NOT_RUNNING"
+	//   "NOT_CRITICAL_ERROR"
+	//   "NO_RESULTS_ON_PAGE"
+	//   "REQUIRED_TOS_AGREEMENT"
+	//   "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING"
+	//   "RESOURCE_NOT_DELETED"
+	//   "SCHEMA_VALIDATION_IGNORED"
+	//   "SINGLE_INSTANCE_PROPERTY_TEMPLATE"
+	//   "UNDECLARED_PROPERTIES"
+	//   "UNREACHABLE"
+	Code string `json:"code,omitempty"`
+
+	// Data: [Output Only] Metadata about this warning in key: value format.
+	// For example:
+	// "data": [ { "key": "scope", "value": "zones/us-east1-d" }
+	Data []*TargetHttpProxyAggregatedListWarningData `json:"data,omitempty"`
+
+	// Message: [Output Only] A human-readable description of the warning
+	// code.
+	Message string `json:"message,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Code") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Code") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpProxyAggregatedListWarning) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpProxyAggregatedListWarning
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type TargetHttpProxyAggregatedListWarningData struct {
+	// Key: [Output Only] A key that provides more detail on the warning
+	// being returned. For example, for warnings where there are no results
+	// in a list request for a particular zone, this key might be scope and
+	// the key value might be the zone name. Other examples might be a key
+	// indicating a deprecated resource and a suggested replacement, or a
+	// warning about invalid network settings (for example, if an instance
+	// attempts to perform IP forwarding but is not enabled for IP
+	// forwarding).
+	Key string `json:"key,omitempty"`
+
+	// Value: [Output Only] A warning data value corresponding to the key.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Key") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Key") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpProxyAggregatedListWarningData) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpProxyAggregatedListWarningData
 	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
@@ -30237,6 +33105,141 @@ func (s *TargetHttpProxyListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+type TargetHttpsProxiesScopedList struct {
+	// TargetHttpsProxies: A list of TargetHttpsProxies contained in this
+	// scope.
+	TargetHttpsProxies []*TargetHttpsProxy `json:"targetHttpsProxies,omitempty"`
+
+	// Warning: Informational warning which replaces the list of backend
+	// services when the list is empty.
+	Warning *TargetHttpsProxiesScopedListWarning `json:"warning,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "TargetHttpsProxies")
+	// to unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "TargetHttpsProxies") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpsProxiesScopedList) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpsProxiesScopedList
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// TargetHttpsProxiesScopedListWarning: Informational warning which
+// replaces the list of backend services when the list is empty.
+type TargetHttpsProxiesScopedListWarning struct {
+	// Code: [Output Only] A warning code, if applicable. For example,
+	// Compute Engine returns NO_RESULTS_ON_PAGE if there are no results in
+	// the response.
+	//
+	// Possible values:
+	//   "CLEANUP_FAILED"
+	//   "DEPRECATED_RESOURCE_USED"
+	//   "DEPRECATED_TYPE_USED"
+	//   "DISK_SIZE_LARGER_THAN_IMAGE_SIZE"
+	//   "EXPERIMENTAL_TYPE_USED"
+	//   "EXTERNAL_API_WARNING"
+	//   "FIELD_VALUE_OVERRIDEN"
+	//   "INJECTED_KERNELS_DEPRECATED"
+	//   "MISSING_TYPE_DEPENDENCY"
+	//   "NEXT_HOP_ADDRESS_NOT_ASSIGNED"
+	//   "NEXT_HOP_CANNOT_IP_FORWARD"
+	//   "NEXT_HOP_INSTANCE_NOT_FOUND"
+	//   "NEXT_HOP_INSTANCE_NOT_ON_NETWORK"
+	//   "NEXT_HOP_NOT_RUNNING"
+	//   "NOT_CRITICAL_ERROR"
+	//   "NO_RESULTS_ON_PAGE"
+	//   "REQUIRED_TOS_AGREEMENT"
+	//   "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING"
+	//   "RESOURCE_NOT_DELETED"
+	//   "SCHEMA_VALIDATION_IGNORED"
+	//   "SINGLE_INSTANCE_PROPERTY_TEMPLATE"
+	//   "UNDECLARED_PROPERTIES"
+	//   "UNREACHABLE"
+	Code string `json:"code,omitempty"`
+
+	// Data: [Output Only] Metadata about this warning in key: value format.
+	// For example:
+	// "data": [ { "key": "scope", "value": "zones/us-east1-d" }
+	Data []*TargetHttpsProxiesScopedListWarningData `json:"data,omitempty"`
+
+	// Message: [Output Only] A human-readable description of the warning
+	// code.
+	Message string `json:"message,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Code") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Code") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpsProxiesScopedListWarning) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpsProxiesScopedListWarning
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type TargetHttpsProxiesScopedListWarningData struct {
+	// Key: [Output Only] A key that provides more detail on the warning
+	// being returned. For example, for warnings where there are no results
+	// in a list request for a particular zone, this key might be scope and
+	// the key value might be the zone name. Other examples might be a key
+	// indicating a deprecated resource and a suggested replacement, or a
+	// warning about invalid network settings (for example, if an instance
+	// attempts to perform IP forwarding but is not enabled for IP
+	// forwarding).
+	Key string `json:"key,omitempty"`
+
+	// Value: [Output Only] A warning data value corresponding to the key.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Key") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Key") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpsProxiesScopedListWarningData) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpsProxiesScopedListWarningData
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 type TargetHttpsProxiesSetQuicOverrideRequest struct {
 	// QuicOverride: QUIC policy for the TargetHttpsProxy resource.
 	//
@@ -30299,9 +33302,13 @@ func (s *TargetHttpsProxiesSetSslCertificatesRequest) MarshalJSON() ([]byte, err
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// TargetHttpsProxy: A TargetHttpsProxy resource. This resource defines
-// an HTTPS proxy. (== resource_for beta.targetHttpsProxies ==) (==
-// resource_for v1.targetHttpsProxies ==)
+// TargetHttpsProxy: Represents a Target HTTPS Proxy resource.
+//
+// A target HTTPS proxy is a component of certain types of load
+// balancers. Global forwarding rules reference a target HTTPS proxy,
+// and the target proxy then references a URL map. For more information,
+// read Using Target Proxies. (== resource_for beta.targetHttpsProxies
+// ==) (== resource_for v1.targetHttpsProxies ==)
 type TargetHttpsProxy struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -30342,6 +33349,11 @@ type TargetHttpsProxy struct {
 	//   "ENABLE"
 	//   "NONE"
 	QuicOverride string `json:"quicOverride,omitempty"`
+
+	// Region: [Output Only] URL of the region where the regional
+	// TargetHttpsProxy resides. This field is not applicable to global
+	// TargetHttpsProxies.
+	Region string `json:"region,omitempty"`
 
 	// SelfLink: [Output Only] Server-defined URL for the resource.
 	SelfLink string `json:"selfLink,omitempty"`
@@ -30390,6 +33402,162 @@ type TargetHttpsProxy struct {
 
 func (s *TargetHttpsProxy) MarshalJSON() ([]byte, error) {
 	type NoMethod TargetHttpsProxy
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type TargetHttpsProxyAggregatedList struct {
+	// Id: [Output Only] Unique identifier for the resource; defined by the
+	// server.
+	Id string `json:"id,omitempty"`
+
+	// Items: A list of TargetHttpsProxiesScopedList resources.
+	Items map[string]TargetHttpsProxiesScopedList `json:"items,omitempty"`
+
+	// Kind: [Output Only] Type of resource. Always
+	// compute#targetHttpsProxyAggregatedList for lists of Target HTTP
+	// Proxies.
+	Kind string `json:"kind,omitempty"`
+
+	// NextPageToken: [Output Only] This token allows you to get the next
+	// page of results for list requests. If the number of results is larger
+	// than maxResults, use the nextPageToken as a value for the query
+	// parameter pageToken in the next list request. Subsequent list
+	// requests will have their own nextPageToken to continue paging through
+	// the results.
+	NextPageToken string `json:"nextPageToken,omitempty"`
+
+	// SelfLink: [Output Only] Server-defined URL for this resource.
+	SelfLink string `json:"selfLink,omitempty"`
+
+	// Warning: [Output Only] Informational warning message.
+	Warning *TargetHttpsProxyAggregatedListWarning `json:"warning,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "Id") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Id") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpsProxyAggregatedList) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpsProxyAggregatedList
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// TargetHttpsProxyAggregatedListWarning: [Output Only] Informational
+// warning message.
+type TargetHttpsProxyAggregatedListWarning struct {
+	// Code: [Output Only] A warning code, if applicable. For example,
+	// Compute Engine returns NO_RESULTS_ON_PAGE if there are no results in
+	// the response.
+	//
+	// Possible values:
+	//   "CLEANUP_FAILED"
+	//   "DEPRECATED_RESOURCE_USED"
+	//   "DEPRECATED_TYPE_USED"
+	//   "DISK_SIZE_LARGER_THAN_IMAGE_SIZE"
+	//   "EXPERIMENTAL_TYPE_USED"
+	//   "EXTERNAL_API_WARNING"
+	//   "FIELD_VALUE_OVERRIDEN"
+	//   "INJECTED_KERNELS_DEPRECATED"
+	//   "MISSING_TYPE_DEPENDENCY"
+	//   "NEXT_HOP_ADDRESS_NOT_ASSIGNED"
+	//   "NEXT_HOP_CANNOT_IP_FORWARD"
+	//   "NEXT_HOP_INSTANCE_NOT_FOUND"
+	//   "NEXT_HOP_INSTANCE_NOT_ON_NETWORK"
+	//   "NEXT_HOP_NOT_RUNNING"
+	//   "NOT_CRITICAL_ERROR"
+	//   "NO_RESULTS_ON_PAGE"
+	//   "REQUIRED_TOS_AGREEMENT"
+	//   "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING"
+	//   "RESOURCE_NOT_DELETED"
+	//   "SCHEMA_VALIDATION_IGNORED"
+	//   "SINGLE_INSTANCE_PROPERTY_TEMPLATE"
+	//   "UNDECLARED_PROPERTIES"
+	//   "UNREACHABLE"
+	Code string `json:"code,omitempty"`
+
+	// Data: [Output Only] Metadata about this warning in key: value format.
+	// For example:
+	// "data": [ { "key": "scope", "value": "zones/us-east1-d" }
+	Data []*TargetHttpsProxyAggregatedListWarningData `json:"data,omitempty"`
+
+	// Message: [Output Only] A human-readable description of the warning
+	// code.
+	Message string `json:"message,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Code") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Code") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpsProxyAggregatedListWarning) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpsProxyAggregatedListWarning
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type TargetHttpsProxyAggregatedListWarningData struct {
+	// Key: [Output Only] A key that provides more detail on the warning
+	// being returned. For example, for warnings where there are no results
+	// in a list request for a particular zone, this key might be scope and
+	// the key value might be the zone name. Other examples might be a key
+	// indicating a deprecated resource and a suggested replacement, or a
+	// warning about invalid network settings (for example, if an instance
+	// attempts to perform IP forwarding but is not enabled for IP
+	// forwarding).
+	Key string `json:"key,omitempty"`
+
+	// Value: [Output Only] A warning data value corresponding to the key.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Key") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Key") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TargetHttpsProxyAggregatedListWarningData) MarshalJSON() ([]byte, error) {
+	type NoMethod TargetHttpsProxyAggregatedListWarningData
 	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
@@ -30550,10 +33718,13 @@ func (s *TargetHttpsProxyListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// TargetInstance: A TargetInstance resource. This resource defines an
-// endpoint instance that terminates traffic of certain protocols. (==
-// resource_for beta.targetInstances ==) (== resource_for
-// v1.targetInstances ==)
+// TargetInstance: Represents a Target Instance resource.
+//
+// You can use a target instance to handle traffic for one or more
+// forwarding rules, which is ideal for forwarding protocol traffic that
+// is managed by a single source. For example, ESP, AH, TCP, or UDP. For
+// more information, read Target instances. (== resource_for
+// beta.targetInstances ==) (== resource_for v1.targetInstances ==)
 type TargetInstance struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -31076,10 +34247,13 @@ func (s *TargetInstancesScopedListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// TargetPool: A TargetPool resource. This resource defines a pool of
-// instances, an associated HttpHealthCheck resource, and the fallback
-// target pool. (== resource_for beta.targetPools ==) (== resource_for
-// v1.targetPools ==)
+// TargetPool: Represents a Target Pool resource.
+//
+// Target pools are used for network TCP/UDP load balancing. A target
+// pool references member instances, an associated legacy
+// HttpHealthCheck resource, and, optionally, a backup target pool. For
+// more information, read Using target pools. (== resource_for
+// beta.targetPools ==) (== resource_for v1.targetPools ==)
 type TargetPool struct {
 	// BackupPool: This field is applicable only when the containing target
 	// pool is serving a forwarding rule as the primary pool, and its
@@ -31176,6 +34350,8 @@ type TargetPool struct {
 	//   "CLIENT_IP_PORT_PROTO"
 	//   "CLIENT_IP_PROTO"
 	//   "GENERATED_COOKIE"
+	//   "HEADER_FIELD"
+	//   "HTTP_COOKIE"
 	//   "NONE"
 	SessionAffinity string `json:"sessionAffinity,omitempty"`
 
@@ -31934,9 +35110,13 @@ func (s *TargetSslProxiesSetSslCertificatesRequest) MarshalJSON() ([]byte, error
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// TargetSslProxy: A TargetSslProxy resource. This resource defines an
-// SSL proxy. (== resource_for beta.targetSslProxies ==) (==
-// resource_for v1.targetSslProxies ==)
+// TargetSslProxy: Represents a Target SSL Proxy resource.
+//
+// A target SSL proxy is a component of a SSL Proxy load balancer.
+// Global forwarding rules reference a target SSL proxy, and the target
+// proxy then references an external backend service. For more
+// information, read Using Target Proxies. (== resource_for
+// beta.targetSslProxies ==) (== resource_for v1.targetSslProxies ==)
 type TargetSslProxy struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -32232,9 +35412,13 @@ func (s *TargetTcpProxiesSetProxyHeaderRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// TargetTcpProxy: A TargetTcpProxy resource. This resource defines a
-// TCP proxy. (== resource_for beta.targetTcpProxies ==) (==
-// resource_for v1.targetTcpProxies ==)
+// TargetTcpProxy: Represents a Target TCP Proxy resource.
+//
+// A target TCP proxy is a component of a TCP Proxy load balancer.
+// Global forwarding rules reference ta target TCP proxy, and the target
+// proxy then references an external backend service. For more
+// information, read TCP Proxy Load Balancing Concepts. (== resource_for
+// beta.targetTcpProxies ==) (== resource_for v1.targetTcpProxies ==)
 type TargetTcpProxy struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -32459,7 +35643,10 @@ func (s *TargetTcpProxyListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// TargetVpnGateway: Represents a Target VPN gateway resource. (==
+// TargetVpnGateway: Represents a Target VPN Gateway resource.
+//
+// The target VPN gateway resource represents a Classic Cloud VPN
+// gateway. For more information, read the the Cloud VPN Overview. (==
 // resource_for beta.targetVpnGateways ==) (== resource_for
 // v1.targetVpnGateways ==)
 type TargetVpnGateway struct {
@@ -33104,13 +36291,29 @@ func (s *TestPermissionsResponse) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// UrlMap: A UrlMap resource. This resource defines the mapping from URL
-// to the BackendService resource, based on the "longest-match" of the
-// URL's host and path.
+// UrlMap: Represents a URL Map resource.
+//
+// A URL map resource is a component of certain types of load balancers.
+// This resource defines mappings from host names and URL paths to
+// either a backend service or a backend bucket.
+//
+// To use this resource, the backend service must have a
+// loadBalancingScheme of either EXTERNAL, INTERNAL_SELF_MANAGED, or
+// INTERNAL_MANAGED For more information, read URL Map Concepts.
 type UrlMap struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
 	CreationTimestamp string `json:"creationTimestamp,omitempty"`
+
+	// DefaultRouteAction: defaultRouteAction takes effect when none of the
+	// hostRules match. The load balancer performs advanced routing actions
+	// like URL rewrites, header transformations, etc. prior to forwarding
+	// the request to the selected backend. If defaultRouteAction specifies
+	// any weightedBackendServices, defaultService must not be set.
+	// Conversely if defaultService is set, defaultRouteAction cannot
+	// contain any  weightedBackendServices.
+	// Only one of defaultRouteAction or defaultUrlRedirect must be set.
+	DefaultRouteAction *HttpRouteAction `json:"defaultRouteAction,omitempty"`
 
 	// DefaultService: The full or partial URL of the defaultService
 	// resource to which traffic is directed if none of the hostRules match.
@@ -33123,6 +36326,12 @@ type UrlMap struct {
 	// Only one of defaultService, defaultUrlRedirect  or
 	// defaultRouteAction.weightedBackendService must be set.
 	DefaultService string `json:"defaultService,omitempty"`
+
+	// DefaultUrlRedirect: When none of the specified hostRules match, the
+	// request is redirected to a URL specified by defaultUrlRedirect.
+	// If defaultUrlRedirect is specified, defaultService or
+	// defaultRouteAction must not be set.
+	DefaultUrlRedirect *HttpRedirectAction `json:"defaultUrlRedirect,omitempty"`
 
 	// Description: An optional description of this resource. Provide this
 	// property when you create the resource.
@@ -33137,6 +36346,12 @@ type UrlMap struct {
 	// To see the latest fingerprint, make a get() request to retrieve a
 	// UrlMap.
 	Fingerprint string `json:"fingerprint,omitempty"`
+
+	// HeaderAction: Specifies changes to request and response headers that
+	// need to take effect for the selected backendService.
+	// The headerAction specified here take effect after headerAction
+	// specified under pathMatcher.
+	HeaderAction *HttpHeaderAction `json:"headerAction,omitempty"`
 
 	// HostRules: The list of HostRules to use against the URL.
 	HostRules []*HostRule `json:"hostRules,omitempty"`
@@ -33160,6 +36375,12 @@ type UrlMap struct {
 
 	// PathMatchers: The list of named PathMatchers to use against the URL.
 	PathMatchers []*PathMatcher `json:"pathMatchers,omitempty"`
+
+	// Region: [Output Only] URL of the region where the regional URL map
+	// resides. This field is not applicable to global URL maps. You must
+	// specify this field as part of the HTTP request URL. It is not
+	// settable as a field in the request body.
+	Region string `json:"region,omitempty"`
 
 	// SelfLink: [Output Only] Server-defined URL for the resource.
 	SelfLink string `json:"selfLink,omitempty"`
@@ -33454,6 +36675,293 @@ func (s *UrlMapValidationResult) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+type UrlMapsAggregatedList struct {
+	// Id: [Output Only] Unique identifier for the resource; defined by the
+	// server.
+	Id string `json:"id,omitempty"`
+
+	// Items: A list of UrlMapsScopedList resources.
+	Items map[string]UrlMapsScopedList `json:"items,omitempty"`
+
+	// Kind: Type of resource.
+	Kind string `json:"kind,omitempty"`
+
+	// NextPageToken: [Output Only] This token allows you to get the next
+	// page of results for list requests. If the number of results is larger
+	// than maxResults, use the nextPageToken as a value for the query
+	// parameter pageToken in the next list request. Subsequent list
+	// requests will have their own nextPageToken to continue paging through
+	// the results.
+	NextPageToken string `json:"nextPageToken,omitempty"`
+
+	// SelfLink: [Output Only] Server-defined URL for this resource.
+	SelfLink string `json:"selfLink,omitempty"`
+
+	// Warning: [Output Only] Informational warning message.
+	Warning *UrlMapsAggregatedListWarning `json:"warning,omitempty"`
+
+	// ServerResponse contains the HTTP response code and headers from the
+	// server.
+	googleapi.ServerResponse `json:"-"`
+
+	// ForceSendFields is a list of field names (e.g. "Id") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Id") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UrlMapsAggregatedList) MarshalJSON() ([]byte, error) {
+	type NoMethod UrlMapsAggregatedList
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// UrlMapsAggregatedListWarning: [Output Only] Informational warning
+// message.
+type UrlMapsAggregatedListWarning struct {
+	// Code: [Output Only] A warning code, if applicable. For example,
+	// Compute Engine returns NO_RESULTS_ON_PAGE if there are no results in
+	// the response.
+	//
+	// Possible values:
+	//   "CLEANUP_FAILED"
+	//   "DEPRECATED_RESOURCE_USED"
+	//   "DEPRECATED_TYPE_USED"
+	//   "DISK_SIZE_LARGER_THAN_IMAGE_SIZE"
+	//   "EXPERIMENTAL_TYPE_USED"
+	//   "EXTERNAL_API_WARNING"
+	//   "FIELD_VALUE_OVERRIDEN"
+	//   "INJECTED_KERNELS_DEPRECATED"
+	//   "MISSING_TYPE_DEPENDENCY"
+	//   "NEXT_HOP_ADDRESS_NOT_ASSIGNED"
+	//   "NEXT_HOP_CANNOT_IP_FORWARD"
+	//   "NEXT_HOP_INSTANCE_NOT_FOUND"
+	//   "NEXT_HOP_INSTANCE_NOT_ON_NETWORK"
+	//   "NEXT_HOP_NOT_RUNNING"
+	//   "NOT_CRITICAL_ERROR"
+	//   "NO_RESULTS_ON_PAGE"
+	//   "REQUIRED_TOS_AGREEMENT"
+	//   "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING"
+	//   "RESOURCE_NOT_DELETED"
+	//   "SCHEMA_VALIDATION_IGNORED"
+	//   "SINGLE_INSTANCE_PROPERTY_TEMPLATE"
+	//   "UNDECLARED_PROPERTIES"
+	//   "UNREACHABLE"
+	Code string `json:"code,omitempty"`
+
+	// Data: [Output Only] Metadata about this warning in key: value format.
+	// For example:
+	// "data": [ { "key": "scope", "value": "zones/us-east1-d" }
+	Data []*UrlMapsAggregatedListWarningData `json:"data,omitempty"`
+
+	// Message: [Output Only] A human-readable description of the warning
+	// code.
+	Message string `json:"message,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Code") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Code") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UrlMapsAggregatedListWarning) MarshalJSON() ([]byte, error) {
+	type NoMethod UrlMapsAggregatedListWarning
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type UrlMapsAggregatedListWarningData struct {
+	// Key: [Output Only] A key that provides more detail on the warning
+	// being returned. For example, for warnings where there are no results
+	// in a list request for a particular zone, this key might be scope and
+	// the key value might be the zone name. Other examples might be a key
+	// indicating a deprecated resource and a suggested replacement, or a
+	// warning about invalid network settings (for example, if an instance
+	// attempts to perform IP forwarding but is not enabled for IP
+	// forwarding).
+	Key string `json:"key,omitempty"`
+
+	// Value: [Output Only] A warning data value corresponding to the key.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Key") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Key") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UrlMapsAggregatedListWarningData) MarshalJSON() ([]byte, error) {
+	type NoMethod UrlMapsAggregatedListWarningData
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type UrlMapsScopedList struct {
+	// UrlMaps: A list of UrlMaps contained in this scope.
+	UrlMaps []*UrlMap `json:"urlMaps,omitempty"`
+
+	// Warning: Informational warning which replaces the list of backend
+	// services when the list is empty.
+	Warning *UrlMapsScopedListWarning `json:"warning,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "UrlMaps") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "UrlMaps") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UrlMapsScopedList) MarshalJSON() ([]byte, error) {
+	type NoMethod UrlMapsScopedList
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// UrlMapsScopedListWarning: Informational warning which replaces the
+// list of backend services when the list is empty.
+type UrlMapsScopedListWarning struct {
+	// Code: [Output Only] A warning code, if applicable. For example,
+	// Compute Engine returns NO_RESULTS_ON_PAGE if there are no results in
+	// the response.
+	//
+	// Possible values:
+	//   "CLEANUP_FAILED"
+	//   "DEPRECATED_RESOURCE_USED"
+	//   "DEPRECATED_TYPE_USED"
+	//   "DISK_SIZE_LARGER_THAN_IMAGE_SIZE"
+	//   "EXPERIMENTAL_TYPE_USED"
+	//   "EXTERNAL_API_WARNING"
+	//   "FIELD_VALUE_OVERRIDEN"
+	//   "INJECTED_KERNELS_DEPRECATED"
+	//   "MISSING_TYPE_DEPENDENCY"
+	//   "NEXT_HOP_ADDRESS_NOT_ASSIGNED"
+	//   "NEXT_HOP_CANNOT_IP_FORWARD"
+	//   "NEXT_HOP_INSTANCE_NOT_FOUND"
+	//   "NEXT_HOP_INSTANCE_NOT_ON_NETWORK"
+	//   "NEXT_HOP_NOT_RUNNING"
+	//   "NOT_CRITICAL_ERROR"
+	//   "NO_RESULTS_ON_PAGE"
+	//   "REQUIRED_TOS_AGREEMENT"
+	//   "RESOURCE_IN_USE_BY_OTHER_RESOURCE_WARNING"
+	//   "RESOURCE_NOT_DELETED"
+	//   "SCHEMA_VALIDATION_IGNORED"
+	//   "SINGLE_INSTANCE_PROPERTY_TEMPLATE"
+	//   "UNDECLARED_PROPERTIES"
+	//   "UNREACHABLE"
+	Code string `json:"code,omitempty"`
+
+	// Data: [Output Only] Metadata about this warning in key: value format.
+	// For example:
+	// "data": [ { "key": "scope", "value": "zones/us-east1-d" }
+	Data []*UrlMapsScopedListWarningData `json:"data,omitempty"`
+
+	// Message: [Output Only] A human-readable description of the warning
+	// code.
+	Message string `json:"message,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Code") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Code") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UrlMapsScopedListWarning) MarshalJSON() ([]byte, error) {
+	type NoMethod UrlMapsScopedListWarning
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type UrlMapsScopedListWarningData struct {
+	// Key: [Output Only] A key that provides more detail on the warning
+	// being returned. For example, for warnings where there are no results
+	// in a list request for a particular zone, this key might be scope and
+	// the key value might be the zone name. Other examples might be a key
+	// indicating a deprecated resource and a suggested replacement, or a
+	// warning about invalid network settings (for example, if an instance
+	// attempts to perform IP forwarding but is not enabled for IP
+	// forwarding).
+	Key string `json:"key,omitempty"`
+
+	// Value: [Output Only] A warning data value corresponding to the key.
+	Value string `json:"value,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Key") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Key") to include in API
+	// requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UrlMapsScopedListWarningData) MarshalJSON() ([]byte, error) {
+	type NoMethod UrlMapsScopedListWarningData
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 type UrlMapsValidateRequest struct {
 	// Resource: Content of the UrlMap to be validated.
 	Resource *UrlMap `json:"resource,omitempty"`
@@ -33507,6 +37015,44 @@ type UrlMapsValidateResponse struct {
 
 func (s *UrlMapsValidateResponse) MarshalJSON() ([]byte, error) {
 	type NoMethod UrlMapsValidateResponse
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// UrlRewrite: The spec for modifying the path before sending the
+// request to the matched backend service.
+type UrlRewrite struct {
+	// HostRewrite: Prior to forwarding the request to the selected service,
+	// the request's host header is replaced with contents of
+	// hostRewrite.
+	// The value must be between 1 and 255 characters.
+	HostRewrite string `json:"hostRewrite,omitempty"`
+
+	// PathPrefixRewrite: Prior to forwarding the request to the selected
+	// backend service, the matching portion of the request's path is
+	// replaced by pathPrefixRewrite.
+	// The value must be between 1 and 1024 characters.
+	PathPrefixRewrite string `json:"pathPrefixRewrite,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "HostRewrite") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "HostRewrite") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *UrlRewrite) MarshalJSON() ([]byte, error) {
+	type NoMethod UrlRewrite
 	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
@@ -34768,8 +38314,10 @@ func (s *VpnGatewaysScopedListWarningData) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// VpnTunnel: VPN tunnel resource. (== resource_for beta.vpnTunnels ==)
-// (== resource_for v1.vpnTunnels ==)
+// VpnTunnel: Represents a Cloud VPN Tunnel resource.
+//
+// For more information about VPN, read the the Cloud VPN Overview. (==
+// resource_for beta.vpnTunnels ==) (== resource_for v1.vpnTunnels ==)
 type VpnTunnel struct {
 	// CreationTimestamp: [Output Only] Creation timestamp in RFC3339 text
 	// format.
@@ -34905,6 +38453,7 @@ type VpnTunnel struct {
 	//   "NO_INCOMING_PACKETS"
 	//   "PROVISIONING"
 	//   "REJECTED"
+	//   "STOPPED"
 	//   "WAITING_FOR_FULL_CONFIG"
 	Status string `json:"status,omitempty"`
 
@@ -35464,6 +39013,58 @@ func (s *WafExpressionSetExpression) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+// WeightedBackendService: In contrast to a single BackendService in
+// HttpRouteAction to which all matching traffic is directed to,
+// WeightedBackendService allows traffic to be split across multiple
+// BackendServices. The volume of traffic for each BackendService is
+// proportional to the weight specified in each WeightedBackendService
+type WeightedBackendService struct {
+	// BackendService: The full or partial URL to the default BackendService
+	// resource. Before forwarding the request to backendService, the
+	// loadbalancer applies any relevant headerActions specified as part of
+	// this backendServiceWeight.
+	BackendService string `json:"backendService,omitempty"`
+
+	// HeaderAction: Specifies changes to request and response headers that
+	// need to take effect for the selected backendService.
+	// headerAction specified here take effect before headerAction in the
+	// enclosing HttpRouteRule, PathMatcher and UrlMap.
+	HeaderAction *HttpHeaderAction `json:"headerAction,omitempty"`
+
+	// Weight: Specifies the fraction of traffic sent to backendService,
+	// computed as weight / (sum of all weightedBackendService weights in
+	// routeAction) .
+	// The selection of a backend service is determined only for new
+	// traffic. Once a user's request has been directed to a backendService,
+	// subsequent requests will be sent to the same backendService as
+	// determined by the BackendService's session affinity policy.
+	// The value must be between 0 and 1000
+	Weight int64 `json:"weight,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "BackendService") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "BackendService") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *WeightedBackendService) MarshalJSON() ([]byte, error) {
+	type NoMethod WeightedBackendService
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 type XpnHostList struct {
 	// Id: [Output Only] Unique identifier for the resource; defined by the
 	// server.
@@ -35655,8 +39256,12 @@ func (s *XpnResourceId) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// Zone: A Zone resource. (== resource_for beta.zones ==) (==
-// resource_for v1.zones ==) Next ID: 17
+// Zone: Represents a Zone resource.
+//
+// A zone is a deployment area. These deployment areas are subsets of a
+// region. For example the zone us-east1-a is located in the us-east1
+// region. For more information, read Regions and Zones. (==
+// resource_for beta.zones ==) (== resource_for v1.zones ==)
 type Zone struct {
 	// AvailableCpuPlatforms: [Output Only] Available cpu/platform
 	// selections for the zone.
@@ -36073,6 +39678,7 @@ func (c *AcceleratorTypesAggregatedListCall) Header() http.Header {
 
 func (c *AcceleratorTypesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -36265,6 +39871,7 @@ func (c *AcceleratorTypesGetCall) Header() http.Header {
 
 func (c *AcceleratorTypesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -36493,6 +40100,7 @@ func (c *AcceleratorTypesListCall) Header() http.Header {
 
 func (c *AcceleratorTypesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -36754,6 +40362,7 @@ func (c *AddressesAggregatedListCall) Header() http.Header {
 
 func (c *AddressesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -36955,6 +40564,7 @@ func (c *AddressesDeleteCall) Header() http.Header {
 
 func (c *AddressesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -37123,6 +40733,7 @@ func (c *AddressesGetCall) Header() http.Header {
 
 func (c *AddressesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -37242,7 +40853,7 @@ type AddressesInsertCall struct {
 	header_    http.Header
 }
 
-// Insert: Creates an address resource in the specified project using
+// Insert: Creates an address resource in the specified project by using
 // the data included in the request.
 // For details, see https://cloud.google.com/compute/docs/reference/latest/addresses/insert
 func (r *AddressesService) Insert(project string, region string, address *Address) *AddressesInsertCall {
@@ -37299,6 +40910,7 @@ func (c *AddressesInsertCall) Header() http.Header {
 
 func (c *AddressesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -37363,7 +40975,7 @@ func (c *AddressesInsertCall) Do(opts ...googleapi.CallOption) (*Operation, erro
 	}
 	return ret, nil
 	// {
-	//   "description": "Creates an address resource in the specified project using the data included in the request.",
+	//   "description": "Creates an address resource in the specified project by using the data included in the request.",
 	//   "httpMethod": "POST",
 	//   "id": "compute.addresses.insert",
 	//   "parameterOrder": [
@@ -37528,6 +41140,7 @@ func (c *AddressesListCall) Header() http.Header {
 
 func (c *AddressesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -37740,6 +41353,7 @@ func (c *AddressesSetLabelsCall) Header() http.Header {
 
 func (c *AddressesSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -37907,6 +41521,7 @@ func (c *AddressesTestIamPermissionsCall) Header() http.Header {
 
 func (c *AddressesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -38137,6 +41752,7 @@ func (c *AutoscalersAggregatedListCall) Header() http.Header {
 
 func (c *AutoscalersAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -38337,6 +41953,7 @@ func (c *AutoscalersDeleteCall) Header() http.Header {
 
 func (c *AutoscalersDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -38505,6 +42122,7 @@ func (c *AutoscalersGetCall) Header() http.Header {
 
 func (c *AutoscalersGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -38680,6 +42298,7 @@ func (c *AutoscalersInsertCall) Header() http.Header {
 
 func (c *AutoscalersInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -38908,6 +42527,7 @@ func (c *AutoscalersListCall) Header() http.Header {
 
 func (c *AutoscalersListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -39126,6 +42746,7 @@ func (c *AutoscalersPatchCall) Header() http.Header {
 
 func (c *AutoscalersPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -39290,6 +42911,7 @@ func (c *AutoscalersTestIamPermissionsCall) Header() http.Header {
 
 func (c *AutoscalersTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -39477,6 +43099,7 @@ func (c *AutoscalersUpdateCall) Header() http.Header {
 
 func (c *AutoscalersUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -39658,6 +43281,7 @@ func (c *BackendBucketsAddSignedUrlKeyCall) Header() http.Header {
 
 func (c *BackendBucketsAddSignedUrlKeyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -39829,6 +43453,7 @@ func (c *BackendBucketsDeleteCall) Header() http.Header {
 
 func (c *BackendBucketsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -39995,6 +43620,7 @@ func (c *BackendBucketsDeleteSignedUrlKeyCall) Header() http.Header {
 
 func (c *BackendBucketsDeleteSignedUrlKeyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -40158,6 +43784,7 @@ func (c *BackendBucketsGetCall) Header() http.Header {
 
 func (c *BackendBucketsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -40322,6 +43949,7 @@ func (c *BackendBucketsInsertCall) Header() http.Header {
 
 func (c *BackendBucketsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -40539,6 +44167,7 @@ func (c *BackendBucketsListCall) Header() http.Header {
 
 func (c *BackendBucketsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -40741,6 +44370,7 @@ func (c *BackendBucketsPatchCall) Header() http.Header {
 
 func (c *BackendBucketsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -40916,6 +44546,7 @@ func (c *BackendBucketsUpdateCall) Header() http.Header {
 
 func (c *BackendBucketsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -41091,6 +44722,7 @@ func (c *BackendServicesAddSignedUrlKeyCall) Header() http.Header {
 
 func (c *BackendServicesAddSignedUrlKeyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -41316,6 +44948,7 @@ func (c *BackendServicesAggregatedListCall) Header() http.Header {
 
 func (c *BackendServicesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -41515,6 +45148,7 @@ func (c *BackendServicesDeleteCall) Header() http.Header {
 
 func (c *BackendServicesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -41681,6 +45315,7 @@ func (c *BackendServicesDeleteSignedUrlKeyCall) Header() http.Header {
 
 func (c *BackendServicesDeleteSignedUrlKeyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -41845,6 +45480,7 @@ func (c *BackendServicesGetCall) Header() http.Header {
 
 func (c *BackendServicesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -41993,6 +45629,7 @@ func (c *BackendServicesGetHealthCall) Header() http.Header {
 
 func (c *BackendServicesGetHealthCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -42164,6 +45801,7 @@ func (c *BackendServicesInsertCall) Header() http.Header {
 
 func (c *BackendServicesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -42382,6 +46020,7 @@ func (c *BackendServicesListCall) Header() http.Header {
 
 func (c *BackendServicesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -42588,6 +46227,7 @@ func (c *BackendServicesPatchCall) Header() http.Header {
 
 func (c *BackendServicesPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -42763,6 +46403,7 @@ func (c *BackendServicesSetSecurityPolicyCall) Header() http.Header {
 
 func (c *BackendServicesSetSecurityPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -42918,6 +46559,7 @@ func (c *BackendServicesTestIamPermissionsCall) Header() http.Header {
 
 func (c *BackendServicesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -43092,6 +46734,7 @@ func (c *BackendServicesUpdateCall) Header() http.Header {
 
 func (c *BackendServicesUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -43318,6 +46961,7 @@ func (c *DiskTypesAggregatedListCall) Header() http.Header {
 
 func (c *DiskTypesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -43512,6 +47156,7 @@ func (c *DiskTypesGetCall) Header() http.Header {
 
 func (c *DiskTypesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -43741,6 +47386,7 @@ func (c *DiskTypesListCall) Header() http.Header {
 
 func (c *DiskTypesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -43954,6 +47600,7 @@ func (c *DisksAddResourcePoliciesCall) Header() http.Header {
 
 func (c *DisksAddResourcePoliciesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -44189,6 +47836,7 @@ func (c *DisksAggregatedListCall) Header() http.Header {
 
 func (c *DisksAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -44346,7 +47994,10 @@ func (r *DisksService) CreateSnapshot(project string, zone string, disk string, 
 	return c
 }
 
-// GuestFlush sets the optional parameter "guestFlush":
+// GuestFlush sets the optional parameter "guestFlush": [Input Only]
+// Specifies to create an application consistent snapshot by informing
+// the OS to prepare for the snapshot process. Currently only supported
+// on Windows instances using the Volume Shadow Copy Service (VSS).
 func (c *DisksCreateSnapshotCall) GuestFlush(guestFlush bool) *DisksCreateSnapshotCall {
 	c.urlParams_.Set("guestFlush", fmt.Sprint(guestFlush))
 	return c
@@ -44398,6 +48049,7 @@ func (c *DisksCreateSnapshotCall) Header() http.Header {
 
 func (c *DisksCreateSnapshotCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -44480,6 +48132,7 @@ func (c *DisksCreateSnapshotCall) Do(opts ...googleapi.CallOption) (*Operation, 
 	//       "type": "string"
 	//     },
 	//     "guestFlush": {
+	//       "description": "[Input Only] Specifies to create an application consistent snapshot by informing the OS to prepare for the snapshot process. Currently only supported on Windows instances using the Volume Shadow Copy Service (VSS).",
 	//       "location": "query",
 	//       "type": "boolean"
 	//     },
@@ -44589,6 +48242,7 @@ func (c *DisksDeleteCall) Header() http.Header {
 
 func (c *DisksDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -44757,6 +48411,7 @@ func (c *DisksGetCall) Header() http.Header {
 
 func (c *DisksGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -44924,6 +48579,7 @@ func (c *DisksGetIamPolicyCall) Header() http.Header {
 
 func (c *DisksGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -45110,6 +48766,7 @@ func (c *DisksInsertCall) Header() http.Header {
 
 func (c *DisksInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -45344,6 +49001,7 @@ func (c *DisksListCall) Header() http.Header {
 
 func (c *DisksListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -45555,6 +49213,7 @@ func (c *DisksRemoveResourcePoliciesCall) Header() http.Header {
 
 func (c *DisksRemoveResourcePoliciesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -45741,6 +49400,7 @@ func (c *DisksResizeCall) Header() http.Header {
 
 func (c *DisksResizeCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -45908,6 +49568,7 @@ func (c *DisksSetIamPolicyCall) Header() http.Header {
 
 func (c *DisksSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -46089,6 +49750,7 @@ func (c *DisksSetLabelsCall) Header() http.Header {
 
 func (c *DisksSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -46256,6 +49918,7 @@ func (c *DisksTestIamPermissionsCall) Header() http.Header {
 
 func (c *DisksTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -46433,6 +50096,7 @@ func (c *ExternalVpnGatewaysDeleteCall) Header() http.Header {
 
 func (c *ExternalVpnGatewaysDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -46590,6 +50254,7 @@ func (c *ExternalVpnGatewaysGetCall) Header() http.Header {
 
 func (c *ExternalVpnGatewaysGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -46754,6 +50419,7 @@ func (c *ExternalVpnGatewaysInsertCall) Header() http.Header {
 
 func (c *ExternalVpnGatewaysInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -46971,6 +50637,7 @@ func (c *ExternalVpnGatewaysListCall) Header() http.Header {
 
 func (c *ExternalVpnGatewaysListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -47153,6 +50820,7 @@ func (c *ExternalVpnGatewaysSetLabelsCall) Header() http.Header {
 
 func (c *ExternalVpnGatewaysSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -47304,6 +50972,7 @@ func (c *ExternalVpnGatewaysTestIamPermissionsCall) Header() http.Header {
 
 func (c *ExternalVpnGatewaysTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -47473,6 +51142,7 @@ func (c *FirewallsDeleteCall) Header() http.Header {
 
 func (c *FirewallsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -47630,6 +51300,7 @@ func (c *FirewallsGetCall) Header() http.Header {
 
 func (c *FirewallsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -47795,6 +51466,7 @@ func (c *FirewallsInsertCall) Header() http.Header {
 
 func (c *FirewallsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -48013,6 +51685,7 @@ func (c *FirewallsListCall) Header() http.Header {
 
 func (c *FirewallsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -48216,6 +51889,7 @@ func (c *FirewallsPatchCall) Header() http.Header {
 
 func (c *FirewallsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -48372,6 +52046,7 @@ func (c *FirewallsTestIamPermissionsCall) Header() http.Header {
 
 func (c *FirewallsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -48546,6 +52221,7 @@ func (c *FirewallsUpdateCall) Header() http.Header {
 
 func (c *FirewallsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -48772,6 +52448,7 @@ func (c *ForwardingRulesAggregatedListCall) Header() http.Header {
 
 func (c *ForwardingRulesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -48973,6 +52650,7 @@ func (c *ForwardingRulesDeleteCall) Header() http.Header {
 
 func (c *ForwardingRulesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -49141,6 +52819,7 @@ func (c *ForwardingRulesGetCall) Header() http.Header {
 
 func (c *ForwardingRulesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -49317,6 +52996,7 @@ func (c *ForwardingRulesInsertCall) Header() http.Header {
 
 func (c *ForwardingRulesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -49546,6 +53226,7 @@ func (c *ForwardingRulesListCall) Header() http.Header {
 
 func (c *ForwardingRulesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -49760,6 +53441,7 @@ func (c *ForwardingRulesPatchCall) Header() http.Header {
 
 func (c *ForwardingRulesPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -49946,6 +53628,7 @@ func (c *ForwardingRulesSetLabelsCall) Header() http.Header {
 
 func (c *ForwardingRulesSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -50133,6 +53816,7 @@ func (c *ForwardingRulesSetTargetCall) Header() http.Header {
 
 func (c *ForwardingRulesSetTargetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -50300,6 +53984,7 @@ func (c *ForwardingRulesTestIamPermissionsCall) Header() http.Header {
 
 func (c *ForwardingRulesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -50478,6 +54163,7 @@ func (c *GlobalAddressesDeleteCall) Header() http.Header {
 
 func (c *GlobalAddressesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -50636,6 +54322,7 @@ func (c *GlobalAddressesGetCall) Header() http.Header {
 
 func (c *GlobalAddressesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -50745,7 +54432,7 @@ type GlobalAddressesInsertCall struct {
 	header_    http.Header
 }
 
-// Insert: Creates an address resource in the specified project using
+// Insert: Creates an address resource in the specified project by using
 // the data included in the request.
 // For details, see https://cloud.google.com/compute/docs/reference/latest/globalAddresses/insert
 func (r *GlobalAddressesService) Insert(project string, address *Address) *GlobalAddressesInsertCall {
@@ -50801,6 +54488,7 @@ func (c *GlobalAddressesInsertCall) Header() http.Header {
 
 func (c *GlobalAddressesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -50864,7 +54552,7 @@ func (c *GlobalAddressesInsertCall) Do(opts ...googleapi.CallOption) (*Operation
 	}
 	return ret, nil
 	// {
-	//   "description": "Creates an address resource in the specified project using the data included in the request.",
+	//   "description": "Creates an address resource in the specified project by using the data included in the request.",
 	//   "httpMethod": "POST",
 	//   "id": "compute.globalAddresses.insert",
 	//   "parameterOrder": [
@@ -51018,6 +54706,7 @@ func (c *GlobalAddressesListCall) Header() http.Header {
 
 func (c *GlobalAddressesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -51200,6 +54889,7 @@ func (c *GlobalAddressesSetLabelsCall) Header() http.Header {
 
 func (c *GlobalAddressesSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -51351,6 +55041,7 @@ func (c *GlobalAddressesTestIamPermissionsCall) Header() http.Header {
 
 func (c *GlobalAddressesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -51520,6 +55211,7 @@ func (c *GlobalForwardingRulesDeleteCall) Header() http.Header {
 
 func (c *GlobalForwardingRulesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -51678,6 +55370,7 @@ func (c *GlobalForwardingRulesGetCall) Header() http.Header {
 
 func (c *GlobalForwardingRulesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -51843,6 +55536,7 @@ func (c *GlobalForwardingRulesInsertCall) Header() http.Header {
 
 func (c *GlobalForwardingRulesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -52061,6 +55755,7 @@ func (c *GlobalForwardingRulesListCall) Header() http.Header {
 
 func (c *GlobalForwardingRulesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -52264,6 +55959,7 @@ func (c *GlobalForwardingRulesPatchCall) Header() http.Header {
 
 func (c *GlobalForwardingRulesPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -52420,6 +56116,7 @@ func (c *GlobalForwardingRulesSetLabelsCall) Header() http.Header {
 
 func (c *GlobalForwardingRulesSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -52591,6 +56288,7 @@ func (c *GlobalForwardingRulesSetTargetCall) Header() http.Header {
 
 func (c *GlobalForwardingRulesSetTargetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -52747,6 +56445,7 @@ func (c *GlobalForwardingRulesTestIamPermissionsCall) Header() http.Header {
 
 func (c *GlobalForwardingRulesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -52969,6 +56668,7 @@ func (c *GlobalOperationsAggregatedListCall) Header() http.Header {
 
 func (c *GlobalOperationsAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -53149,6 +56849,7 @@ func (c *GlobalOperationsDeleteCall) Header() http.Header {
 
 func (c *GlobalOperationsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -53274,6 +56975,7 @@ func (c *GlobalOperationsGetCall) Header() http.Header {
 
 func (c *GlobalOperationsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -53492,6 +57194,7 @@ func (c *GlobalOperationsListCall) Header() http.Header {
 
 func (c *GlobalOperationsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -53625,6 +57328,259 @@ func (c *GlobalOperationsListCall) Pages(ctx context.Context, f func(*OperationL
 	}
 }
 
+// method id "compute.healthChecks.aggregatedList":
+
+type HealthChecksAggregatedListCall struct {
+	s            *Service
+	project      string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// AggregatedList: Retrieves the list of all HealthCheck resources,
+// regional and global, available to the specified project.
+func (r *HealthChecksService) AggregatedList(project string) *HealthChecksAggregatedListCall {
+	c := &HealthChecksAggregatedListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	return c
+}
+
+// Filter sets the optional parameter "filter": A filter expression that
+// filters resources listed in the response. The expression must specify
+// the field name, a comparison operator, and the value that you want to
+// use for filtering. The value must be a string, a number, or a
+// boolean. The comparison operator must be either =, !=, >, or <.
+//
+// For example, if you are filtering Compute Engine instances, you can
+// exclude instances named example-instance by specifying name !=
+// example-instance.
+//
+// You can also filter nested fields. For example, you could specify
+// scheduling.automaticRestart = false to include instances only if they
+// are not scheduled for automatic restarts. You can use filtering on
+// nested fields to filter based on resource labels.
+//
+// To filter on multiple expressions, provide each separate expression
+// within parentheses. For example, (scheduling.automaticRestart = true)
+// (cpuPlatform = "Intel Skylake"). By default, each expression is an
+// AND expression. However, you can include AND and OR expressions
+// explicitly. For example, (cpuPlatform = "Intel Skylake") OR
+// (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
+// true).
+func (c *HealthChecksAggregatedListCall) Filter(filter string) *HealthChecksAggregatedListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
+// MaxResults sets the optional parameter "maxResults": The maximum
+// number of results per page that should be returned. If the number of
+// available results is larger than maxResults, Compute Engine returns a
+// nextPageToken that can be used to get the next page of results in
+// subsequent list requests. Acceptable values are 0 to 500, inclusive.
+// (Default: 500)
+func (c *HealthChecksAggregatedListCall) MaxResults(maxResults int64) *HealthChecksAggregatedListCall {
+	c.urlParams_.Set("maxResults", fmt.Sprint(maxResults))
+	return c
+}
+
+// OrderBy sets the optional parameter "orderBy": Sorts list results by
+// a certain order. By default, results are returned in alphanumerical
+// order based on the resource name.
+//
+// You can also sort results in descending order based on the creation
+// timestamp using orderBy="creationTimestamp desc". This sorts results
+// based on the creationTimestamp field in reverse chronological order
+// (newest result first). Use this to sort resources like operations so
+// that the newest operation is returned first.
+//
+// Currently, only sorting by name or creationTimestamp desc is
+// supported.
+func (c *HealthChecksAggregatedListCall) OrderBy(orderBy string) *HealthChecksAggregatedListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": Specifies a page
+// token to use. Set pageToken to the nextPageToken returned by a
+// previous list request to get the next page of results.
+func (c *HealthChecksAggregatedListCall) PageToken(pageToken string) *HealthChecksAggregatedListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *HealthChecksAggregatedListCall) Fields(s ...googleapi.Field) *HealthChecksAggregatedListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *HealthChecksAggregatedListCall) IfNoneMatch(entityTag string) *HealthChecksAggregatedListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *HealthChecksAggregatedListCall) Context(ctx context.Context) *HealthChecksAggregatedListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *HealthChecksAggregatedListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *HealthChecksAggregatedListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/aggregated/healthChecks")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.healthChecks.aggregatedList" call.
+// Exactly one of *HealthChecksAggregatedList or error will be non-nil.
+// Any non-2xx status code is an error. Response headers are in either
+// *HealthChecksAggregatedList.ServerResponse.Header or (if a response
+// was returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *HealthChecksAggregatedListCall) Do(opts ...googleapi.CallOption) (*HealthChecksAggregatedList, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &HealthChecksAggregatedList{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Retrieves the list of all HealthCheck resources, regional and global, available to the specified project.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.healthChecks.aggregatedList",
+	//   "parameterOrder": [
+	//     "project"
+	//   ],
+	//   "parameters": {
+	//     "filter": {
+	//       "description": "A filter expression that filters resources listed in the response. The expression must specify the field name, a comparison operator, and the value that you want to use for filtering. The value must be a string, a number, or a boolean. The comparison operator must be either =, !=, \u003e, or \u003c.\n\nFor example, if you are filtering Compute Engine instances, you can exclude instances named example-instance by specifying name != example-instance.\n\nYou can also filter nested fields. For example, you could specify scheduling.automaticRestart = false to include instances only if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based on resource labels.\n\nTo filter on multiple expressions, provide each separate expression within parentheses. For example, (scheduling.automaticRestart = true) (cpuPlatform = \"Intel Skylake\"). By default, each expression is an AND expression. However, you can include AND and OR expressions explicitly. For example, (cpuPlatform = \"Intel Skylake\") OR (cpuPlatform = \"Intel Broadwell\") AND (scheduling.automaticRestart = true).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "maxResults": {
+	//       "default": "500",
+	//       "description": "The maximum number of results per page that should be returned. If the number of available results is larger than maxResults, Compute Engine returns a nextPageToken that can be used to get the next page of results in subsequent list requests. Acceptable values are 0 to 500, inclusive. (Default: 500)",
+	//       "format": "uint32",
+	//       "location": "query",
+	//       "minimum": "0",
+	//       "type": "integer"
+	//     },
+	//     "orderBy": {
+	//       "description": "Sorts list results by a certain order. By default, results are returned in alphanumerical order based on the resource name.\n\nYou can also sort results in descending order based on the creation timestamp using orderBy=\"creationTimestamp desc\". This sorts results based on the creationTimestamp field in reverse chronological order (newest result first). Use this to sort resources like operations so that the newest operation is returned first.\n\nCurrently, only sorting by name or creationTimestamp desc is supported.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "pageToken": {
+	//       "description": "Specifies a page token to use. Set pageToken to the nextPageToken returned by a previous list request to get the next page of results.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Name of the project scoping this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/aggregated/healthChecks",
+	//   "response": {
+	//     "$ref": "HealthChecksAggregatedList"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *HealthChecksAggregatedListCall) Pages(ctx context.Context, f func(*HealthChecksAggregatedList) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
+}
+
 // method id "compute.healthChecks.delete":
 
 type HealthChecksDeleteCall struct {
@@ -53690,6 +57646,7 @@ func (c *HealthChecksDeleteCall) Header() http.Header {
 
 func (c *HealthChecksDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -53847,6 +57804,7 @@ func (c *HealthChecksGetCall) Header() http.Header {
 
 func (c *HealthChecksGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -54011,6 +57969,7 @@ func (c *HealthChecksInsertCall) Header() http.Header {
 
 func (c *HealthChecksInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -54228,6 +58187,7 @@ func (c *HealthChecksListCall) Header() http.Header {
 
 func (c *HealthChecksListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -54430,6 +58390,7 @@ func (c *HealthChecksPatchCall) Header() http.Header {
 
 func (c *HealthChecksPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -54586,6 +58547,7 @@ func (c *HealthChecksTestIamPermissionsCall) Header() http.Header {
 
 func (c *HealthChecksTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -54757,6 +58719,7 @@ func (c *HealthChecksUpdateCall) Header() http.Header {
 
 func (c *HealthChecksUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -54930,6 +58893,7 @@ func (c *HttpHealthChecksDeleteCall) Header() http.Header {
 
 func (c *HttpHealthChecksDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -55088,6 +59052,7 @@ func (c *HttpHealthChecksGetCall) Header() http.Header {
 
 func (c *HttpHealthChecksGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -55253,6 +59218,7 @@ func (c *HttpHealthChecksInsertCall) Header() http.Header {
 
 func (c *HttpHealthChecksInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -55471,6 +59437,7 @@ func (c *HttpHealthChecksListCall) Header() http.Header {
 
 func (c *HttpHealthChecksListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -55674,6 +59641,7 @@ func (c *HttpHealthChecksPatchCall) Header() http.Header {
 
 func (c *HttpHealthChecksPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -55830,6 +59798,7 @@ func (c *HttpHealthChecksTestIamPermissionsCall) Header() http.Header {
 
 func (c *HttpHealthChecksTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -56002,6 +59971,7 @@ func (c *HttpHealthChecksUpdateCall) Header() http.Header {
 
 func (c *HttpHealthChecksUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -56174,6 +60144,7 @@ func (c *HttpsHealthChecksDeleteCall) Header() http.Header {
 
 func (c *HttpsHealthChecksDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -56331,6 +60302,7 @@ func (c *HttpsHealthChecksGetCall) Header() http.Header {
 
 func (c *HttpsHealthChecksGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -56495,6 +60467,7 @@ func (c *HttpsHealthChecksInsertCall) Header() http.Header {
 
 func (c *HttpsHealthChecksInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -56712,6 +60685,7 @@ func (c *HttpsHealthChecksListCall) Header() http.Header {
 
 func (c *HttpsHealthChecksListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -56914,6 +60888,7 @@ func (c *HttpsHealthChecksPatchCall) Header() http.Header {
 
 func (c *HttpsHealthChecksPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -57070,6 +61045,7 @@ func (c *HttpsHealthChecksTestIamPermissionsCall) Header() http.Header {
 
 func (c *HttpsHealthChecksTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -57241,6 +61217,7 @@ func (c *HttpsHealthChecksUpdateCall) Header() http.Header {
 
 func (c *HttpsHealthChecksUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -57414,6 +61391,7 @@ func (c *ImagesDeleteCall) Header() http.Header {
 
 func (c *ImagesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -57584,6 +61562,7 @@ func (c *ImagesDeprecateCall) Header() http.Header {
 
 func (c *ImagesDeprecateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -57750,6 +61729,7 @@ func (c *ImagesGetCall) Header() http.Header {
 
 func (c *ImagesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -57906,6 +61886,7 @@ func (c *ImagesGetFromFamilyCall) Header() http.Header {
 
 func (c *ImagesGetFromFamilyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -58062,6 +62043,7 @@ func (c *ImagesGetIamPolicyCall) Header() http.Header {
 
 func (c *ImagesGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -58234,6 +62216,7 @@ func (c *ImagesInsertCall) Header() http.Header {
 
 func (c *ImagesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -58465,6 +62448,7 @@ func (c *ImagesListCall) Header() http.Header {
 
 func (c *ImagesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -58647,6 +62631,7 @@ func (c *ImagesSetIamPolicyCall) Header() http.Header {
 
 func (c *ImagesSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -58798,6 +62783,7 @@ func (c *ImagesSetLabelsCall) Header() http.Header {
 
 func (c *ImagesSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -58949,6 +62935,7 @@ func (c *ImagesTestIamPermissionsCall) Header() http.Header {
 
 func (c *ImagesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -59137,6 +63124,7 @@ func (c *InstanceGroupManagersAbandonInstancesCall) Header() http.Header {
 
 func (c *InstanceGroupManagersAbandonInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -59370,6 +63358,7 @@ func (c *InstanceGroupManagersAggregatedListCall) Header() http.Header {
 
 func (c *InstanceGroupManagersAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -59556,6 +63545,7 @@ func (c *InstanceGroupManagersApplyUpdatesToInstancesCall) Header() http.Header 
 
 func (c *InstanceGroupManagersApplyUpdatesToInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -59735,6 +63725,7 @@ func (c *InstanceGroupManagersDeleteCall) Header() http.Header {
 
 func (c *InstanceGroupManagersDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -59925,6 +63916,7 @@ func (c *InstanceGroupManagersDeleteInstancesCall) Header() http.Header {
 
 func (c *InstanceGroupManagersDeleteInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -60100,6 +64092,7 @@ func (c *InstanceGroupManagersGetCall) Header() http.Header {
 
 func (c *InstanceGroupManagersGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -60281,6 +64274,7 @@ func (c *InstanceGroupManagersInsertCall) Header() http.Header {
 
 func (c *InstanceGroupManagersInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -60508,6 +64502,7 @@ func (c *InstanceGroupManagersListCall) Header() http.Header {
 
 func (c *InstanceGroupManagersListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -60765,6 +64760,7 @@ func (c *InstanceGroupManagersListManagedInstancesCall) Header() http.Header {
 
 func (c *InstanceGroupManagersListManagedInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -60988,6 +64984,7 @@ func (c *InstanceGroupManagersPatchCall) Header() http.Header {
 
 func (c *InstanceGroupManagersPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -61185,6 +65182,7 @@ func (c *InstanceGroupManagersRecreateInstancesCall) Header() http.Header {
 
 func (c *InstanceGroupManagersRecreateInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -61387,6 +65385,7 @@ func (c *InstanceGroupManagersResizeCall) Header() http.Header {
 
 func (c *InstanceGroupManagersResizeCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -61584,6 +65583,7 @@ func (c *InstanceGroupManagersResizeAdvancedCall) Header() http.Header {
 
 func (c *InstanceGroupManagersResizeAdvancedCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -61768,6 +65768,7 @@ func (c *InstanceGroupManagersSetAutoHealingPoliciesCall) Header() http.Header {
 
 func (c *InstanceGroupManagersSetAutoHealingPoliciesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -61953,6 +65954,7 @@ func (c *InstanceGroupManagersSetInstanceTemplateCall) Header() http.Header {
 
 func (c *InstanceGroupManagersSetInstanceTemplateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -62142,6 +66144,7 @@ func (c *InstanceGroupManagersSetTargetPoolsCall) Header() http.Header {
 
 func (c *InstanceGroupManagersSetTargetPoolsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -62307,6 +66310,7 @@ func (c *InstanceGroupManagersTestIamPermissionsCall) Header() http.Header {
 
 func (c *InstanceGroupManagersTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -62492,6 +66496,7 @@ func (c *InstanceGroupManagersUpdateCall) Header() http.Header {
 
 func (c *InstanceGroupManagersUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -62677,6 +66682,7 @@ func (c *InstanceGroupsAddInstancesCall) Header() http.Header {
 
 func (c *InstanceGroupsAddInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -62910,6 +66916,7 @@ func (c *InstanceGroupsAggregatedListCall) Header() http.Header {
 
 func (c *InstanceGroupsAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -63113,6 +67120,7 @@ func (c *InstanceGroupsDeleteCall) Header() http.Header {
 
 func (c *InstanceGroupsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -63279,6 +67287,7 @@ func (c *InstanceGroupsGetCall) Header() http.Header {
 
 func (c *InstanceGroupsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -63452,6 +67461,7 @@ func (c *InstanceGroupsInsertCall) Header() http.Header {
 
 func (c *InstanceGroupsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -63679,6 +67689,7 @@ func (c *InstanceGroupsListCall) Header() http.Header {
 
 func (c *InstanceGroupsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -63933,6 +67944,7 @@ func (c *InstanceGroupsListInstancesCall) Header() http.Header {
 
 func (c *InstanceGroupsListInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -64161,6 +68173,7 @@ func (c *InstanceGroupsRemoveInstancesCall) Header() http.Header {
 
 func (c *InstanceGroupsRemoveInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -64344,6 +68357,7 @@ func (c *InstanceGroupsSetNamedPortsCall) Header() http.Header {
 
 func (c *InstanceGroupsSetNamedPortsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -64509,6 +68523,7 @@ func (c *InstanceGroupsTestIamPermissionsCall) Header() http.Header {
 
 func (c *InstanceGroupsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -64689,6 +68704,7 @@ func (c *InstanceTemplatesDeleteCall) Header() http.Header {
 
 func (c *InstanceTemplatesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -64847,6 +68863,7 @@ func (c *InstanceTemplatesGetCall) Header() http.Header {
 
 func (c *InstanceTemplatesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -65003,6 +69020,7 @@ func (c *InstanceTemplatesGetIamPolicyCall) Header() http.Header {
 
 func (c *InstanceTemplatesGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -65171,6 +69189,7 @@ func (c *InstanceTemplatesInsertCall) Header() http.Header {
 
 func (c *InstanceTemplatesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -65389,6 +69408,7 @@ func (c *InstanceTemplatesListCall) Header() http.Header {
 
 func (c *InstanceTemplatesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -65571,6 +69591,7 @@ func (c *InstanceTemplatesSetIamPolicyCall) Header() http.Header {
 
 func (c *InstanceTemplatesSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -65722,6 +69743,7 @@ func (c *InstanceTemplatesTestIamPermissionsCall) Header() http.Header {
 
 func (c *InstanceTemplatesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -65897,6 +69919,7 @@ func (c *InstancesAddAccessConfigCall) Header() http.Header {
 
 func (c *InstancesAddAccessConfigCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -66140,6 +70163,7 @@ func (c *InstancesAggregatedListCall) Header() http.Header {
 
 func (c *InstancesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -66354,6 +70378,7 @@ func (c *InstancesAttachDiskCall) Header() http.Header {
 
 func (c *InstancesAttachDiskCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -66544,6 +70569,7 @@ func (c *InstancesDeleteCall) Header() http.Header {
 
 func (c *InstancesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -66723,6 +70749,7 @@ func (c *InstancesDeleteAccessConfigCall) Header() http.Header {
 
 func (c *InstancesDeleteAccessConfigCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -66914,6 +70941,7 @@ func (c *InstancesDetachDiskCall) Header() http.Header {
 
 func (c *InstancesDetachDiskCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -67090,6 +71118,7 @@ func (c *InstancesGetCall) Header() http.Header {
 
 func (c *InstancesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -67270,6 +71299,7 @@ func (c *InstancesGetGuestAttributesCall) Header() http.Header {
 
 func (c *InstancesGetGuestAttributesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -67447,6 +71477,7 @@ func (c *InstancesGetIamPolicyCall) Header() http.Header {
 
 func (c *InstancesGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -67633,6 +71664,7 @@ func (c *InstancesGetSerialPortOutputCall) Header() http.Header {
 
 func (c *InstancesGetSerialPortOutputCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -67815,6 +71847,7 @@ func (c *InstancesGetShieldedInstanceIdentityCall) Header() http.Header {
 
 func (c *InstancesGetShieldedInstanceIdentityCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -67982,6 +72015,7 @@ func (c *InstancesGetShieldedVmIdentityCall) Header() http.Header {
 
 func (c *InstancesGetShieldedVmIdentityCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -68173,6 +72207,7 @@ func (c *InstancesInsertCall) Header() http.Header {
 
 func (c *InstancesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -68407,6 +72442,7 @@ func (c *InstancesListCall) Header() http.Header {
 
 func (c *InstancesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -68673,6 +72709,7 @@ func (c *InstancesListReferrersCall) Header() http.Header {
 
 func (c *InstancesListReferrersCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -68894,6 +72931,7 @@ func (c *InstancesResetCall) Header() http.Header {
 
 func (c *InstancesResetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -69072,6 +73110,7 @@ func (c *InstancesResumeCall) Header() http.Header {
 
 func (c *InstancesResumeCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -69262,6 +73301,7 @@ func (c *InstancesSetDeletionProtectionCall) Header() http.Header {
 
 func (c *InstancesSetDeletionProtectionCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -69447,6 +73487,7 @@ func (c *InstancesSetDiskAutoDeleteCall) Header() http.Header {
 
 func (c *InstancesSetDiskAutoDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -69621,6 +73662,7 @@ func (c *InstancesSetIamPolicyCall) Header() http.Header {
 
 func (c *InstancesSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -69802,6 +73844,7 @@ func (c *InstancesSetLabelsCall) Header() http.Header {
 
 func (c *InstancesSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -69988,6 +74031,7 @@ func (c *InstancesSetMachineResourcesCall) Header() http.Header {
 
 func (c *InstancesSetMachineResourcesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -70174,6 +74218,7 @@ func (c *InstancesSetMachineTypeCall) Header() http.Header {
 
 func (c *InstancesSetMachineTypeCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -70361,6 +74406,7 @@ func (c *InstancesSetMetadataCall) Header() http.Header {
 
 func (c *InstancesSetMetadataCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -70549,6 +74595,7 @@ func (c *InstancesSetMinCpuPlatformCall) Header() http.Header {
 
 func (c *InstancesSetMinCpuPlatformCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -70735,6 +74782,7 @@ func (c *InstancesSetSchedulingCall) Header() http.Header {
 
 func (c *InstancesSetSchedulingCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -70922,6 +74970,7 @@ func (c *InstancesSetServiceAccountCall) Header() http.Header {
 
 func (c *InstancesSetServiceAccountCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -71110,6 +75159,7 @@ func (c *InstancesSetShieldedInstanceIntegrityPolicyCall) Header() http.Header {
 
 func (c *InstancesSetShieldedInstanceIntegrityPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -71298,6 +75348,7 @@ func (c *InstancesSetShieldedVmIntegrityPolicyCall) Header() http.Header {
 
 func (c *InstancesSetShieldedVmIntegrityPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -71485,6 +75536,7 @@ func (c *InstancesSetTagsCall) Header() http.Header {
 
 func (c *InstancesSetTagsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -71650,6 +75702,7 @@ func (c *InstancesSimulateMaintenanceEventCall) Header() http.Header {
 
 func (c *InstancesSimulateMaintenanceEventCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -71822,6 +75875,7 @@ func (c *InstancesStartCall) Header() http.Header {
 
 func (c *InstancesStartCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -72001,6 +76055,7 @@ func (c *InstancesStartWithEncryptionKeyCall) Header() http.Header {
 
 func (c *InstancesStartWithEncryptionKeyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -72190,6 +76245,7 @@ func (c *InstancesStopCall) Header() http.Header {
 
 func (c *InstancesStopCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -72378,6 +76434,7 @@ func (c *InstancesSuspendCall) Header() http.Header {
 
 func (c *InstancesSuspendCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -72542,6 +76599,7 @@ func (c *InstancesTestIamPermissionsCall) Header() http.Header {
 
 func (c *InstancesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -72727,6 +76785,7 @@ func (c *InstancesUpdateAccessConfigCall) Header() http.Header {
 
 func (c *InstancesUpdateAccessConfigCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -72922,6 +76981,7 @@ func (c *InstancesUpdateDisplayDeviceCall) Header() http.Header {
 
 func (c *InstancesUpdateDisplayDeviceCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -73109,6 +77169,7 @@ func (c *InstancesUpdateNetworkInterfaceCall) Header() http.Header {
 
 func (c *InstancesUpdateNetworkInterfaceCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -73304,6 +77365,7 @@ func (c *InstancesUpdateShieldedInstanceConfigCall) Header() http.Header {
 
 func (c *InstancesUpdateShieldedInstanceConfigCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -73492,6 +77554,7 @@ func (c *InstancesUpdateShieldedVmConfigCall) Header() http.Header {
 
 func (c *InstancesUpdateShieldedVmConfigCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -73727,6 +77790,7 @@ func (c *InterconnectAttachmentsAggregatedListCall) Header() http.Header {
 
 func (c *InterconnectAttachmentsAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -73928,6 +77992,7 @@ func (c *InterconnectAttachmentsDeleteCall) Header() http.Header {
 
 func (c *InterconnectAttachmentsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -74095,6 +78160,7 @@ func (c *InterconnectAttachmentsGetCall) Header() http.Header {
 
 func (c *InterconnectAttachmentsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -74270,6 +78336,7 @@ func (c *InterconnectAttachmentsInsertCall) Header() http.Header {
 
 func (c *InterconnectAttachmentsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -74498,6 +78565,7 @@ func (c *InterconnectAttachmentsListCall) Header() http.Header {
 
 func (c *InterconnectAttachmentsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -74711,6 +78779,7 @@ func (c *InterconnectAttachmentsPatchCall) Header() http.Header {
 
 func (c *InterconnectAttachmentsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -74897,6 +78966,7 @@ func (c *InterconnectAttachmentsSetLabelsCall) Header() http.Header {
 
 func (c *InterconnectAttachmentsSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -75064,6 +79134,7 @@ func (c *InterconnectAttachmentsTestIamPermissionsCall) Header() http.Header {
 
 func (c *InterconnectAttachmentsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -75235,6 +79306,7 @@ func (c *InterconnectLocationsGetCall) Header() http.Header {
 
 func (c *InterconnectLocationsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -75452,6 +79524,7 @@ func (c *InterconnectLocationsListCall) Header() http.Header {
 
 func (c *InterconnectLocationsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -75650,6 +79723,7 @@ func (c *InterconnectsDeleteCall) Header() http.Header {
 
 func (c *InterconnectsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -75807,6 +79881,7 @@ func (c *InterconnectsGetCall) Header() http.Header {
 
 func (c *InterconnectsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -75963,6 +80038,7 @@ func (c *InterconnectsGetDiagnosticsCall) Header() http.Header {
 
 func (c *InterconnectsGetDiagnosticsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -76128,6 +80204,7 @@ func (c *InterconnectsInsertCall) Header() http.Header {
 
 func (c *InterconnectsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -76345,6 +80422,7 @@ func (c *InterconnectsListCall) Header() http.Header {
 
 func (c *InterconnectsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -76547,6 +80625,7 @@ func (c *InterconnectsPatchCall) Header() http.Header {
 
 func (c *InterconnectsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -76703,6 +80782,7 @@ func (c *InterconnectsSetLabelsCall) Header() http.Header {
 
 func (c *InterconnectsSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -76854,6 +80934,7 @@ func (c *InterconnectsTestIamPermissionsCall) Header() http.Header {
 
 func (c *InterconnectsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -77015,6 +81096,7 @@ func (c *LicenseCodesGetCall) Header() http.Header {
 
 func (c *LicenseCodesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -77178,6 +81260,7 @@ func (c *LicensesDeleteCall) Header() http.Header {
 
 func (c *LicensesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -77335,6 +81418,7 @@ func (c *LicensesGetCall) Header() http.Header {
 
 func (c *LicensesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -77491,6 +81575,7 @@ func (c *LicensesGetIamPolicyCall) Header() http.Header {
 
 func (c *LicensesGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -77654,6 +81739,7 @@ func (c *LicensesInsertCall) Header() http.Header {
 
 func (c *LicensesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -77878,6 +81964,7 @@ func (c *LicensesListCall) Header() http.Header {
 
 func (c *LicensesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -78060,6 +82147,7 @@ func (c *LicensesSetIamPolicyCall) Header() http.Header {
 
 func (c *LicensesSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -78281,6 +82369,7 @@ func (c *MachineTypesAggregatedListCall) Header() http.Header {
 
 func (c *MachineTypesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -78475,6 +82564,7 @@ func (c *MachineTypesGetCall) Header() http.Header {
 
 func (c *MachineTypesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -78704,6 +82794,7 @@ func (c *MachineTypesListCall) Header() http.Header {
 
 func (c *MachineTypesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -78965,6 +83056,7 @@ func (c *NetworkEndpointGroupsAggregatedListCall) Header() http.Header {
 
 func (c *NetworkEndpointGroupsAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -79169,6 +83261,7 @@ func (c *NetworkEndpointGroupsAttachNetworkEndpointsCall) Header() http.Header {
 
 func (c *NetworkEndpointGroupsAttachNetworkEndpointsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -79353,6 +83446,7 @@ func (c *NetworkEndpointGroupsDeleteCall) Header() http.Header {
 
 func (c *NetworkEndpointGroupsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -79529,6 +83623,7 @@ func (c *NetworkEndpointGroupsDetachNetworkEndpointsCall) Header() http.Header {
 
 func (c *NetworkEndpointGroupsDetachNetworkEndpointsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -79703,6 +83798,7 @@ func (c *NetworkEndpointGroupsGetCall) Header() http.Header {
 
 func (c *NetworkEndpointGroupsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -79876,6 +83972,7 @@ func (c *NetworkEndpointGroupsInsertCall) Header() http.Header {
 
 func (c *NetworkEndpointGroupsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -80103,6 +84200,7 @@ func (c *NetworkEndpointGroupsListCall) Header() http.Header {
 
 func (c *NetworkEndpointGroupsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -80358,6 +84456,7 @@ func (c *NetworkEndpointGroupsListNetworkEndpointsCall) Header() http.Header {
 
 func (c *NetworkEndpointGroupsListNetworkEndpointsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -80565,6 +84664,7 @@ func (c *NetworkEndpointGroupsTestIamPermissionsCall) Header() http.Header {
 
 func (c *NetworkEndpointGroupsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -80744,6 +84844,7 @@ func (c *NetworksAddPeeringCall) Header() http.Header {
 
 func (c *NetworksAddPeeringCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -80917,6 +85018,7 @@ func (c *NetworksDeleteCall) Header() http.Header {
 
 func (c *NetworksDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -81075,6 +85177,7 @@ func (c *NetworksGetCall) Header() http.Header {
 
 func (c *NetworksGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -81240,6 +85343,7 @@ func (c *NetworksInsertCall) Header() http.Header {
 
 func (c *NetworksInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -81458,6 +85562,7 @@ func (c *NetworksListCall) Header() http.Header {
 
 func (c *NetworksListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -81738,6 +85843,7 @@ func (c *NetworksListPeeringRoutesCall) Header() http.Header {
 
 func (c *NetworksListPeeringRoutesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -81972,6 +86078,7 @@ func (c *NetworksPatchCall) Header() http.Header {
 
 func (c *NetworksPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -82146,6 +86253,7 @@ func (c *NetworksRemovePeeringCall) Header() http.Header {
 
 func (c *NetworksRemovePeeringCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -82319,6 +86427,7 @@ func (c *NetworksSwitchToCustomModeCall) Header() http.Header {
 
 func (c *NetworksSwitchToCustomModeCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -82467,6 +86576,7 @@ func (c *NetworksTestIamPermissionsCall) Header() http.Header {
 
 func (c *NetworksTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -82640,6 +86750,7 @@ func (c *NetworksUpdatePeeringCall) Header() http.Header {
 
 func (c *NetworksUpdatePeeringCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -82816,6 +86927,7 @@ func (c *NodeGroupsAddNodesCall) Header() http.Header {
 
 func (c *NodeGroupsAddNodesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -83051,6 +87163,7 @@ func (c *NodeGroupsAggregatedListCall) Header() http.Header {
 
 func (c *NodeGroupsAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -83251,6 +87364,7 @@ func (c *NodeGroupsDeleteCall) Header() http.Header {
 
 func (c *NodeGroupsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -83428,6 +87542,7 @@ func (c *NodeGroupsDeleteNodesCall) Header() http.Header {
 
 func (c *NodeGroupsDeleteNodesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -83605,6 +87720,7 @@ func (c *NodeGroupsGetCall) Header() http.Header {
 
 func (c *NodeGroupsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -83772,6 +87888,7 @@ func (c *NodeGroupsGetIamPolicyCall) Header() http.Header {
 
 func (c *NodeGroupsGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -83948,6 +88065,7 @@ func (c *NodeGroupsInsertCall) Header() http.Header {
 
 func (c *NodeGroupsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -84185,6 +88303,7 @@ func (c *NodeGroupsListCall) Header() http.Header {
 
 func (c *NodeGroupsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -84438,6 +88557,7 @@ func (c *NodeGroupsListNodesCall) Header() http.Header {
 
 func (c *NodeGroupsListNodesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -84637,6 +88757,7 @@ func (c *NodeGroupsSetIamPolicyCall) Header() http.Header {
 
 func (c *NodeGroupsSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -84817,6 +88938,7 @@ func (c *NodeGroupsSetNodeTemplateCall) Header() http.Header {
 
 func (c *NodeGroupsSetNodeTemplateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -84984,6 +89106,7 @@ func (c *NodeGroupsTestIamPermissionsCall) Header() http.Header {
 
 func (c *NodeGroupsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -85214,6 +89337,7 @@ func (c *NodeTemplatesAggregatedListCall) Header() http.Header {
 
 func (c *NodeTemplatesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -85414,6 +89538,7 @@ func (c *NodeTemplatesDeleteCall) Header() http.Header {
 
 func (c *NodeTemplatesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -85582,6 +89707,7 @@ func (c *NodeTemplatesGetCall) Header() http.Header {
 
 func (c *NodeTemplatesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -85749,6 +89875,7 @@ func (c *NodeTemplatesGetIamPolicyCall) Header() http.Header {
 
 func (c *NodeTemplatesGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -85924,6 +90051,7 @@ func (c *NodeTemplatesInsertCall) Header() http.Header {
 
 func (c *NodeTemplatesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -86152,6 +90280,7 @@ func (c *NodeTemplatesListCall) Header() http.Header {
 
 func (c *NodeTemplatesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -86345,6 +90474,7 @@ func (c *NodeTemplatesSetIamPolicyCall) Header() http.Header {
 
 func (c *NodeTemplatesSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -86507,6 +90637,7 @@ func (c *NodeTemplatesTestIamPermissionsCall) Header() http.Header {
 
 func (c *NodeTemplatesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -86737,6 +90868,7 @@ func (c *NodeTypesAggregatedListCall) Header() http.Header {
 
 func (c *NodeTypesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -86930,6 +91062,7 @@ func (c *NodeTypesGetCall) Header() http.Header {
 
 func (c *NodeTypesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -87158,6 +91291,7 @@ func (c *NodeTypesListCall) Header() http.Header {
 
 func (c *NodeTypesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -87363,6 +91497,7 @@ func (c *ProjectsDisableXpnHostCall) Header() http.Header {
 
 func (c *ProjectsDisableXpnHostCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -87464,7 +91599,7 @@ type ProjectsDisableXpnResourceCall struct {
 	header_                           http.Header
 }
 
-// DisableXpnResource: Disable a serivce resource (a.k.a service
+// DisableXpnResource: Disable a service resource (also known as service
 // project) associated with this host project.
 func (r *ProjectsService) DisableXpnResource(project string, projectsdisablexpnresourcerequest *ProjectsDisableXpnResourceRequest) *ProjectsDisableXpnResourceCall {
 	c := &ProjectsDisableXpnResourceCall{s: r.s, urlParams_: make(gensupport.URLParams)}
@@ -87519,6 +91654,7 @@ func (c *ProjectsDisableXpnResourceCall) Header() http.Header {
 
 func (c *ProjectsDisableXpnResourceCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -87582,7 +91718,7 @@ func (c *ProjectsDisableXpnResourceCall) Do(opts ...googleapi.CallOption) (*Oper
 	}
 	return ret, nil
 	// {
-	//   "description": "Disable a serivce resource (a.k.a service project) associated with this host project.",
+	//   "description": "Disable a service resource (also known as service project) associated with this host project.",
 	//   "httpMethod": "POST",
 	//   "id": "compute.projects.disableXpnResource",
 	//   "parameterOrder": [
@@ -87680,6 +91816,7 @@ func (c *ProjectsEnableXpnHostCall) Header() http.Header {
 
 func (c *ProjectsEnableXpnHostCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -87837,6 +91974,7 @@ func (c *ProjectsEnableXpnResourceCall) Header() http.Header {
 
 func (c *ProjectsEnableXpnResourceCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -87991,6 +92129,7 @@ func (c *ProjectsGetCall) Header() http.Header {
 
 func (c *ProjectsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -88136,6 +92275,7 @@ func (c *ProjectsGetXpnHostCall) Header() http.Header {
 
 func (c *ProjectsGetXpnHostCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -88343,6 +92483,7 @@ func (c *ProjectsGetXpnResourcesCall) Header() http.Header {
 
 func (c *ProjectsGetXpnResourcesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -88585,6 +92726,7 @@ func (c *ProjectsListXpnHostsCall) Header() http.Header {
 
 func (c *ProjectsListXpnHostsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -88787,6 +92929,7 @@ func (c *ProjectsMoveDiskCall) Header() http.Header {
 
 func (c *ProjectsMoveDiskCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -88951,6 +93094,7 @@ func (c *ProjectsMoveInstanceCall) Header() http.Header {
 
 func (c *ProjectsMoveInstanceCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -89116,6 +93260,7 @@ func (c *ProjectsSetCommonInstanceMetadataCall) Header() http.Header {
 
 func (c *ProjectsSetCommonInstanceMetadataCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -89282,6 +93427,7 @@ func (c *ProjectsSetDefaultNetworkTierCall) Header() http.Header {
 
 func (c *ProjectsSetDefaultNetworkTierCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -89449,6 +93595,7 @@ func (c *ProjectsSetUsageExportBucketCall) Header() http.Header {
 
 func (c *ProjectsSetUsageExportBucketCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -89617,6 +93764,7 @@ func (c *RegionAutoscalersDeleteCall) Header() http.Header {
 
 func (c *RegionAutoscalersDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -89784,6 +93932,7 @@ func (c *RegionAutoscalersGetCall) Header() http.Header {
 
 func (c *RegionAutoscalersGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -89959,6 +94108,7 @@ func (c *RegionAutoscalersInsertCall) Header() http.Header {
 
 func (c *RegionAutoscalersInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -90187,6 +94337,7 @@ func (c *RegionAutoscalersListCall) Header() http.Header {
 
 func (c *RegionAutoscalersListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -90405,6 +94556,7 @@ func (c *RegionAutoscalersPatchCall) Header() http.Header {
 
 func (c *RegionAutoscalersPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -90569,6 +94721,7 @@ func (c *RegionAutoscalersTestIamPermissionsCall) Header() http.Header {
 
 func (c *RegionAutoscalersTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -90756,6 +94909,7 @@ func (c *RegionAutoscalersUpdateCall) Header() http.Header {
 
 func (c *RegionAutoscalersUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -90936,6 +95090,7 @@ func (c *RegionBackendServicesDeleteCall) Header() http.Header {
 
 func (c *RegionBackendServicesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -91103,6 +95258,7 @@ func (c *RegionBackendServicesGetCall) Header() http.Header {
 
 func (c *RegionBackendServicesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -91261,6 +95417,7 @@ func (c *RegionBackendServicesGetHealthCall) Header() http.Header {
 
 func (c *RegionBackendServicesGetHealthCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -91443,6 +95600,7 @@ func (c *RegionBackendServicesInsertCall) Header() http.Header {
 
 func (c *RegionBackendServicesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -91671,6 +95829,7 @@ func (c *RegionBackendServicesListCall) Header() http.Header {
 
 func (c *RegionBackendServicesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -91887,6 +96046,7 @@ func (c *RegionBackendServicesPatchCall) Header() http.Header {
 
 func (c *RegionBackendServicesPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -92054,6 +96214,7 @@ func (c *RegionBackendServicesTestIamPermissionsCall) Header() http.Header {
 
 func (c *RegionBackendServicesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -92238,6 +96399,7 @@ func (c *RegionBackendServicesUpdateCall) Header() http.Header {
 
 func (c *RegionBackendServicesUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -92472,6 +96634,7 @@ func (c *RegionCommitmentsAggregatedListCall) Header() http.Header {
 
 func (c *RegionCommitmentsAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -92665,6 +96828,7 @@ func (c *RegionCommitmentsGetCall) Header() http.Header {
 
 func (c *RegionCommitmentsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -92840,6 +97004,7 @@ func (c *RegionCommitmentsInsertCall) Header() http.Header {
 
 func (c *RegionCommitmentsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -93068,6 +97233,7 @@ func (c *RegionCommitmentsListCall) Header() http.Header {
 
 func (c *RegionCommitmentsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -93280,6 +97446,7 @@ func (c *RegionCommitmentsUpdateReservationsCall) Header() http.Header {
 
 func (c *RegionCommitmentsUpdateReservationsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -93456,6 +97623,7 @@ func (c *RegionDiskTypesGetCall) Header() http.Header {
 
 func (c *RegionDiskTypesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -93684,6 +97852,7 @@ func (c *RegionDiskTypesListCall) Header() http.Header {
 
 func (c *RegionDiskTypesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -93897,6 +98066,7 @@ func (c *RegionDisksAddResourcePoliciesCall) Header() http.Header {
 
 func (c *RegionDisksAddResourcePoliciesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -94082,6 +98252,7 @@ func (c *RegionDisksCreateSnapshotCall) Header() http.Header {
 
 func (c *RegionDisksCreateSnapshotCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -94268,6 +98439,7 @@ func (c *RegionDisksDeleteCall) Header() http.Header {
 
 func (c *RegionDisksDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -94434,6 +98606,7 @@ func (c *RegionDisksGetCall) Header() http.Header {
 
 func (c *RegionDisksGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -94601,6 +98774,7 @@ func (c *RegionDisksGetIamPolicyCall) Header() http.Header {
 
 func (c *RegionDisksGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -94783,6 +98957,7 @@ func (c *RegionDisksInsertCall) Header() http.Header {
 
 func (c *RegionDisksInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -95016,6 +99191,7 @@ func (c *RegionDisksListCall) Header() http.Header {
 
 func (c *RegionDisksListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -95228,6 +99404,7 @@ func (c *RegionDisksRemoveResourcePoliciesCall) Header() http.Header {
 
 func (c *RegionDisksRemoveResourcePoliciesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -95413,6 +99590,7 @@ func (c *RegionDisksResizeCall) Header() http.Header {
 
 func (c *RegionDisksResizeCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -95580,6 +99758,7 @@ func (c *RegionDisksSetIamPolicyCall) Header() http.Header {
 
 func (c *RegionDisksSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -95760,6 +99939,7 @@ func (c *RegionDisksSetLabelsCall) Header() http.Header {
 
 func (c *RegionDisksSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -95927,6 +100107,7 @@ func (c *RegionDisksTestIamPermissionsCall) Header() http.Header {
 
 func (c *RegionDisksTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -96039,6 +100220,1165 @@ func (c *RegionDisksTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (*T
 
 }
 
+// method id "compute.regionHealthChecks.delete":
+
+type RegionHealthChecksDeleteCall struct {
+	s           *Service
+	project     string
+	region      string
+	healthCheck string
+	urlParams_  gensupport.URLParams
+	ctx_        context.Context
+	header_     http.Header
+}
+
+// Delete: Deletes the specified HealthCheck resource.
+func (r *RegionHealthChecksService) Delete(project string, region string, healthCheck string) *RegionHealthChecksDeleteCall {
+	c := &RegionHealthChecksDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.healthCheck = healthCheck
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionHealthChecksDeleteCall) RequestId(requestId string) *RegionHealthChecksDeleteCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionHealthChecksDeleteCall) Fields(s ...googleapi.Field) *RegionHealthChecksDeleteCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionHealthChecksDeleteCall) Context(ctx context.Context) *RegionHealthChecksDeleteCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionHealthChecksDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionHealthChecksDeleteCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/healthChecks/{healthCheck}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("DELETE", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":     c.project,
+		"region":      c.region,
+		"healthCheck": c.healthCheck,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionHealthChecks.delete" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionHealthChecksDeleteCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Deletes the specified HealthCheck resource.",
+	//   "httpMethod": "DELETE",
+	//   "id": "compute.regionHealthChecks.delete",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "healthCheck"
+	//   ],
+	//   "parameters": {
+	//     "healthCheck": {
+	//       "description": "Name of the HealthCheck resource to delete.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/healthChecks/{healthCheck}",
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionHealthChecks.get":
+
+type RegionHealthChecksGetCall struct {
+	s            *Service
+	project      string
+	region       string
+	healthCheck  string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// Get: Returns the specified HealthCheck resource. Gets a list of
+// available health checks by making a list() request.
+func (r *RegionHealthChecksService) Get(project string, region string, healthCheck string) *RegionHealthChecksGetCall {
+	c := &RegionHealthChecksGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.healthCheck = healthCheck
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionHealthChecksGetCall) Fields(s ...googleapi.Field) *RegionHealthChecksGetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *RegionHealthChecksGetCall) IfNoneMatch(entityTag string) *RegionHealthChecksGetCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionHealthChecksGetCall) Context(ctx context.Context) *RegionHealthChecksGetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionHealthChecksGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionHealthChecksGetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/healthChecks/{healthCheck}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":     c.project,
+		"region":      c.region,
+		"healthCheck": c.healthCheck,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionHealthChecks.get" call.
+// Exactly one of *HealthCheck or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *HealthCheck.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionHealthChecksGetCall) Do(opts ...googleapi.CallOption) (*HealthCheck, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &HealthCheck{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Returns the specified HealthCheck resource. Gets a list of available health checks by making a list() request.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.regionHealthChecks.get",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "healthCheck"
+	//   ],
+	//   "parameters": {
+	//     "healthCheck": {
+	//       "description": "Name of the HealthCheck resource to return.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/healthChecks/{healthCheck}",
+	//   "response": {
+	//     "$ref": "HealthCheck"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionHealthChecks.insert":
+
+type RegionHealthChecksInsertCall struct {
+	s           *Service
+	project     string
+	region      string
+	healthcheck *HealthCheck
+	urlParams_  gensupport.URLParams
+	ctx_        context.Context
+	header_     http.Header
+}
+
+// Insert: Creates a HealthCheck resource in the specified project using
+// the data included in the request.
+func (r *RegionHealthChecksService) Insert(project string, region string, healthcheck *HealthCheck) *RegionHealthChecksInsertCall {
+	c := &RegionHealthChecksInsertCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.healthcheck = healthcheck
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionHealthChecksInsertCall) RequestId(requestId string) *RegionHealthChecksInsertCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionHealthChecksInsertCall) Fields(s ...googleapi.Field) *RegionHealthChecksInsertCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionHealthChecksInsertCall) Context(ctx context.Context) *RegionHealthChecksInsertCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionHealthChecksInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionHealthChecksInsertCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.healthcheck)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/healthChecks")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionHealthChecks.insert" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionHealthChecksInsertCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Creates a HealthCheck resource in the specified project using the data included in the request.",
+	//   "httpMethod": "POST",
+	//   "id": "compute.regionHealthChecks.insert",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/healthChecks",
+	//   "request": {
+	//     "$ref": "HealthCheck"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionHealthChecks.list":
+
+type RegionHealthChecksListCall struct {
+	s            *Service
+	project      string
+	region       string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// List: Retrieves the list of HealthCheck resources available to the
+// specified project.
+func (r *RegionHealthChecksService) List(project string, region string) *RegionHealthChecksListCall {
+	c := &RegionHealthChecksListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	return c
+}
+
+// Filter sets the optional parameter "filter": A filter expression that
+// filters resources listed in the response. The expression must specify
+// the field name, a comparison operator, and the value that you want to
+// use for filtering. The value must be a string, a number, or a
+// boolean. The comparison operator must be either =, !=, >, or <.
+//
+// For example, if you are filtering Compute Engine instances, you can
+// exclude instances named example-instance by specifying name !=
+// example-instance.
+//
+// You can also filter nested fields. For example, you could specify
+// scheduling.automaticRestart = false to include instances only if they
+// are not scheduled for automatic restarts. You can use filtering on
+// nested fields to filter based on resource labels.
+//
+// To filter on multiple expressions, provide each separate expression
+// within parentheses. For example, (scheduling.automaticRestart = true)
+// (cpuPlatform = "Intel Skylake"). By default, each expression is an
+// AND expression. However, you can include AND and OR expressions
+// explicitly. For example, (cpuPlatform = "Intel Skylake") OR
+// (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
+// true).
+func (c *RegionHealthChecksListCall) Filter(filter string) *RegionHealthChecksListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
+// MaxResults sets the optional parameter "maxResults": The maximum
+// number of results per page that should be returned. If the number of
+// available results is larger than maxResults, Compute Engine returns a
+// nextPageToken that can be used to get the next page of results in
+// subsequent list requests. Acceptable values are 0 to 500, inclusive.
+// (Default: 500)
+func (c *RegionHealthChecksListCall) MaxResults(maxResults int64) *RegionHealthChecksListCall {
+	c.urlParams_.Set("maxResults", fmt.Sprint(maxResults))
+	return c
+}
+
+// OrderBy sets the optional parameter "orderBy": Sorts list results by
+// a certain order. By default, results are returned in alphanumerical
+// order based on the resource name.
+//
+// You can also sort results in descending order based on the creation
+// timestamp using orderBy="creationTimestamp desc". This sorts results
+// based on the creationTimestamp field in reverse chronological order
+// (newest result first). Use this to sort resources like operations so
+// that the newest operation is returned first.
+//
+// Currently, only sorting by name or creationTimestamp desc is
+// supported.
+func (c *RegionHealthChecksListCall) OrderBy(orderBy string) *RegionHealthChecksListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": Specifies a page
+// token to use. Set pageToken to the nextPageToken returned by a
+// previous list request to get the next page of results.
+func (c *RegionHealthChecksListCall) PageToken(pageToken string) *RegionHealthChecksListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionHealthChecksListCall) Fields(s ...googleapi.Field) *RegionHealthChecksListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *RegionHealthChecksListCall) IfNoneMatch(entityTag string) *RegionHealthChecksListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionHealthChecksListCall) Context(ctx context.Context) *RegionHealthChecksListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionHealthChecksListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionHealthChecksListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/healthChecks")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionHealthChecks.list" call.
+// Exactly one of *HealthCheckList or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *HealthCheckList.ServerResponse.Header or (if a response was returned
+// at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *RegionHealthChecksListCall) Do(opts ...googleapi.CallOption) (*HealthCheckList, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &HealthCheckList{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Retrieves the list of HealthCheck resources available to the specified project.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.regionHealthChecks.list",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region"
+	//   ],
+	//   "parameters": {
+	//     "filter": {
+	//       "description": "A filter expression that filters resources listed in the response. The expression must specify the field name, a comparison operator, and the value that you want to use for filtering. The value must be a string, a number, or a boolean. The comparison operator must be either =, !=, \u003e, or \u003c.\n\nFor example, if you are filtering Compute Engine instances, you can exclude instances named example-instance by specifying name != example-instance.\n\nYou can also filter nested fields. For example, you could specify scheduling.automaticRestart = false to include instances only if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based on resource labels.\n\nTo filter on multiple expressions, provide each separate expression within parentheses. For example, (scheduling.automaticRestart = true) (cpuPlatform = \"Intel Skylake\"). By default, each expression is an AND expression. However, you can include AND and OR expressions explicitly. For example, (cpuPlatform = \"Intel Skylake\") OR (cpuPlatform = \"Intel Broadwell\") AND (scheduling.automaticRestart = true).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "maxResults": {
+	//       "default": "500",
+	//       "description": "The maximum number of results per page that should be returned. If the number of available results is larger than maxResults, Compute Engine returns a nextPageToken that can be used to get the next page of results in subsequent list requests. Acceptable values are 0 to 500, inclusive. (Default: 500)",
+	//       "format": "uint32",
+	//       "location": "query",
+	//       "minimum": "0",
+	//       "type": "integer"
+	//     },
+	//     "orderBy": {
+	//       "description": "Sorts list results by a certain order. By default, results are returned in alphanumerical order based on the resource name.\n\nYou can also sort results in descending order based on the creation timestamp using orderBy=\"creationTimestamp desc\". This sorts results based on the creationTimestamp field in reverse chronological order (newest result first). Use this to sort resources like operations so that the newest operation is returned first.\n\nCurrently, only sorting by name or creationTimestamp desc is supported.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "pageToken": {
+	//       "description": "Specifies a page token to use. Set pageToken to the nextPageToken returned by a previous list request to get the next page of results.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/healthChecks",
+	//   "response": {
+	//     "$ref": "HealthCheckList"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *RegionHealthChecksListCall) Pages(ctx context.Context, f func(*HealthCheckList) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
+}
+
+// method id "compute.regionHealthChecks.patch":
+
+type RegionHealthChecksPatchCall struct {
+	s           *Service
+	project     string
+	region      string
+	healthCheck string
+	healthcheck *HealthCheck
+	urlParams_  gensupport.URLParams
+	ctx_        context.Context
+	header_     http.Header
+}
+
+// Patch: Updates a HealthCheck resource in the specified project using
+// the data included in the request. This method supports PATCH
+// semantics and uses the JSON merge patch format and processing rules.
+func (r *RegionHealthChecksService) Patch(project string, region string, healthCheck string, healthcheck *HealthCheck) *RegionHealthChecksPatchCall {
+	c := &RegionHealthChecksPatchCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.healthCheck = healthCheck
+	c.healthcheck = healthcheck
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionHealthChecksPatchCall) RequestId(requestId string) *RegionHealthChecksPatchCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionHealthChecksPatchCall) Fields(s ...googleapi.Field) *RegionHealthChecksPatchCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionHealthChecksPatchCall) Context(ctx context.Context) *RegionHealthChecksPatchCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionHealthChecksPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionHealthChecksPatchCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.healthcheck)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/healthChecks/{healthCheck}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("PATCH", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":     c.project,
+		"region":      c.region,
+		"healthCheck": c.healthCheck,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionHealthChecks.patch" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionHealthChecksPatchCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Updates a HealthCheck resource in the specified project using the data included in the request. This method supports PATCH semantics and uses the JSON merge patch format and processing rules.",
+	//   "httpMethod": "PATCH",
+	//   "id": "compute.regionHealthChecks.patch",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "healthCheck"
+	//   ],
+	//   "parameters": {
+	//     "healthCheck": {
+	//       "description": "Name of the HealthCheck resource to patch.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/healthChecks/{healthCheck}",
+	//   "request": {
+	//     "$ref": "HealthCheck"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionHealthChecks.update":
+
+type RegionHealthChecksUpdateCall struct {
+	s           *Service
+	project     string
+	region      string
+	healthCheck string
+	healthcheck *HealthCheck
+	urlParams_  gensupport.URLParams
+	ctx_        context.Context
+	header_     http.Header
+}
+
+// Update: Updates a HealthCheck resource in the specified project using
+// the data included in the request.
+func (r *RegionHealthChecksService) Update(project string, region string, healthCheck string, healthcheck *HealthCheck) *RegionHealthChecksUpdateCall {
+	c := &RegionHealthChecksUpdateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.healthCheck = healthCheck
+	c.healthcheck = healthcheck
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionHealthChecksUpdateCall) RequestId(requestId string) *RegionHealthChecksUpdateCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionHealthChecksUpdateCall) Fields(s ...googleapi.Field) *RegionHealthChecksUpdateCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionHealthChecksUpdateCall) Context(ctx context.Context) *RegionHealthChecksUpdateCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionHealthChecksUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionHealthChecksUpdateCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.healthcheck)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/healthChecks/{healthCheck}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("PUT", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":     c.project,
+		"region":      c.region,
+		"healthCheck": c.healthCheck,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionHealthChecks.update" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionHealthChecksUpdateCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Updates a HealthCheck resource in the specified project using the data included in the request.",
+	//   "httpMethod": "PUT",
+	//   "id": "compute.regionHealthChecks.update",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "healthCheck"
+	//   ],
+	//   "parameters": {
+	//     "healthCheck": {
+	//       "description": "Name of the HealthCheck resource to update.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/healthChecks/{healthCheck}",
+	//   "request": {
+	//     "$ref": "HealthCheck"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
 // method id "compute.regionInstanceGroupManagers.abandonInstances":
 
 type RegionInstanceGroupManagersAbandonInstancesCall struct {
@@ -96124,6 +101464,7 @@ func (c *RegionInstanceGroupManagersAbandonInstancesCall) Header() http.Header {
 
 func (c *RegionInstanceGroupManagersAbandonInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -96289,6 +101630,7 @@ func (c *RegionInstanceGroupManagersApplyUpdatesToInstancesCall) Header() http.H
 
 func (c *RegionInstanceGroupManagersApplyUpdatesToInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -96466,6 +101808,7 @@ func (c *RegionInstanceGroupManagersDeleteCall) Header() http.Header {
 
 func (c *RegionInstanceGroupManagersDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -96657,6 +102000,7 @@ func (c *RegionInstanceGroupManagersDeleteInstancesCall) Header() http.Header {
 
 func (c *RegionInstanceGroupManagersDeleteInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -96831,6 +102175,7 @@ func (c *RegionInstanceGroupManagersGetCall) Header() http.Header {
 
 func (c *RegionInstanceGroupManagersGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -97011,6 +102356,7 @@ func (c *RegionInstanceGroupManagersInsertCall) Header() http.Header {
 
 func (c *RegionInstanceGroupManagersInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -97238,6 +102584,7 @@ func (c *RegionInstanceGroupManagersListCall) Header() http.Header {
 
 func (c *RegionInstanceGroupManagersListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -97493,6 +102840,7 @@ func (c *RegionInstanceGroupManagersListManagedInstancesCall) Header() http.Head
 
 func (c *RegionInstanceGroupManagersListManagedInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -97716,6 +103064,7 @@ func (c *RegionInstanceGroupManagersPatchCall) Header() http.Header {
 
 func (c *RegionInstanceGroupManagersPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -97913,6 +103262,7 @@ func (c *RegionInstanceGroupManagersRecreateInstancesCall) Header() http.Header 
 
 func (c *RegionInstanceGroupManagersRecreateInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -98107,6 +103457,7 @@ func (c *RegionInstanceGroupManagersResizeCall) Header() http.Header {
 
 func (c *RegionInstanceGroupManagersResizeCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -98293,6 +103644,7 @@ func (c *RegionInstanceGroupManagersSetAutoHealingPoliciesCall) Header() http.He
 
 func (c *RegionInstanceGroupManagersSetAutoHealingPoliciesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -98478,6 +103830,7 @@ func (c *RegionInstanceGroupManagersSetInstanceTemplateCall) Header() http.Heade
 
 func (c *RegionInstanceGroupManagersSetInstanceTemplateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -98663,6 +104016,7 @@ func (c *RegionInstanceGroupManagersSetTargetPoolsCall) Header() http.Header {
 
 func (c *RegionInstanceGroupManagersSetTargetPoolsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -98828,6 +104182,7 @@ func (c *RegionInstanceGroupManagersTestIamPermissionsCall) Header() http.Header
 
 func (c *RegionInstanceGroupManagersTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -99013,6 +104368,7 @@ func (c *RegionInstanceGroupManagersUpdateCall) Header() http.Header {
 
 func (c *RegionInstanceGroupManagersUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -99186,6 +104542,7 @@ func (c *RegionInstanceGroupsGetCall) Header() http.Header {
 
 func (c *RegionInstanceGroupsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -99412,6 +104769,7 @@ func (c *RegionInstanceGroupsListCall) Header() http.Header {
 
 func (c *RegionInstanceGroupsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -99669,6 +105027,7 @@ func (c *RegionInstanceGroupsListInstancesCall) Header() http.Header {
 
 func (c *RegionInstanceGroupsListInstancesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -99894,6 +105253,7 @@ func (c *RegionInstanceGroupsSetNamedPortsCall) Header() http.Header {
 
 func (c *RegionInstanceGroupsSetNamedPortsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -100059,6 +105419,7 @@ func (c *RegionInstanceGroupsTestIamPermissionsCall) Header() http.Header {
 
 func (c *RegionInstanceGroupsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -100220,6 +105581,7 @@ func (c *RegionOperationsDeleteCall) Header() http.Header {
 
 func (c *RegionOperationsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -100355,6 +105717,7 @@ func (c *RegionOperationsGetCall) Header() http.Header {
 
 func (c *RegionOperationsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -100584,6 +105947,7 @@ func (c *RegionOperationsListCall) Header() http.Header {
 
 func (c *RegionOperationsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -100726,6 +106090,4369 @@ func (c *RegionOperationsListCall) Pages(ctx context.Context, f func(*OperationL
 	}
 }
 
+// method id "compute.regionSslCertificates.delete":
+
+type RegionSslCertificatesDeleteCall struct {
+	s              *Service
+	project        string
+	region         string
+	sslCertificate string
+	urlParams_     gensupport.URLParams
+	ctx_           context.Context
+	header_        http.Header
+}
+
+// Delete: Deletes the specified SslCertificate resource in the region.
+func (r *RegionSslCertificatesService) Delete(project string, region string, sslCertificate string) *RegionSslCertificatesDeleteCall {
+	c := &RegionSslCertificatesDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.sslCertificate = sslCertificate
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionSslCertificatesDeleteCall) RequestId(requestId string) *RegionSslCertificatesDeleteCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionSslCertificatesDeleteCall) Fields(s ...googleapi.Field) *RegionSslCertificatesDeleteCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionSslCertificatesDeleteCall) Context(ctx context.Context) *RegionSslCertificatesDeleteCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionSslCertificatesDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionSslCertificatesDeleteCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/sslCertificates/{sslCertificate}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("DELETE", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":        c.project,
+		"region":         c.region,
+		"sslCertificate": c.sslCertificate,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionSslCertificates.delete" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionSslCertificatesDeleteCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Deletes the specified SslCertificate resource in the region.",
+	//   "httpMethod": "DELETE",
+	//   "id": "compute.regionSslCertificates.delete",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "sslCertificate"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "sslCertificate": {
+	//       "description": "Name of the SslCertificate resource to delete.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/sslCertificates/{sslCertificate}",
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionSslCertificates.get":
+
+type RegionSslCertificatesGetCall struct {
+	s              *Service
+	project        string
+	region         string
+	sslCertificate string
+	urlParams_     gensupport.URLParams
+	ifNoneMatch_   string
+	ctx_           context.Context
+	header_        http.Header
+}
+
+// Get: Returns the specified SslCertificate resource in the specified
+// region. Get a list of available SSL certificates by making a list()
+// request.
+func (r *RegionSslCertificatesService) Get(project string, region string, sslCertificate string) *RegionSslCertificatesGetCall {
+	c := &RegionSslCertificatesGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.sslCertificate = sslCertificate
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionSslCertificatesGetCall) Fields(s ...googleapi.Field) *RegionSslCertificatesGetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *RegionSslCertificatesGetCall) IfNoneMatch(entityTag string) *RegionSslCertificatesGetCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionSslCertificatesGetCall) Context(ctx context.Context) *RegionSslCertificatesGetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionSslCertificatesGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionSslCertificatesGetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/sslCertificates/{sslCertificate}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":        c.project,
+		"region":         c.region,
+		"sslCertificate": c.sslCertificate,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionSslCertificates.get" call.
+// Exactly one of *SslCertificate or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *SslCertificate.ServerResponse.Header or (if a response was returned
+// at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *RegionSslCertificatesGetCall) Do(opts ...googleapi.CallOption) (*SslCertificate, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &SslCertificate{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Returns the specified SslCertificate resource in the specified region. Get a list of available SSL certificates by making a list() request.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.regionSslCertificates.get",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "sslCertificate"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "sslCertificate": {
+	//       "description": "Name of the SslCertificate resource to return.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/sslCertificates/{sslCertificate}",
+	//   "response": {
+	//     "$ref": "SslCertificate"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionSslCertificates.insert":
+
+type RegionSslCertificatesInsertCall struct {
+	s              *Service
+	project        string
+	region         string
+	sslcertificate *SslCertificate
+	urlParams_     gensupport.URLParams
+	ctx_           context.Context
+	header_        http.Header
+}
+
+// Insert: Creates a SslCertificate resource in the specified project
+// and region using the data included in the request
+func (r *RegionSslCertificatesService) Insert(project string, region string, sslcertificate *SslCertificate) *RegionSslCertificatesInsertCall {
+	c := &RegionSslCertificatesInsertCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.sslcertificate = sslcertificate
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionSslCertificatesInsertCall) RequestId(requestId string) *RegionSslCertificatesInsertCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionSslCertificatesInsertCall) Fields(s ...googleapi.Field) *RegionSslCertificatesInsertCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionSslCertificatesInsertCall) Context(ctx context.Context) *RegionSslCertificatesInsertCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionSslCertificatesInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionSslCertificatesInsertCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.sslcertificate)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/sslCertificates")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionSslCertificates.insert" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionSslCertificatesInsertCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Creates a SslCertificate resource in the specified project and region using the data included in the request",
+	//   "httpMethod": "POST",
+	//   "id": "compute.regionSslCertificates.insert",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/sslCertificates",
+	//   "request": {
+	//     "$ref": "SslCertificate"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionSslCertificates.list":
+
+type RegionSslCertificatesListCall struct {
+	s            *Service
+	project      string
+	region       string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// List: Retrieves the list of SslCertificate resources available to the
+// specified project in the specified region.
+func (r *RegionSslCertificatesService) List(project string, region string) *RegionSslCertificatesListCall {
+	c := &RegionSslCertificatesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	return c
+}
+
+// Filter sets the optional parameter "filter": A filter expression that
+// filters resources listed in the response. The expression must specify
+// the field name, a comparison operator, and the value that you want to
+// use for filtering. The value must be a string, a number, or a
+// boolean. The comparison operator must be either =, !=, >, or <.
+//
+// For example, if you are filtering Compute Engine instances, you can
+// exclude instances named example-instance by specifying name !=
+// example-instance.
+//
+// You can also filter nested fields. For example, you could specify
+// scheduling.automaticRestart = false to include instances only if they
+// are not scheduled for automatic restarts. You can use filtering on
+// nested fields to filter based on resource labels.
+//
+// To filter on multiple expressions, provide each separate expression
+// within parentheses. For example, (scheduling.automaticRestart = true)
+// (cpuPlatform = "Intel Skylake"). By default, each expression is an
+// AND expression. However, you can include AND and OR expressions
+// explicitly. For example, (cpuPlatform = "Intel Skylake") OR
+// (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
+// true).
+func (c *RegionSslCertificatesListCall) Filter(filter string) *RegionSslCertificatesListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
+// MaxResults sets the optional parameter "maxResults": The maximum
+// number of results per page that should be returned. If the number of
+// available results is larger than maxResults, Compute Engine returns a
+// nextPageToken that can be used to get the next page of results in
+// subsequent list requests. Acceptable values are 0 to 500, inclusive.
+// (Default: 500)
+func (c *RegionSslCertificatesListCall) MaxResults(maxResults int64) *RegionSslCertificatesListCall {
+	c.urlParams_.Set("maxResults", fmt.Sprint(maxResults))
+	return c
+}
+
+// OrderBy sets the optional parameter "orderBy": Sorts list results by
+// a certain order. By default, results are returned in alphanumerical
+// order based on the resource name.
+//
+// You can also sort results in descending order based on the creation
+// timestamp using orderBy="creationTimestamp desc". This sorts results
+// based on the creationTimestamp field in reverse chronological order
+// (newest result first). Use this to sort resources like operations so
+// that the newest operation is returned first.
+//
+// Currently, only sorting by name or creationTimestamp desc is
+// supported.
+func (c *RegionSslCertificatesListCall) OrderBy(orderBy string) *RegionSslCertificatesListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": Specifies a page
+// token to use. Set pageToken to the nextPageToken returned by a
+// previous list request to get the next page of results.
+func (c *RegionSslCertificatesListCall) PageToken(pageToken string) *RegionSslCertificatesListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionSslCertificatesListCall) Fields(s ...googleapi.Field) *RegionSslCertificatesListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *RegionSslCertificatesListCall) IfNoneMatch(entityTag string) *RegionSslCertificatesListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionSslCertificatesListCall) Context(ctx context.Context) *RegionSslCertificatesListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionSslCertificatesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionSslCertificatesListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/sslCertificates")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionSslCertificates.list" call.
+// Exactly one of *SslCertificateList or error will be non-nil. Any
+// non-2xx status code is an error. Response headers are in either
+// *SslCertificateList.ServerResponse.Header or (if a response was
+// returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *RegionSslCertificatesListCall) Do(opts ...googleapi.CallOption) (*SslCertificateList, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &SslCertificateList{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Retrieves the list of SslCertificate resources available to the specified project in the specified region.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.regionSslCertificates.list",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region"
+	//   ],
+	//   "parameters": {
+	//     "filter": {
+	//       "description": "A filter expression that filters resources listed in the response. The expression must specify the field name, a comparison operator, and the value that you want to use for filtering. The value must be a string, a number, or a boolean. The comparison operator must be either =, !=, \u003e, or \u003c.\n\nFor example, if you are filtering Compute Engine instances, you can exclude instances named example-instance by specifying name != example-instance.\n\nYou can also filter nested fields. For example, you could specify scheduling.automaticRestart = false to include instances only if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based on resource labels.\n\nTo filter on multiple expressions, provide each separate expression within parentheses. For example, (scheduling.automaticRestart = true) (cpuPlatform = \"Intel Skylake\"). By default, each expression is an AND expression. However, you can include AND and OR expressions explicitly. For example, (cpuPlatform = \"Intel Skylake\") OR (cpuPlatform = \"Intel Broadwell\") AND (scheduling.automaticRestart = true).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "maxResults": {
+	//       "default": "500",
+	//       "description": "The maximum number of results per page that should be returned. If the number of available results is larger than maxResults, Compute Engine returns a nextPageToken that can be used to get the next page of results in subsequent list requests. Acceptable values are 0 to 500, inclusive. (Default: 500)",
+	//       "format": "uint32",
+	//       "location": "query",
+	//       "minimum": "0",
+	//       "type": "integer"
+	//     },
+	//     "orderBy": {
+	//       "description": "Sorts list results by a certain order. By default, results are returned in alphanumerical order based on the resource name.\n\nYou can also sort results in descending order based on the creation timestamp using orderBy=\"creationTimestamp desc\". This sorts results based on the creationTimestamp field in reverse chronological order (newest result first). Use this to sort resources like operations so that the newest operation is returned first.\n\nCurrently, only sorting by name or creationTimestamp desc is supported.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "pageToken": {
+	//       "description": "Specifies a page token to use. Set pageToken to the nextPageToken returned by a previous list request to get the next page of results.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/sslCertificates",
+	//   "response": {
+	//     "$ref": "SslCertificateList"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *RegionSslCertificatesListCall) Pages(ctx context.Context, f func(*SslCertificateList) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
+}
+
+// method id "compute.regionTargetHttpProxies.delete":
+
+type RegionTargetHttpProxiesDeleteCall struct {
+	s               *Service
+	project         string
+	region          string
+	targetHttpProxy string
+	urlParams_      gensupport.URLParams
+	ctx_            context.Context
+	header_         http.Header
+}
+
+// Delete: Deletes the specified TargetHttpProxy resource.
+func (r *RegionTargetHttpProxiesService) Delete(project string, region string, targetHttpProxy string) *RegionTargetHttpProxiesDeleteCall {
+	c := &RegionTargetHttpProxiesDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.targetHttpProxy = targetHttpProxy
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionTargetHttpProxiesDeleteCall) RequestId(requestId string) *RegionTargetHttpProxiesDeleteCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionTargetHttpProxiesDeleteCall) Fields(s ...googleapi.Field) *RegionTargetHttpProxiesDeleteCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionTargetHttpProxiesDeleteCall) Context(ctx context.Context) *RegionTargetHttpProxiesDeleteCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionTargetHttpProxiesDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionTargetHttpProxiesDeleteCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/targetHttpProxies/{targetHttpProxy}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("DELETE", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":         c.project,
+		"region":          c.region,
+		"targetHttpProxy": c.targetHttpProxy,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionTargetHttpProxies.delete" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionTargetHttpProxiesDeleteCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Deletes the specified TargetHttpProxy resource.",
+	//   "httpMethod": "DELETE",
+	//   "id": "compute.regionTargetHttpProxies.delete",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "targetHttpProxy"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "targetHttpProxy": {
+	//       "description": "Name of the TargetHttpProxy resource to delete.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/targetHttpProxies/{targetHttpProxy}",
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionTargetHttpProxies.get":
+
+type RegionTargetHttpProxiesGetCall struct {
+	s               *Service
+	project         string
+	region          string
+	targetHttpProxy string
+	urlParams_      gensupport.URLParams
+	ifNoneMatch_    string
+	ctx_            context.Context
+	header_         http.Header
+}
+
+// Get: Returns the specified TargetHttpProxy resource in the specified
+// region. Gets a list of available target HTTP proxies by making a
+// list() request.
+func (r *RegionTargetHttpProxiesService) Get(project string, region string, targetHttpProxy string) *RegionTargetHttpProxiesGetCall {
+	c := &RegionTargetHttpProxiesGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.targetHttpProxy = targetHttpProxy
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionTargetHttpProxiesGetCall) Fields(s ...googleapi.Field) *RegionTargetHttpProxiesGetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *RegionTargetHttpProxiesGetCall) IfNoneMatch(entityTag string) *RegionTargetHttpProxiesGetCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionTargetHttpProxiesGetCall) Context(ctx context.Context) *RegionTargetHttpProxiesGetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionTargetHttpProxiesGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionTargetHttpProxiesGetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/targetHttpProxies/{targetHttpProxy}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":         c.project,
+		"region":          c.region,
+		"targetHttpProxy": c.targetHttpProxy,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionTargetHttpProxies.get" call.
+// Exactly one of *TargetHttpProxy or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *TargetHttpProxy.ServerResponse.Header or (if a response was returned
+// at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *RegionTargetHttpProxiesGetCall) Do(opts ...googleapi.CallOption) (*TargetHttpProxy, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &TargetHttpProxy{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Returns the specified TargetHttpProxy resource in the specified region. Gets a list of available target HTTP proxies by making a list() request.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.regionTargetHttpProxies.get",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "targetHttpProxy"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "targetHttpProxy": {
+	//       "description": "Name of the TargetHttpProxy resource to return.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/targetHttpProxies/{targetHttpProxy}",
+	//   "response": {
+	//     "$ref": "TargetHttpProxy"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionTargetHttpProxies.insert":
+
+type RegionTargetHttpProxiesInsertCall struct {
+	s               *Service
+	project         string
+	region          string
+	targethttpproxy *TargetHttpProxy
+	urlParams_      gensupport.URLParams
+	ctx_            context.Context
+	header_         http.Header
+}
+
+// Insert: Creates a TargetHttpProxy resource in the specified project
+// and region using the data included in the request.
+func (r *RegionTargetHttpProxiesService) Insert(project string, region string, targethttpproxy *TargetHttpProxy) *RegionTargetHttpProxiesInsertCall {
+	c := &RegionTargetHttpProxiesInsertCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.targethttpproxy = targethttpproxy
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionTargetHttpProxiesInsertCall) RequestId(requestId string) *RegionTargetHttpProxiesInsertCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionTargetHttpProxiesInsertCall) Fields(s ...googleapi.Field) *RegionTargetHttpProxiesInsertCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionTargetHttpProxiesInsertCall) Context(ctx context.Context) *RegionTargetHttpProxiesInsertCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionTargetHttpProxiesInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionTargetHttpProxiesInsertCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.targethttpproxy)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/targetHttpProxies")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionTargetHttpProxies.insert" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionTargetHttpProxiesInsertCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Creates a TargetHttpProxy resource in the specified project and region using the data included in the request.",
+	//   "httpMethod": "POST",
+	//   "id": "compute.regionTargetHttpProxies.insert",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/targetHttpProxies",
+	//   "request": {
+	//     "$ref": "TargetHttpProxy"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionTargetHttpProxies.list":
+
+type RegionTargetHttpProxiesListCall struct {
+	s            *Service
+	project      string
+	region       string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// List: Retrieves the list of TargetHttpProxy resources available to
+// the specified project in the specified region.
+func (r *RegionTargetHttpProxiesService) List(project string, region string) *RegionTargetHttpProxiesListCall {
+	c := &RegionTargetHttpProxiesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	return c
+}
+
+// Filter sets the optional parameter "filter": A filter expression that
+// filters resources listed in the response. The expression must specify
+// the field name, a comparison operator, and the value that you want to
+// use for filtering. The value must be a string, a number, or a
+// boolean. The comparison operator must be either =, !=, >, or <.
+//
+// For example, if you are filtering Compute Engine instances, you can
+// exclude instances named example-instance by specifying name !=
+// example-instance.
+//
+// You can also filter nested fields. For example, you could specify
+// scheduling.automaticRestart = false to include instances only if they
+// are not scheduled for automatic restarts. You can use filtering on
+// nested fields to filter based on resource labels.
+//
+// To filter on multiple expressions, provide each separate expression
+// within parentheses. For example, (scheduling.automaticRestart = true)
+// (cpuPlatform = "Intel Skylake"). By default, each expression is an
+// AND expression. However, you can include AND and OR expressions
+// explicitly. For example, (cpuPlatform = "Intel Skylake") OR
+// (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
+// true).
+func (c *RegionTargetHttpProxiesListCall) Filter(filter string) *RegionTargetHttpProxiesListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
+// MaxResults sets the optional parameter "maxResults": The maximum
+// number of results per page that should be returned. If the number of
+// available results is larger than maxResults, Compute Engine returns a
+// nextPageToken that can be used to get the next page of results in
+// subsequent list requests. Acceptable values are 0 to 500, inclusive.
+// (Default: 500)
+func (c *RegionTargetHttpProxiesListCall) MaxResults(maxResults int64) *RegionTargetHttpProxiesListCall {
+	c.urlParams_.Set("maxResults", fmt.Sprint(maxResults))
+	return c
+}
+
+// OrderBy sets the optional parameter "orderBy": Sorts list results by
+// a certain order. By default, results are returned in alphanumerical
+// order based on the resource name.
+//
+// You can also sort results in descending order based on the creation
+// timestamp using orderBy="creationTimestamp desc". This sorts results
+// based on the creationTimestamp field in reverse chronological order
+// (newest result first). Use this to sort resources like operations so
+// that the newest operation is returned first.
+//
+// Currently, only sorting by name or creationTimestamp desc is
+// supported.
+func (c *RegionTargetHttpProxiesListCall) OrderBy(orderBy string) *RegionTargetHttpProxiesListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": Specifies a page
+// token to use. Set pageToken to the nextPageToken returned by a
+// previous list request to get the next page of results.
+func (c *RegionTargetHttpProxiesListCall) PageToken(pageToken string) *RegionTargetHttpProxiesListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionTargetHttpProxiesListCall) Fields(s ...googleapi.Field) *RegionTargetHttpProxiesListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *RegionTargetHttpProxiesListCall) IfNoneMatch(entityTag string) *RegionTargetHttpProxiesListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionTargetHttpProxiesListCall) Context(ctx context.Context) *RegionTargetHttpProxiesListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionTargetHttpProxiesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionTargetHttpProxiesListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/targetHttpProxies")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionTargetHttpProxies.list" call.
+// Exactly one of *TargetHttpProxyList or error will be non-nil. Any
+// non-2xx status code is an error. Response headers are in either
+// *TargetHttpProxyList.ServerResponse.Header or (if a response was
+// returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *RegionTargetHttpProxiesListCall) Do(opts ...googleapi.CallOption) (*TargetHttpProxyList, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &TargetHttpProxyList{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Retrieves the list of TargetHttpProxy resources available to the specified project in the specified region.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.regionTargetHttpProxies.list",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region"
+	//   ],
+	//   "parameters": {
+	//     "filter": {
+	//       "description": "A filter expression that filters resources listed in the response. The expression must specify the field name, a comparison operator, and the value that you want to use for filtering. The value must be a string, a number, or a boolean. The comparison operator must be either =, !=, \u003e, or \u003c.\n\nFor example, if you are filtering Compute Engine instances, you can exclude instances named example-instance by specifying name != example-instance.\n\nYou can also filter nested fields. For example, you could specify scheduling.automaticRestart = false to include instances only if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based on resource labels.\n\nTo filter on multiple expressions, provide each separate expression within parentheses. For example, (scheduling.automaticRestart = true) (cpuPlatform = \"Intel Skylake\"). By default, each expression is an AND expression. However, you can include AND and OR expressions explicitly. For example, (cpuPlatform = \"Intel Skylake\") OR (cpuPlatform = \"Intel Broadwell\") AND (scheduling.automaticRestart = true).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "maxResults": {
+	//       "default": "500",
+	//       "description": "The maximum number of results per page that should be returned. If the number of available results is larger than maxResults, Compute Engine returns a nextPageToken that can be used to get the next page of results in subsequent list requests. Acceptable values are 0 to 500, inclusive. (Default: 500)",
+	//       "format": "uint32",
+	//       "location": "query",
+	//       "minimum": "0",
+	//       "type": "integer"
+	//     },
+	//     "orderBy": {
+	//       "description": "Sorts list results by a certain order. By default, results are returned in alphanumerical order based on the resource name.\n\nYou can also sort results in descending order based on the creation timestamp using orderBy=\"creationTimestamp desc\". This sorts results based on the creationTimestamp field in reverse chronological order (newest result first). Use this to sort resources like operations so that the newest operation is returned first.\n\nCurrently, only sorting by name or creationTimestamp desc is supported.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "pageToken": {
+	//       "description": "Specifies a page token to use. Set pageToken to the nextPageToken returned by a previous list request to get the next page of results.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/targetHttpProxies",
+	//   "response": {
+	//     "$ref": "TargetHttpProxyList"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *RegionTargetHttpProxiesListCall) Pages(ctx context.Context, f func(*TargetHttpProxyList) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
+}
+
+// method id "compute.regionTargetHttpProxies.setUrlMap":
+
+type RegionTargetHttpProxiesSetUrlMapCall struct {
+	s               *Service
+	project         string
+	region          string
+	targetHttpProxy string
+	urlmapreference *UrlMapReference
+	urlParams_      gensupport.URLParams
+	ctx_            context.Context
+	header_         http.Header
+}
+
+// SetUrlMap: Changes the URL map for TargetHttpProxy.
+func (r *RegionTargetHttpProxiesService) SetUrlMap(project string, region string, targetHttpProxy string, urlmapreference *UrlMapReference) *RegionTargetHttpProxiesSetUrlMapCall {
+	c := &RegionTargetHttpProxiesSetUrlMapCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.targetHttpProxy = targetHttpProxy
+	c.urlmapreference = urlmapreference
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionTargetHttpProxiesSetUrlMapCall) RequestId(requestId string) *RegionTargetHttpProxiesSetUrlMapCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionTargetHttpProxiesSetUrlMapCall) Fields(s ...googleapi.Field) *RegionTargetHttpProxiesSetUrlMapCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionTargetHttpProxiesSetUrlMapCall) Context(ctx context.Context) *RegionTargetHttpProxiesSetUrlMapCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionTargetHttpProxiesSetUrlMapCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionTargetHttpProxiesSetUrlMapCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.urlmapreference)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/targetHttpProxies/{targetHttpProxy}/setUrlMap")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":         c.project,
+		"region":          c.region,
+		"targetHttpProxy": c.targetHttpProxy,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionTargetHttpProxies.setUrlMap" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionTargetHttpProxiesSetUrlMapCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Changes the URL map for TargetHttpProxy.",
+	//   "httpMethod": "POST",
+	//   "id": "compute.regionTargetHttpProxies.setUrlMap",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "targetHttpProxy"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "targetHttpProxy": {
+	//       "description": "Name of the TargetHttpProxy to set a URL map for.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/targetHttpProxies/{targetHttpProxy}/setUrlMap",
+	//   "request": {
+	//     "$ref": "UrlMapReference"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionTargetHttpsProxies.delete":
+
+type RegionTargetHttpsProxiesDeleteCall struct {
+	s                *Service
+	project          string
+	region           string
+	targetHttpsProxy string
+	urlParams_       gensupport.URLParams
+	ctx_             context.Context
+	header_          http.Header
+}
+
+// Delete: Deletes the specified TargetHttpsProxy resource.
+func (r *RegionTargetHttpsProxiesService) Delete(project string, region string, targetHttpsProxy string) *RegionTargetHttpsProxiesDeleteCall {
+	c := &RegionTargetHttpsProxiesDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.targetHttpsProxy = targetHttpsProxy
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionTargetHttpsProxiesDeleteCall) RequestId(requestId string) *RegionTargetHttpsProxiesDeleteCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionTargetHttpsProxiesDeleteCall) Fields(s ...googleapi.Field) *RegionTargetHttpsProxiesDeleteCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionTargetHttpsProxiesDeleteCall) Context(ctx context.Context) *RegionTargetHttpsProxiesDeleteCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionTargetHttpsProxiesDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionTargetHttpsProxiesDeleteCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/targetHttpsProxies/{targetHttpsProxy}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("DELETE", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":          c.project,
+		"region":           c.region,
+		"targetHttpsProxy": c.targetHttpsProxy,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionTargetHttpsProxies.delete" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionTargetHttpsProxiesDeleteCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Deletes the specified TargetHttpsProxy resource.",
+	//   "httpMethod": "DELETE",
+	//   "id": "compute.regionTargetHttpsProxies.delete",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "targetHttpsProxy"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "targetHttpsProxy": {
+	//       "description": "Name of the TargetHttpsProxy resource to delete.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/targetHttpsProxies/{targetHttpsProxy}",
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionTargetHttpsProxies.get":
+
+type RegionTargetHttpsProxiesGetCall struct {
+	s                *Service
+	project          string
+	region           string
+	targetHttpsProxy string
+	urlParams_       gensupport.URLParams
+	ifNoneMatch_     string
+	ctx_             context.Context
+	header_          http.Header
+}
+
+// Get: Returns the specified TargetHttpsProxy resource in the specified
+// region. Gets a list of available target HTTP proxies by making a
+// list() request.
+func (r *RegionTargetHttpsProxiesService) Get(project string, region string, targetHttpsProxy string) *RegionTargetHttpsProxiesGetCall {
+	c := &RegionTargetHttpsProxiesGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.targetHttpsProxy = targetHttpsProxy
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionTargetHttpsProxiesGetCall) Fields(s ...googleapi.Field) *RegionTargetHttpsProxiesGetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *RegionTargetHttpsProxiesGetCall) IfNoneMatch(entityTag string) *RegionTargetHttpsProxiesGetCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionTargetHttpsProxiesGetCall) Context(ctx context.Context) *RegionTargetHttpsProxiesGetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionTargetHttpsProxiesGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionTargetHttpsProxiesGetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/targetHttpsProxies/{targetHttpsProxy}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":          c.project,
+		"region":           c.region,
+		"targetHttpsProxy": c.targetHttpsProxy,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionTargetHttpsProxies.get" call.
+// Exactly one of *TargetHttpsProxy or error will be non-nil. Any
+// non-2xx status code is an error. Response headers are in either
+// *TargetHttpsProxy.ServerResponse.Header or (if a response was
+// returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *RegionTargetHttpsProxiesGetCall) Do(opts ...googleapi.CallOption) (*TargetHttpsProxy, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &TargetHttpsProxy{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Returns the specified TargetHttpsProxy resource in the specified region. Gets a list of available target HTTP proxies by making a list() request.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.regionTargetHttpsProxies.get",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "targetHttpsProxy"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "targetHttpsProxy": {
+	//       "description": "Name of the TargetHttpsProxy resource to return.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/targetHttpsProxies/{targetHttpsProxy}",
+	//   "response": {
+	//     "$ref": "TargetHttpsProxy"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionTargetHttpsProxies.insert":
+
+type RegionTargetHttpsProxiesInsertCall struct {
+	s                *Service
+	project          string
+	region           string
+	targethttpsproxy *TargetHttpsProxy
+	urlParams_       gensupport.URLParams
+	ctx_             context.Context
+	header_          http.Header
+}
+
+// Insert: Creates a TargetHttpsProxy resource in the specified project
+// and region using the data included in the request.
+func (r *RegionTargetHttpsProxiesService) Insert(project string, region string, targethttpsproxy *TargetHttpsProxy) *RegionTargetHttpsProxiesInsertCall {
+	c := &RegionTargetHttpsProxiesInsertCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.targethttpsproxy = targethttpsproxy
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionTargetHttpsProxiesInsertCall) RequestId(requestId string) *RegionTargetHttpsProxiesInsertCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionTargetHttpsProxiesInsertCall) Fields(s ...googleapi.Field) *RegionTargetHttpsProxiesInsertCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionTargetHttpsProxiesInsertCall) Context(ctx context.Context) *RegionTargetHttpsProxiesInsertCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionTargetHttpsProxiesInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionTargetHttpsProxiesInsertCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.targethttpsproxy)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/targetHttpsProxies")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionTargetHttpsProxies.insert" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionTargetHttpsProxiesInsertCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Creates a TargetHttpsProxy resource in the specified project and region using the data included in the request.",
+	//   "httpMethod": "POST",
+	//   "id": "compute.regionTargetHttpsProxies.insert",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/targetHttpsProxies",
+	//   "request": {
+	//     "$ref": "TargetHttpsProxy"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionTargetHttpsProxies.list":
+
+type RegionTargetHttpsProxiesListCall struct {
+	s            *Service
+	project      string
+	region       string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// List: Retrieves the list of TargetHttpsProxy resources available to
+// the specified project in the specified region.
+func (r *RegionTargetHttpsProxiesService) List(project string, region string) *RegionTargetHttpsProxiesListCall {
+	c := &RegionTargetHttpsProxiesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	return c
+}
+
+// Filter sets the optional parameter "filter": A filter expression that
+// filters resources listed in the response. The expression must specify
+// the field name, a comparison operator, and the value that you want to
+// use for filtering. The value must be a string, a number, or a
+// boolean. The comparison operator must be either =, !=, >, or <.
+//
+// For example, if you are filtering Compute Engine instances, you can
+// exclude instances named example-instance by specifying name !=
+// example-instance.
+//
+// You can also filter nested fields. For example, you could specify
+// scheduling.automaticRestart = false to include instances only if they
+// are not scheduled for automatic restarts. You can use filtering on
+// nested fields to filter based on resource labels.
+//
+// To filter on multiple expressions, provide each separate expression
+// within parentheses. For example, (scheduling.automaticRestart = true)
+// (cpuPlatform = "Intel Skylake"). By default, each expression is an
+// AND expression. However, you can include AND and OR expressions
+// explicitly. For example, (cpuPlatform = "Intel Skylake") OR
+// (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
+// true).
+func (c *RegionTargetHttpsProxiesListCall) Filter(filter string) *RegionTargetHttpsProxiesListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
+// MaxResults sets the optional parameter "maxResults": The maximum
+// number of results per page that should be returned. If the number of
+// available results is larger than maxResults, Compute Engine returns a
+// nextPageToken that can be used to get the next page of results in
+// subsequent list requests. Acceptable values are 0 to 500, inclusive.
+// (Default: 500)
+func (c *RegionTargetHttpsProxiesListCall) MaxResults(maxResults int64) *RegionTargetHttpsProxiesListCall {
+	c.urlParams_.Set("maxResults", fmt.Sprint(maxResults))
+	return c
+}
+
+// OrderBy sets the optional parameter "orderBy": Sorts list results by
+// a certain order. By default, results are returned in alphanumerical
+// order based on the resource name.
+//
+// You can also sort results in descending order based on the creation
+// timestamp using orderBy="creationTimestamp desc". This sorts results
+// based on the creationTimestamp field in reverse chronological order
+// (newest result first). Use this to sort resources like operations so
+// that the newest operation is returned first.
+//
+// Currently, only sorting by name or creationTimestamp desc is
+// supported.
+func (c *RegionTargetHttpsProxiesListCall) OrderBy(orderBy string) *RegionTargetHttpsProxiesListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": Specifies a page
+// token to use. Set pageToken to the nextPageToken returned by a
+// previous list request to get the next page of results.
+func (c *RegionTargetHttpsProxiesListCall) PageToken(pageToken string) *RegionTargetHttpsProxiesListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionTargetHttpsProxiesListCall) Fields(s ...googleapi.Field) *RegionTargetHttpsProxiesListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *RegionTargetHttpsProxiesListCall) IfNoneMatch(entityTag string) *RegionTargetHttpsProxiesListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionTargetHttpsProxiesListCall) Context(ctx context.Context) *RegionTargetHttpsProxiesListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionTargetHttpsProxiesListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionTargetHttpsProxiesListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/targetHttpsProxies")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionTargetHttpsProxies.list" call.
+// Exactly one of *TargetHttpsProxyList or error will be non-nil. Any
+// non-2xx status code is an error. Response headers are in either
+// *TargetHttpsProxyList.ServerResponse.Header or (if a response was
+// returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *RegionTargetHttpsProxiesListCall) Do(opts ...googleapi.CallOption) (*TargetHttpsProxyList, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &TargetHttpsProxyList{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Retrieves the list of TargetHttpsProxy resources available to the specified project in the specified region.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.regionTargetHttpsProxies.list",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region"
+	//   ],
+	//   "parameters": {
+	//     "filter": {
+	//       "description": "A filter expression that filters resources listed in the response. The expression must specify the field name, a comparison operator, and the value that you want to use for filtering. The value must be a string, a number, or a boolean. The comparison operator must be either =, !=, \u003e, or \u003c.\n\nFor example, if you are filtering Compute Engine instances, you can exclude instances named example-instance by specifying name != example-instance.\n\nYou can also filter nested fields. For example, you could specify scheduling.automaticRestart = false to include instances only if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based on resource labels.\n\nTo filter on multiple expressions, provide each separate expression within parentheses. For example, (scheduling.automaticRestart = true) (cpuPlatform = \"Intel Skylake\"). By default, each expression is an AND expression. However, you can include AND and OR expressions explicitly. For example, (cpuPlatform = \"Intel Skylake\") OR (cpuPlatform = \"Intel Broadwell\") AND (scheduling.automaticRestart = true).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "maxResults": {
+	//       "default": "500",
+	//       "description": "The maximum number of results per page that should be returned. If the number of available results is larger than maxResults, Compute Engine returns a nextPageToken that can be used to get the next page of results in subsequent list requests. Acceptable values are 0 to 500, inclusive. (Default: 500)",
+	//       "format": "uint32",
+	//       "location": "query",
+	//       "minimum": "0",
+	//       "type": "integer"
+	//     },
+	//     "orderBy": {
+	//       "description": "Sorts list results by a certain order. By default, results are returned in alphanumerical order based on the resource name.\n\nYou can also sort results in descending order based on the creation timestamp using orderBy=\"creationTimestamp desc\". This sorts results based on the creationTimestamp field in reverse chronological order (newest result first). Use this to sort resources like operations so that the newest operation is returned first.\n\nCurrently, only sorting by name or creationTimestamp desc is supported.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "pageToken": {
+	//       "description": "Specifies a page token to use. Set pageToken to the nextPageToken returned by a previous list request to get the next page of results.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/targetHttpsProxies",
+	//   "response": {
+	//     "$ref": "TargetHttpsProxyList"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *RegionTargetHttpsProxiesListCall) Pages(ctx context.Context, f func(*TargetHttpsProxyList) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
+}
+
+// method id "compute.regionTargetHttpsProxies.setSslCertificates":
+
+type RegionTargetHttpsProxiesSetSslCertificatesCall struct {
+	s                                                 *Service
+	project                                           string
+	region                                            string
+	targetHttpsProxy                                  string
+	regiontargethttpsproxiessetsslcertificatesrequest *RegionTargetHttpsProxiesSetSslCertificatesRequest
+	urlParams_                                        gensupport.URLParams
+	ctx_                                              context.Context
+	header_                                           http.Header
+}
+
+// SetSslCertificates: Replaces SslCertificates for TargetHttpsProxy.
+func (r *RegionTargetHttpsProxiesService) SetSslCertificates(project string, region string, targetHttpsProxy string, regiontargethttpsproxiessetsslcertificatesrequest *RegionTargetHttpsProxiesSetSslCertificatesRequest) *RegionTargetHttpsProxiesSetSslCertificatesCall {
+	c := &RegionTargetHttpsProxiesSetSslCertificatesCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.targetHttpsProxy = targetHttpsProxy
+	c.regiontargethttpsproxiessetsslcertificatesrequest = regiontargethttpsproxiessetsslcertificatesrequest
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionTargetHttpsProxiesSetSslCertificatesCall) RequestId(requestId string) *RegionTargetHttpsProxiesSetSslCertificatesCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionTargetHttpsProxiesSetSslCertificatesCall) Fields(s ...googleapi.Field) *RegionTargetHttpsProxiesSetSslCertificatesCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionTargetHttpsProxiesSetSslCertificatesCall) Context(ctx context.Context) *RegionTargetHttpsProxiesSetSslCertificatesCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionTargetHttpsProxiesSetSslCertificatesCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionTargetHttpsProxiesSetSslCertificatesCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.regiontargethttpsproxiessetsslcertificatesrequest)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/targetHttpsProxies/{targetHttpsProxy}/setSslCertificates")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":          c.project,
+		"region":           c.region,
+		"targetHttpsProxy": c.targetHttpsProxy,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionTargetHttpsProxies.setSslCertificates" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionTargetHttpsProxiesSetSslCertificatesCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Replaces SslCertificates for TargetHttpsProxy.",
+	//   "httpMethod": "POST",
+	//   "id": "compute.regionTargetHttpsProxies.setSslCertificates",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "targetHttpsProxy"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "targetHttpsProxy": {
+	//       "description": "Name of the TargetHttpsProxy resource to set an SslCertificates resource for.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/targetHttpsProxies/{targetHttpsProxy}/setSslCertificates",
+	//   "request": {
+	//     "$ref": "RegionTargetHttpsProxiesSetSslCertificatesRequest"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionTargetHttpsProxies.setUrlMap":
+
+type RegionTargetHttpsProxiesSetUrlMapCall struct {
+	s                *Service
+	project          string
+	region           string
+	targetHttpsProxy string
+	urlmapreference  *UrlMapReference
+	urlParams_       gensupport.URLParams
+	ctx_             context.Context
+	header_          http.Header
+}
+
+// SetUrlMap: Changes the URL map for TargetHttpsProxy.
+func (r *RegionTargetHttpsProxiesService) SetUrlMap(project string, region string, targetHttpsProxy string, urlmapreference *UrlMapReference) *RegionTargetHttpsProxiesSetUrlMapCall {
+	c := &RegionTargetHttpsProxiesSetUrlMapCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.targetHttpsProxy = targetHttpsProxy
+	c.urlmapreference = urlmapreference
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": An optional
+// request ID to identify requests. Specify a unique request ID so that
+// if you must retry your request, the server will know to ignore the
+// request if it has already been completed.
+//
+// For example, consider a situation where you make an initial request
+// and the request times out. If you make the request again with the
+// same request ID, the server can check if original operation with the
+// same request ID was received, and if so, will ignore the second
+// request. This prevents clients from accidentally creating duplicate
+// commitments.
+//
+// The request ID must be a valid UUID with the exception that zero UUID
+// is not supported (00000000-0000-0000-0000-000000000000).
+func (c *RegionTargetHttpsProxiesSetUrlMapCall) RequestId(requestId string) *RegionTargetHttpsProxiesSetUrlMapCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionTargetHttpsProxiesSetUrlMapCall) Fields(s ...googleapi.Field) *RegionTargetHttpsProxiesSetUrlMapCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionTargetHttpsProxiesSetUrlMapCall) Context(ctx context.Context) *RegionTargetHttpsProxiesSetUrlMapCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionTargetHttpsProxiesSetUrlMapCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionTargetHttpsProxiesSetUrlMapCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.urlmapreference)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/targetHttpsProxies/{targetHttpsProxy}/setUrlMap")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":          c.project,
+		"region":           c.region,
+		"targetHttpsProxy": c.targetHttpsProxy,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionTargetHttpsProxies.setUrlMap" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionTargetHttpsProxiesSetUrlMapCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Changes the URL map for TargetHttpsProxy.",
+	//   "httpMethod": "POST",
+	//   "id": "compute.regionTargetHttpsProxies.setUrlMap",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "targetHttpsProxy"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "An optional request ID to identify requests. Specify a unique request ID so that if you must retry your request, the server will know to ignore the request if it has already been completed.\n\nFor example, consider a situation where you make an initial request and the request times out. If you make the request again with the same request ID, the server can check if original operation with the same request ID was received, and if so, will ignore the second request. This prevents clients from accidentally creating duplicate commitments.\n\nThe request ID must be a valid UUID with the exception that zero UUID is not supported (00000000-0000-0000-0000-000000000000).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "targetHttpsProxy": {
+	//       "description": "Name of the TargetHttpsProxy to set a URL map for.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/targetHttpsProxies/{targetHttpsProxy}/setUrlMap",
+	//   "request": {
+	//     "$ref": "UrlMapReference"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionUrlMaps.delete":
+
+type RegionUrlMapsDeleteCall struct {
+	s          *Service
+	project    string
+	region     string
+	urlMap     string
+	urlParams_ gensupport.URLParams
+	ctx_       context.Context
+	header_    http.Header
+}
+
+// Delete: Deletes the specified UrlMap resource.
+func (r *RegionUrlMapsService) Delete(project string, region string, urlMap string) *RegionUrlMapsDeleteCall {
+	c := &RegionUrlMapsDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.urlMap = urlMap
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": begin_interface:
+// MixerMutationRequestBuilder Request ID to support idempotency.
+func (c *RegionUrlMapsDeleteCall) RequestId(requestId string) *RegionUrlMapsDeleteCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionUrlMapsDeleteCall) Fields(s ...googleapi.Field) *RegionUrlMapsDeleteCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionUrlMapsDeleteCall) Context(ctx context.Context) *RegionUrlMapsDeleteCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionUrlMapsDeleteCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionUrlMapsDeleteCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/urlMaps/{urlMap}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("DELETE", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+		"urlMap":  c.urlMap,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionUrlMaps.delete" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionUrlMapsDeleteCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Deletes the specified UrlMap resource.",
+	//   "httpMethod": "DELETE",
+	//   "id": "compute.regionUrlMaps.delete",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "urlMap"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "begin_interface: MixerMutationRequestBuilder Request ID to support idempotency.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "urlMap": {
+	//       "description": "Name of the UrlMap resource to delete.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/urlMaps/{urlMap}",
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionUrlMaps.get":
+
+type RegionUrlMapsGetCall struct {
+	s            *Service
+	project      string
+	region       string
+	urlMap       string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// Get: Returns the specified UrlMap resource. Gets a list of available
+// URL maps by making a list() request.
+func (r *RegionUrlMapsService) Get(project string, region string, urlMap string) *RegionUrlMapsGetCall {
+	c := &RegionUrlMapsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.urlMap = urlMap
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionUrlMapsGetCall) Fields(s ...googleapi.Field) *RegionUrlMapsGetCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *RegionUrlMapsGetCall) IfNoneMatch(entityTag string) *RegionUrlMapsGetCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionUrlMapsGetCall) Context(ctx context.Context) *RegionUrlMapsGetCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionUrlMapsGetCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionUrlMapsGetCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/urlMaps/{urlMap}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+		"urlMap":  c.urlMap,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionUrlMaps.get" call.
+// Exactly one of *UrlMap or error will be non-nil. Any non-2xx status
+// code is an error. Response headers are in either
+// *UrlMap.ServerResponse.Header or (if a response was returned at all)
+// in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to
+// check whether the returned error was because http.StatusNotModified
+// was returned.
+func (c *RegionUrlMapsGetCall) Do(opts ...googleapi.CallOption) (*UrlMap, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &UrlMap{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Returns the specified UrlMap resource. Gets a list of available URL maps by making a list() request.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.regionUrlMaps.get",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "urlMap"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "urlMap": {
+	//       "description": "Name of the UrlMap resource to return.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/urlMaps/{urlMap}",
+	//   "response": {
+	//     "$ref": "UrlMap"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionUrlMaps.insert":
+
+type RegionUrlMapsInsertCall struct {
+	s          *Service
+	project    string
+	region     string
+	urlmap     *UrlMap
+	urlParams_ gensupport.URLParams
+	ctx_       context.Context
+	header_    http.Header
+}
+
+// Insert: Creates a UrlMap resource in the specified project using the
+// data included in the request.
+func (r *RegionUrlMapsService) Insert(project string, region string, urlmap *UrlMap) *RegionUrlMapsInsertCall {
+	c := &RegionUrlMapsInsertCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.urlmap = urlmap
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": begin_interface:
+// MixerMutationRequestBuilder Request ID to support idempotency.
+func (c *RegionUrlMapsInsertCall) RequestId(requestId string) *RegionUrlMapsInsertCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionUrlMapsInsertCall) Fields(s ...googleapi.Field) *RegionUrlMapsInsertCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionUrlMapsInsertCall) Context(ctx context.Context) *RegionUrlMapsInsertCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionUrlMapsInsertCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionUrlMapsInsertCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.urlmap)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/urlMaps")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionUrlMaps.insert" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionUrlMapsInsertCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Creates a UrlMap resource in the specified project using the data included in the request.",
+	//   "httpMethod": "POST",
+	//   "id": "compute.regionUrlMaps.insert",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "begin_interface: MixerMutationRequestBuilder Request ID to support idempotency.",
+	//       "location": "query",
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/urlMaps",
+	//   "request": {
+	//     "$ref": "UrlMap"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionUrlMaps.invalidateCache":
+
+type RegionUrlMapsInvalidateCacheCall struct {
+	s                     *Service
+	project               string
+	region                string
+	urlMap                string
+	cacheinvalidationrule *CacheInvalidationRule
+	urlParams_            gensupport.URLParams
+	ctx_                  context.Context
+	header_               http.Header
+}
+
+// InvalidateCache: Initiates a cache invalidation operation,
+// invalidating the specified path, scoped to the specified UrlMap.
+func (r *RegionUrlMapsService) InvalidateCache(project string, region string, urlMap string, cacheinvalidationrule *CacheInvalidationRule) *RegionUrlMapsInvalidateCacheCall {
+	c := &RegionUrlMapsInvalidateCacheCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.urlMap = urlMap
+	c.cacheinvalidationrule = cacheinvalidationrule
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": begin_interface:
+// MixerMutationRequestBuilder Request ID to support idempotency.
+func (c *RegionUrlMapsInvalidateCacheCall) RequestId(requestId string) *RegionUrlMapsInvalidateCacheCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionUrlMapsInvalidateCacheCall) Fields(s ...googleapi.Field) *RegionUrlMapsInvalidateCacheCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionUrlMapsInvalidateCacheCall) Context(ctx context.Context) *RegionUrlMapsInvalidateCacheCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionUrlMapsInvalidateCacheCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionUrlMapsInvalidateCacheCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.cacheinvalidationrule)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/urlMaps/{urlMap}/invalidateCache")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+		"urlMap":  c.urlMap,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionUrlMaps.invalidateCache" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionUrlMapsInvalidateCacheCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Initiates a cache invalidation operation, invalidating the specified path, scoped to the specified UrlMap.",
+	//   "httpMethod": "POST",
+	//   "id": "compute.regionUrlMaps.invalidateCache",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "urlMap"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "begin_interface: MixerMutationRequestBuilder Request ID to support idempotency.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "urlMap": {
+	//       "description": "Name of the UrlMap scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/urlMaps/{urlMap}/invalidateCache",
+	//   "request": {
+	//     "$ref": "CacheInvalidationRule"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionUrlMaps.list":
+
+type RegionUrlMapsListCall struct {
+	s            *Service
+	project      string
+	region       string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// List: Retrieves the list of UrlMap resources available to the
+// specified project in the specified region.
+func (r *RegionUrlMapsService) List(project string, region string) *RegionUrlMapsListCall {
+	c := &RegionUrlMapsListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	return c
+}
+
+// Filter sets the optional parameter "filter": A filter expression that
+// filters resources listed in the response. The expression must specify
+// the field name, a comparison operator, and the value that you want to
+// use for filtering. The value must be a string, a number, or a
+// boolean. The comparison operator must be either =, !=, >, or <.
+//
+// For example, if you are filtering Compute Engine instances, you can
+// exclude instances named example-instance by specifying name !=
+// example-instance.
+//
+// You can also filter nested fields. For example, you could specify
+// scheduling.automaticRestart = false to include instances only if they
+// are not scheduled for automatic restarts. You can use filtering on
+// nested fields to filter based on resource labels.
+//
+// To filter on multiple expressions, provide each separate expression
+// within parentheses. For example, (scheduling.automaticRestart = true)
+// (cpuPlatform = "Intel Skylake"). By default, each expression is an
+// AND expression. However, you can include AND and OR expressions
+// explicitly. For example, (cpuPlatform = "Intel Skylake") OR
+// (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
+// true).
+func (c *RegionUrlMapsListCall) Filter(filter string) *RegionUrlMapsListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
+// MaxResults sets the optional parameter "maxResults": The maximum
+// number of results per page that should be returned. If the number of
+// available results is larger than maxResults, Compute Engine returns a
+// nextPageToken that can be used to get the next page of results in
+// subsequent list requests. Acceptable values are 0 to 500, inclusive.
+// (Default: 500)
+func (c *RegionUrlMapsListCall) MaxResults(maxResults int64) *RegionUrlMapsListCall {
+	c.urlParams_.Set("maxResults", fmt.Sprint(maxResults))
+	return c
+}
+
+// OrderBy sets the optional parameter "orderBy": Sorts list results by
+// a certain order. By default, results are returned in alphanumerical
+// order based on the resource name.
+//
+// You can also sort results in descending order based on the creation
+// timestamp using orderBy="creationTimestamp desc". This sorts results
+// based on the creationTimestamp field in reverse chronological order
+// (newest result first). Use this to sort resources like operations so
+// that the newest operation is returned first.
+//
+// Currently, only sorting by name or creationTimestamp desc is
+// supported.
+func (c *RegionUrlMapsListCall) OrderBy(orderBy string) *RegionUrlMapsListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": Specifies a page
+// token to use. Set pageToken to the nextPageToken returned by a
+// previous list request to get the next page of results.
+func (c *RegionUrlMapsListCall) PageToken(pageToken string) *RegionUrlMapsListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionUrlMapsListCall) Fields(s ...googleapi.Field) *RegionUrlMapsListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *RegionUrlMapsListCall) IfNoneMatch(entityTag string) *RegionUrlMapsListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionUrlMapsListCall) Context(ctx context.Context) *RegionUrlMapsListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionUrlMapsListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionUrlMapsListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/urlMaps")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionUrlMaps.list" call.
+// Exactly one of *UrlMapList or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *UrlMapList.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionUrlMapsListCall) Do(opts ...googleapi.CallOption) (*UrlMapList, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &UrlMapList{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Retrieves the list of UrlMap resources available to the specified project in the specified region.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.regionUrlMaps.list",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region"
+	//   ],
+	//   "parameters": {
+	//     "filter": {
+	//       "description": "A filter expression that filters resources listed in the response. The expression must specify the field name, a comparison operator, and the value that you want to use for filtering. The value must be a string, a number, or a boolean. The comparison operator must be either =, !=, \u003e, or \u003c.\n\nFor example, if you are filtering Compute Engine instances, you can exclude instances named example-instance by specifying name != example-instance.\n\nYou can also filter nested fields. For example, you could specify scheduling.automaticRestart = false to include instances only if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based on resource labels.\n\nTo filter on multiple expressions, provide each separate expression within parentheses. For example, (scheduling.automaticRestart = true) (cpuPlatform = \"Intel Skylake\"). By default, each expression is an AND expression. However, you can include AND and OR expressions explicitly. For example, (cpuPlatform = \"Intel Skylake\") OR (cpuPlatform = \"Intel Broadwell\") AND (scheduling.automaticRestart = true).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "maxResults": {
+	//       "default": "500",
+	//       "description": "The maximum number of results per page that should be returned. If the number of available results is larger than maxResults, Compute Engine returns a nextPageToken that can be used to get the next page of results in subsequent list requests. Acceptable values are 0 to 500, inclusive. (Default: 500)",
+	//       "format": "uint32",
+	//       "location": "query",
+	//       "minimum": "0",
+	//       "type": "integer"
+	//     },
+	//     "orderBy": {
+	//       "description": "Sorts list results by a certain order. By default, results are returned in alphanumerical order based on the resource name.\n\nYou can also sort results in descending order based on the creation timestamp using orderBy=\"creationTimestamp desc\". This sorts results based on the creationTimestamp field in reverse chronological order (newest result first). Use this to sort resources like operations so that the newest operation is returned first.\n\nCurrently, only sorting by name or creationTimestamp desc is supported.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "pageToken": {
+	//       "description": "Specifies a page token to use. Set pageToken to the nextPageToken returned by a previous list request to get the next page of results.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/urlMaps",
+	//   "response": {
+	//     "$ref": "UrlMapList"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *RegionUrlMapsListCall) Pages(ctx context.Context, f func(*UrlMapList) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
+}
+
+// method id "compute.regionUrlMaps.patch":
+
+type RegionUrlMapsPatchCall struct {
+	s          *Service
+	project    string
+	region     string
+	urlMap     string
+	urlmap     *UrlMap
+	urlParams_ gensupport.URLParams
+	ctx_       context.Context
+	header_    http.Header
+}
+
+// Patch: Patches the specified UrlMap resource with the data included
+// in the request. This method supports PATCH semantics and uses JSON
+// merge patch format and processing rules.
+func (r *RegionUrlMapsService) Patch(project string, region string, urlMap string, urlmap *UrlMap) *RegionUrlMapsPatchCall {
+	c := &RegionUrlMapsPatchCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.urlMap = urlMap
+	c.urlmap = urlmap
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": begin_interface:
+// MixerMutationRequestBuilder Request ID to support idempotency.
+func (c *RegionUrlMapsPatchCall) RequestId(requestId string) *RegionUrlMapsPatchCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionUrlMapsPatchCall) Fields(s ...googleapi.Field) *RegionUrlMapsPatchCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionUrlMapsPatchCall) Context(ctx context.Context) *RegionUrlMapsPatchCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionUrlMapsPatchCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionUrlMapsPatchCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.urlmap)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/urlMaps/{urlMap}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("PATCH", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+		"urlMap":  c.urlMap,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionUrlMaps.patch" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionUrlMapsPatchCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Patches the specified UrlMap resource with the data included in the request. This method supports PATCH semantics and uses JSON merge patch format and processing rules.",
+	//   "httpMethod": "PATCH",
+	//   "id": "compute.regionUrlMaps.patch",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "urlMap"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "begin_interface: MixerMutationRequestBuilder Request ID to support idempotency.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "urlMap": {
+	//       "description": "Name of the UrlMap resource to patch.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/urlMaps/{urlMap}",
+	//   "request": {
+	//     "$ref": "UrlMap"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionUrlMaps.update":
+
+type RegionUrlMapsUpdateCall struct {
+	s          *Service
+	project    string
+	region     string
+	urlMap     string
+	urlmap     *UrlMap
+	urlParams_ gensupport.URLParams
+	ctx_       context.Context
+	header_    http.Header
+}
+
+// Update: Updates the specified UrlMap resource with the data included
+// in the request.
+func (r *RegionUrlMapsService) Update(project string, region string, urlMap string, urlmap *UrlMap) *RegionUrlMapsUpdateCall {
+	c := &RegionUrlMapsUpdateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.urlMap = urlMap
+	c.urlmap = urlmap
+	return c
+}
+
+// RequestId sets the optional parameter "requestId": begin_interface:
+// MixerMutationRequestBuilder Request ID to support idempotency.
+func (c *RegionUrlMapsUpdateCall) RequestId(requestId string) *RegionUrlMapsUpdateCall {
+	c.urlParams_.Set("requestId", requestId)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionUrlMapsUpdateCall) Fields(s ...googleapi.Field) *RegionUrlMapsUpdateCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionUrlMapsUpdateCall) Context(ctx context.Context) *RegionUrlMapsUpdateCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionUrlMapsUpdateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionUrlMapsUpdateCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.urlmap)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/urlMaps/{urlMap}")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("PUT", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+		"urlMap":  c.urlMap,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionUrlMaps.update" call.
+// Exactly one of *Operation or error will be non-nil. Any non-2xx
+// status code is an error. Response headers are in either
+// *Operation.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified
+// to check whether the returned error was because
+// http.StatusNotModified was returned.
+func (c *RegionUrlMapsUpdateCall) Do(opts ...googleapi.CallOption) (*Operation, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Operation{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Updates the specified UrlMap resource with the data included in the request.",
+	//   "httpMethod": "PUT",
+	//   "id": "compute.regionUrlMaps.update",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "urlMap"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "requestId": {
+	//       "description": "begin_interface: MixerMutationRequestBuilder Request ID to support idempotency.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "urlMap": {
+	//       "description": "Name of the UrlMap resource to update.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/urlMaps/{urlMap}",
+	//   "request": {
+	//     "$ref": "UrlMap"
+	//   },
+	//   "response": {
+	//     "$ref": "Operation"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
+// method id "compute.regionUrlMaps.validate":
+
+type RegionUrlMapsValidateCall struct {
+	s                            *Service
+	project                      string
+	region                       string
+	urlMap                       string
+	regionurlmapsvalidaterequest *RegionUrlMapsValidateRequest
+	urlParams_                   gensupport.URLParams
+	ctx_                         context.Context
+	header_                      http.Header
+}
+
+// Validate: Runs static validation for the UrlMap. In particular, the
+// tests of the provided UrlMap will be run. Calling this method does
+// NOT create the UrlMap.
+func (r *RegionUrlMapsService) Validate(project string, region string, urlMap string, regionurlmapsvalidaterequest *RegionUrlMapsValidateRequest) *RegionUrlMapsValidateCall {
+	c := &RegionUrlMapsValidateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.urlMap = urlMap
+	c.regionurlmapsvalidaterequest = regionurlmapsvalidaterequest
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *RegionUrlMapsValidateCall) Fields(s ...googleapi.Field) *RegionUrlMapsValidateCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *RegionUrlMapsValidateCall) Context(ctx context.Context) *RegionUrlMapsValidateCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *RegionUrlMapsValidateCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *RegionUrlMapsValidateCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.regionurlmapsvalidaterequest)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/urlMaps/{urlMap}/validate")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+		"region":  c.region,
+		"urlMap":  c.urlMap,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.regionUrlMaps.validate" call.
+// Exactly one of *UrlMapsValidateResponse or error will be non-nil. Any
+// non-2xx status code is an error. Response headers are in either
+// *UrlMapsValidateResponse.ServerResponse.Header or (if a response was
+// returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *RegionUrlMapsValidateCall) Do(opts ...googleapi.CallOption) (*UrlMapsValidateResponse, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &UrlMapsValidateResponse{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Runs static validation for the UrlMap. In particular, the tests of the provided UrlMap will be run. Calling this method does NOT create the UrlMap.",
+	//   "httpMethod": "POST",
+	//   "id": "compute.regionUrlMaps.validate",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "urlMap"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "Name of the region scoping this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "urlMap": {
+	//       "description": "Name of the UrlMap resource to be validated as.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/urlMaps/{urlMap}/validate",
+	//   "request": {
+	//     "$ref": "RegionUrlMapsValidateRequest"
+	//   },
+	//   "response": {
+	//     "$ref": "UrlMapsValidateResponse"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
 // method id "compute.regions.get":
 
 type RegionsGetCall struct {
@@ -100785,6 +110512,7 @@ func (c *RegionsGetCall) Header() http.Header {
 
 func (c *RegionsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -101003,6 +110731,7 @@ func (c *RegionsListCall) Header() http.Header {
 
 func (c *RegionsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -101254,6 +110983,7 @@ func (c *ReservationsAggregatedListCall) Header() http.Header {
 
 func (c *ReservationsAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -101454,6 +111184,7 @@ func (c *ReservationsDeleteCall) Header() http.Header {
 
 func (c *ReservationsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -101621,6 +111352,7 @@ func (c *ReservationsGetCall) Header() http.Header {
 
 func (c *ReservationsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -101788,6 +111520,7 @@ func (c *ReservationsGetIamPolicyCall) Header() http.Header {
 
 func (c *ReservationsGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -101907,7 +111640,8 @@ type ReservationsInsertCall struct {
 	header_     http.Header
 }
 
-// Insert: Creates a new reservation.
+// Insert: Creates a new reservation. For more information, read
+// Reserving zonal resources.
 func (r *ReservationsService) Insert(project string, zone string, reservation *Reservation) *ReservationsInsertCall {
 	c := &ReservationsInsertCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.project = project
@@ -101962,6 +111696,7 @@ func (c *ReservationsInsertCall) Header() http.Header {
 
 func (c *ReservationsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -102026,7 +111761,7 @@ func (c *ReservationsInsertCall) Do(opts ...googleapi.CallOption) (*Operation, e
 	}
 	return ret, nil
 	// {
-	//   "description": "Creates a new reservation.",
+	//   "description": "Creates a new reservation. For more information, read Reserving zonal resources.",
 	//   "httpMethod": "POST",
 	//   "id": "compute.reservations.insert",
 	//   "parameterOrder": [
@@ -102190,6 +111925,7 @@ func (c *ReservationsListCall) Header() http.Header {
 
 func (c *ReservationsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -102402,6 +112138,7 @@ func (c *ReservationsResizeCall) Header() http.Header {
 
 func (c *ReservationsResizeCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -102569,6 +112306,7 @@ func (c *ReservationsSetIamPolicyCall) Header() http.Header {
 
 func (c *ReservationsSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -102731,6 +112469,7 @@ func (c *ReservationsTestIamPermissionsCall) Header() http.Header {
 
 func (c *ReservationsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -102961,6 +112700,7 @@ func (c *ResourcePoliciesAggregatedListCall) Header() http.Header {
 
 func (c *ResourcePoliciesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -103161,6 +112901,7 @@ func (c *ResourcePoliciesDeleteCall) Header() http.Header {
 
 func (c *ResourcePoliciesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -103328,6 +113069,7 @@ func (c *ResourcePoliciesGetCall) Header() http.Header {
 
 func (c *ResourcePoliciesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -103435,6 +113177,174 @@ func (c *ResourcePoliciesGetCall) Do(opts ...googleapi.CallOption) (*ResourcePol
 
 }
 
+// method id "compute.resourcePolicies.getIamPolicy":
+
+type ResourcePoliciesGetIamPolicyCall struct {
+	s            *Service
+	project      string
+	region       string
+	resource     string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// GetIamPolicy: Gets the access control policy for a resource. May be
+// empty if no such policy or resource exists.
+func (r *ResourcePoliciesService) GetIamPolicy(project string, region string, resource string) *ResourcePoliciesGetIamPolicyCall {
+	c := &ResourcePoliciesGetIamPolicyCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.resource = resource
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ResourcePoliciesGetIamPolicyCall) Fields(s ...googleapi.Field) *ResourcePoliciesGetIamPolicyCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *ResourcePoliciesGetIamPolicyCall) IfNoneMatch(entityTag string) *ResourcePoliciesGetIamPolicyCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ResourcePoliciesGetIamPolicyCall) Context(ctx context.Context) *ResourcePoliciesGetIamPolicyCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ResourcePoliciesGetIamPolicyCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *ResourcePoliciesGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/resourcePolicies/{resource}/getIamPolicy")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":  c.project,
+		"region":   c.region,
+		"resource": c.resource,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.resourcePolicies.getIamPolicy" call.
+// Exactly one of *Policy or error will be non-nil. Any non-2xx status
+// code is an error. Response headers are in either
+// *Policy.ServerResponse.Header or (if a response was returned at all)
+// in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to
+// check whether the returned error was because http.StatusNotModified
+// was returned.
+func (c *ResourcePoliciesGetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Policy, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Policy{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Gets the access control policy for a resource. May be empty if no such policy or resource exists.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.resourcePolicies.getIamPolicy",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "resource"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "The name of the region for this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "resource": {
+	//       "description": "Name or id of the resource for this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/resourcePolicies/{resource}/getIamPolicy",
+	//   "response": {
+	//     "$ref": "Policy"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
 // method id "compute.resourcePolicies.insert":
 
 type ResourcePoliciesInsertCall struct {
@@ -103502,6 +113412,7 @@ func (c *ResourcePoliciesInsertCall) Header() http.Header {
 
 func (c *ResourcePoliciesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -103730,6 +113641,7 @@ func (c *ResourcePoliciesListCall) Header() http.Header {
 
 func (c *ResourcePoliciesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -103872,6 +113784,169 @@ func (c *ResourcePoliciesListCall) Pages(ctx context.Context, f func(*ResourcePo
 	}
 }
 
+// method id "compute.resourcePolicies.setIamPolicy":
+
+type ResourcePoliciesSetIamPolicyCall struct {
+	s                      *Service
+	project                string
+	region                 string
+	resource               string
+	regionsetpolicyrequest *RegionSetPolicyRequest
+	urlParams_             gensupport.URLParams
+	ctx_                   context.Context
+	header_                http.Header
+}
+
+// SetIamPolicy: Sets the access control policy on the specified
+// resource. Replaces any existing policy.
+func (r *ResourcePoliciesService) SetIamPolicy(project string, region string, resource string, regionsetpolicyrequest *RegionSetPolicyRequest) *ResourcePoliciesSetIamPolicyCall {
+	c := &ResourcePoliciesSetIamPolicyCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	c.region = region
+	c.resource = resource
+	c.regionsetpolicyrequest = regionsetpolicyrequest
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *ResourcePoliciesSetIamPolicyCall) Fields(s ...googleapi.Field) *ResourcePoliciesSetIamPolicyCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *ResourcePoliciesSetIamPolicyCall) Context(ctx context.Context) *ResourcePoliciesSetIamPolicyCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *ResourcePoliciesSetIamPolicyCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *ResourcePoliciesSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	var body io.Reader = nil
+	body, err := googleapi.WithoutDataWrapper.JSONReader(c.regionsetpolicyrequest)
+	if err != nil {
+		return nil, err
+	}
+	reqHeaders.Set("Content-Type", "application/json")
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/regions/{region}/resourcePolicies/{resource}/setIamPolicy")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("POST", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project":  c.project,
+		"region":   c.region,
+		"resource": c.resource,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.resourcePolicies.setIamPolicy" call.
+// Exactly one of *Policy or error will be non-nil. Any non-2xx status
+// code is an error. Response headers are in either
+// *Policy.ServerResponse.Header or (if a response was returned at all)
+// in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to
+// check whether the returned error was because http.StatusNotModified
+// was returned.
+func (c *ResourcePoliciesSetIamPolicyCall) Do(opts ...googleapi.CallOption) (*Policy, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &Policy{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Sets the access control policy on the specified resource. Replaces any existing policy.",
+	//   "httpMethod": "POST",
+	//   "id": "compute.resourcePolicies.setIamPolicy",
+	//   "parameterOrder": [
+	//     "project",
+	//     "region",
+	//     "resource"
+	//   ],
+	//   "parameters": {
+	//     "project": {
+	//       "description": "Project ID for this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "region": {
+	//       "description": "The name of the region for this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?",
+	//       "required": true,
+	//       "type": "string"
+	//     },
+	//     "resource": {
+	//       "description": "Name or id of the resource for this request.",
+	//       "location": "path",
+	//       "pattern": "[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?|[1-9][0-9]{0,19}",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/regions/{region}/resourcePolicies/{resource}/setIamPolicy",
+	//   "request": {
+	//     "$ref": "RegionSetPolicyRequest"
+	//   },
+	//   "response": {
+	//     "$ref": "Policy"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute"
+	//   ]
+	// }
+
+}
+
 // method id "compute.resourcePolicies.testIamPermissions":
 
 type ResourcePoliciesTestIamPermissionsCall struct {
@@ -103923,6 +113998,7 @@ func (c *ResourcePoliciesTestIamPermissionsCall) Header() http.Header {
 
 func (c *ResourcePoliciesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -104153,6 +114229,7 @@ func (c *RoutersAggregatedListCall) Header() http.Header {
 
 func (c *RoutersAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -104353,6 +114430,7 @@ func (c *RoutersDeleteCall) Header() http.Header {
 
 func (c *RoutersDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -104521,6 +114599,7 @@ func (c *RoutersGetCall) Header() http.Header {
 
 func (c *RoutersGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -104751,6 +114830,7 @@ func (c *RoutersGetNatMappingInfoCall) Header() http.Header {
 
 func (c *RoutersGetNatMappingInfoCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -104962,6 +115042,7 @@ func (c *RoutersGetRouterStatusCall) Header() http.Header {
 
 func (c *RoutersGetRouterStatusCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -105137,6 +115218,7 @@ func (c *RoutersInsertCall) Header() http.Header {
 
 func (c *RoutersInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -105365,6 +115447,7 @@ func (c *RoutersListCall) Header() http.Header {
 
 func (c *RoutersListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -105578,6 +115661,7 @@ func (c *RoutersPatchCall) Header() http.Header {
 
 func (c *RoutersPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -105746,6 +115830,7 @@ func (c *RoutersPreviewCall) Header() http.Header {
 
 func (c *RoutersPreviewCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -105909,6 +115994,7 @@ func (c *RoutersTestIamPermissionsCall) Header() http.Header {
 
 func (c *RoutersTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -106035,7 +116121,10 @@ type RoutersUpdateCall struct {
 }
 
 // Update: Updates the specified Router resource with the data included
-// in the request.
+// in the request. This method conforms to PUT semantics, which requests
+// that the state of the target resource be created or replaced with the
+// state defined by the representation enclosed in the request message
+// payload.
 func (r *RoutersService) Update(project string, region string, router string, router2 *Router) *RoutersUpdateCall {
 	c := &RoutersUpdateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.project = project
@@ -106091,6 +116180,7 @@ func (c *RoutersUpdateCall) Header() http.Header {
 
 func (c *RoutersUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -106156,7 +116246,7 @@ func (c *RoutersUpdateCall) Do(opts ...googleapi.CallOption) (*Operation, error)
 	}
 	return ret, nil
 	// {
-	//   "description": "Updates the specified Router resource with the data included in the request.",
+	//   "description": "Updates the specified Router resource with the data included in the request. This method conforms to PUT semantics, which requests that the state of the target resource be created or replaced with the state defined by the representation enclosed in the request message payload.",
 	//   "httpMethod": "PUT",
 	//   "id": "compute.routers.update",
 	//   "parameterOrder": [
@@ -106273,6 +116363,7 @@ func (c *RoutesDeleteCall) Header() http.Header {
 
 func (c *RoutesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -106431,6 +116522,7 @@ func (c *RoutesGetCall) Header() http.Header {
 
 func (c *RoutesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -106596,6 +116688,7 @@ func (c *RoutesInsertCall) Header() http.Header {
 
 func (c *RoutesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -106814,6 +116907,7 @@ func (c *RoutesListCall) Header() http.Header {
 
 func (c *RoutesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -106996,6 +117090,7 @@ func (c *RoutesTestIamPermissionsCall) Header() http.Header {
 
 func (c *RoutesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -107154,6 +117249,7 @@ func (c *SecurityPoliciesAddRuleCall) Header() http.Header {
 
 func (c *SecurityPoliciesAddRuleCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -107326,6 +117422,7 @@ func (c *SecurityPoliciesDeleteCall) Header() http.Header {
 
 func (c *SecurityPoliciesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -107483,6 +117580,7 @@ func (c *SecurityPoliciesGetCall) Header() http.Header {
 
 func (c *SecurityPoliciesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -107645,6 +117743,7 @@ func (c *SecurityPoliciesGetRuleCall) Header() http.Header {
 
 func (c *SecurityPoliciesGetRuleCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -107822,6 +117921,7 @@ func (c *SecurityPoliciesInsertCall) Header() http.Header {
 
 func (c *SecurityPoliciesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -108044,6 +118144,7 @@ func (c *SecurityPoliciesListCall) Header() http.Header {
 
 func (c *SecurityPoliciesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -108296,6 +118397,7 @@ func (c *SecurityPoliciesListPreconfiguredExpressionSetsCall) Header() http.Head
 
 func (c *SecurityPoliciesListPreconfiguredExpressionSetsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -108478,6 +118580,7 @@ func (c *SecurityPoliciesPatchCall) Header() http.Header {
 
 func (c *SecurityPoliciesPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -108647,6 +118750,7 @@ func (c *SecurityPoliciesPatchRuleCall) Header() http.Header {
 
 func (c *SecurityPoliciesPatchRuleCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -108813,6 +118917,7 @@ func (c *SecurityPoliciesRemoveRuleCall) Header() http.Header {
 
 func (c *SecurityPoliciesRemoveRuleCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -108962,6 +119067,7 @@ func (c *SecurityPoliciesSetLabelsCall) Header() http.Header {
 
 func (c *SecurityPoliciesSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -109113,6 +119219,7 @@ func (c *SecurityPoliciesTestIamPermissionsCall) Header() http.Header {
 
 func (c *SecurityPoliciesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -109288,6 +119395,7 @@ func (c *SnapshotsDeleteCall) Header() http.Header {
 
 func (c *SnapshotsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -109446,6 +119554,7 @@ func (c *SnapshotsGetCall) Header() http.Header {
 
 func (c *SnapshotsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -109602,6 +119711,7 @@ func (c *SnapshotsGetIamPolicyCall) Header() http.Header {
 
 func (c *SnapshotsGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -109820,6 +119930,7 @@ func (c *SnapshotsListCall) Header() http.Header {
 
 func (c *SnapshotsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -110002,6 +120113,7 @@ func (c *SnapshotsSetIamPolicyCall) Header() http.Header {
 
 func (c *SnapshotsSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -110153,6 +120265,7 @@ func (c *SnapshotsSetLabelsCall) Header() http.Header {
 
 func (c *SnapshotsSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -110304,6 +120417,7 @@ func (c *SnapshotsTestIamPermissionsCall) Header() http.Header {
 
 func (c *SnapshotsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -110407,6 +120521,259 @@ func (c *SnapshotsTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (*Tes
 
 }
 
+// method id "compute.sslCertificates.aggregatedList":
+
+type SslCertificatesAggregatedListCall struct {
+	s            *Service
+	project      string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// AggregatedList: Retrieves the list of all SslCertificate resources,
+// regional and global, available to the specified project.
+func (r *SslCertificatesService) AggregatedList(project string) *SslCertificatesAggregatedListCall {
+	c := &SslCertificatesAggregatedListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	return c
+}
+
+// Filter sets the optional parameter "filter": A filter expression that
+// filters resources listed in the response. The expression must specify
+// the field name, a comparison operator, and the value that you want to
+// use for filtering. The value must be a string, a number, or a
+// boolean. The comparison operator must be either =, !=, >, or <.
+//
+// For example, if you are filtering Compute Engine instances, you can
+// exclude instances named example-instance by specifying name !=
+// example-instance.
+//
+// You can also filter nested fields. For example, you could specify
+// scheduling.automaticRestart = false to include instances only if they
+// are not scheduled for automatic restarts. You can use filtering on
+// nested fields to filter based on resource labels.
+//
+// To filter on multiple expressions, provide each separate expression
+// within parentheses. For example, (scheduling.automaticRestart = true)
+// (cpuPlatform = "Intel Skylake"). By default, each expression is an
+// AND expression. However, you can include AND and OR expressions
+// explicitly. For example, (cpuPlatform = "Intel Skylake") OR
+// (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
+// true).
+func (c *SslCertificatesAggregatedListCall) Filter(filter string) *SslCertificatesAggregatedListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
+// MaxResults sets the optional parameter "maxResults": The maximum
+// number of results per page that should be returned. If the number of
+// available results is larger than maxResults, Compute Engine returns a
+// nextPageToken that can be used to get the next page of results in
+// subsequent list requests. Acceptable values are 0 to 500, inclusive.
+// (Default: 500)
+func (c *SslCertificatesAggregatedListCall) MaxResults(maxResults int64) *SslCertificatesAggregatedListCall {
+	c.urlParams_.Set("maxResults", fmt.Sprint(maxResults))
+	return c
+}
+
+// OrderBy sets the optional parameter "orderBy": Sorts list results by
+// a certain order. By default, results are returned in alphanumerical
+// order based on the resource name.
+//
+// You can also sort results in descending order based on the creation
+// timestamp using orderBy="creationTimestamp desc". This sorts results
+// based on the creationTimestamp field in reverse chronological order
+// (newest result first). Use this to sort resources like operations so
+// that the newest operation is returned first.
+//
+// Currently, only sorting by name or creationTimestamp desc is
+// supported.
+func (c *SslCertificatesAggregatedListCall) OrderBy(orderBy string) *SslCertificatesAggregatedListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": Specifies a page
+// token to use. Set pageToken to the nextPageToken returned by a
+// previous list request to get the next page of results.
+func (c *SslCertificatesAggregatedListCall) PageToken(pageToken string) *SslCertificatesAggregatedListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *SslCertificatesAggregatedListCall) Fields(s ...googleapi.Field) *SslCertificatesAggregatedListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *SslCertificatesAggregatedListCall) IfNoneMatch(entityTag string) *SslCertificatesAggregatedListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *SslCertificatesAggregatedListCall) Context(ctx context.Context) *SslCertificatesAggregatedListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *SslCertificatesAggregatedListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *SslCertificatesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/aggregated/sslCertificates")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.sslCertificates.aggregatedList" call.
+// Exactly one of *SslCertificateAggregatedList or error will be
+// non-nil. Any non-2xx status code is an error. Response headers are in
+// either *SslCertificateAggregatedList.ServerResponse.Header or (if a
+// response was returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *SslCertificatesAggregatedListCall) Do(opts ...googleapi.CallOption) (*SslCertificateAggregatedList, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &SslCertificateAggregatedList{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Retrieves the list of all SslCertificate resources, regional and global, available to the specified project.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.sslCertificates.aggregatedList",
+	//   "parameterOrder": [
+	//     "project"
+	//   ],
+	//   "parameters": {
+	//     "filter": {
+	//       "description": "A filter expression that filters resources listed in the response. The expression must specify the field name, a comparison operator, and the value that you want to use for filtering. The value must be a string, a number, or a boolean. The comparison operator must be either =, !=, \u003e, or \u003c.\n\nFor example, if you are filtering Compute Engine instances, you can exclude instances named example-instance by specifying name != example-instance.\n\nYou can also filter nested fields. For example, you could specify scheduling.automaticRestart = false to include instances only if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based on resource labels.\n\nTo filter on multiple expressions, provide each separate expression within parentheses. For example, (scheduling.automaticRestart = true) (cpuPlatform = \"Intel Skylake\"). By default, each expression is an AND expression. However, you can include AND and OR expressions explicitly. For example, (cpuPlatform = \"Intel Skylake\") OR (cpuPlatform = \"Intel Broadwell\") AND (scheduling.automaticRestart = true).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "maxResults": {
+	//       "default": "500",
+	//       "description": "The maximum number of results per page that should be returned. If the number of available results is larger than maxResults, Compute Engine returns a nextPageToken that can be used to get the next page of results in subsequent list requests. Acceptable values are 0 to 500, inclusive. (Default: 500)",
+	//       "format": "uint32",
+	//       "location": "query",
+	//       "minimum": "0",
+	//       "type": "integer"
+	//     },
+	//     "orderBy": {
+	//       "description": "Sorts list results by a certain order. By default, results are returned in alphanumerical order based on the resource name.\n\nYou can also sort results in descending order based on the creation timestamp using orderBy=\"creationTimestamp desc\". This sorts results based on the creationTimestamp field in reverse chronological order (newest result first). Use this to sort resources like operations so that the newest operation is returned first.\n\nCurrently, only sorting by name or creationTimestamp desc is supported.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "pageToken": {
+	//       "description": "Specifies a page token to use. Set pageToken to the nextPageToken returned by a previous list request to get the next page of results.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Name of the project scoping this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/aggregated/sslCertificates",
+	//   "response": {
+	//     "$ref": "SslCertificateAggregatedList"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *SslCertificatesAggregatedListCall) Pages(ctx context.Context, f func(*SslCertificateAggregatedList) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
+}
+
 // method id "compute.sslCertificates.delete":
 
 type SslCertificatesDeleteCall struct {
@@ -110472,6 +120839,7 @@ func (c *SslCertificatesDeleteCall) Header() http.Header {
 
 func (c *SslCertificatesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -110629,6 +120997,7 @@ func (c *SslCertificatesGetCall) Header() http.Header {
 
 func (c *SslCertificatesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -110793,6 +121162,7 @@ func (c *SslCertificatesInsertCall) Header() http.Header {
 
 func (c *SslCertificatesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -111010,6 +121380,7 @@ func (c *SslCertificatesListCall) Header() http.Header {
 
 func (c *SslCertificatesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -111192,6 +121563,7 @@ func (c *SslCertificatesTestIamPermissionsCall) Header() http.Header {
 
 func (c *SslCertificatesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -111362,6 +121734,7 @@ func (c *SslPoliciesDeleteCall) Header() http.Header {
 
 func (c *SslPoliciesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -111518,6 +121891,7 @@ func (c *SslPoliciesGetCall) Header() http.Header {
 
 func (c *SslPoliciesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -111681,6 +122055,7 @@ func (c *SslPoliciesInsertCall) Header() http.Header {
 
 func (c *SslPoliciesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -111898,6 +122273,7 @@ func (c *SslPoliciesListCall) Header() http.Header {
 
 func (c *SslPoliciesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -112150,6 +122526,7 @@ func (c *SslPoliciesListAvailableFeaturesCall) Header() http.Header {
 
 func (c *SslPoliciesListAvailableFeaturesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -112332,6 +122709,7 @@ func (c *SslPoliciesPatchCall) Header() http.Header {
 
 func (c *SslPoliciesPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -112487,6 +122865,7 @@ func (c *SslPoliciesTestIamPermissionsCall) Header() http.Header {
 
 func (c *SslPoliciesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -112708,6 +123087,7 @@ func (c *SubnetworksAggregatedListCall) Header() http.Header {
 
 func (c *SubnetworksAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -112908,6 +123288,7 @@ func (c *SubnetworksDeleteCall) Header() http.Header {
 
 func (c *SubnetworksDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -113086,6 +123467,7 @@ func (c *SubnetworksExpandIpCidrRangeCall) Header() http.Header {
 
 func (c *SubnetworksExpandIpCidrRangeCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -113262,6 +123644,7 @@ func (c *SubnetworksGetCall) Header() http.Header {
 
 func (c *SubnetworksGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -113429,6 +123812,7 @@ func (c *SubnetworksGetIamPolicyCall) Header() http.Header {
 
 func (c *SubnetworksGetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -113604,6 +123988,7 @@ func (c *SubnetworksInsertCall) Header() http.Header {
 
 func (c *SubnetworksInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -113832,6 +124217,7 @@ func (c *SubnetworksListCall) Header() http.Header {
 
 func (c *SubnetworksListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -114092,6 +124478,7 @@ func (c *SubnetworksListUsableCall) Header() http.Header {
 
 func (c *SubnetworksListUsableCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -114251,6 +124638,21 @@ func (r *SubnetworksService) Patch(project string, region string, subnetwork str
 	return c
 }
 
+// DrainTimeoutSeconds sets the optional parameter
+// "drainTimeoutSeconds": The drain timeout specifies the upper bound in
+// seconds on the amount of time allowed to drain connections from the
+// current ACTIVE subnetwork to the current BACKUP subnetwork. The drain
+// timeout is only applicable when the following conditions are true: -
+// the subnetwork being patched has purpose =
+// INTERNAL_HTTPS_LOAD_BALANCER - the subnetwork being patched has role
+// = BACKUP - the patch request is setting the role to ACTIVE. Note that
+// after this patch operation the roles of the ACTIVE and BACKUP
+// subnetworks will be swapped.
+func (c *SubnetworksPatchCall) DrainTimeoutSeconds(drainTimeoutSeconds int64) *SubnetworksPatchCall {
+	c.urlParams_.Set("drainTimeoutSeconds", fmt.Sprint(drainTimeoutSeconds))
+	return c
+}
+
 // RequestId sets the optional parameter "requestId": An optional
 // request ID to identify requests. Specify a unique request ID so that
 // if you must retry your request, the server will know to ignore the
@@ -114297,6 +124699,7 @@ func (c *SubnetworksPatchCall) Header() http.Header {
 
 func (c *SubnetworksPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -114371,6 +124774,12 @@ func (c *SubnetworksPatchCall) Do(opts ...googleapi.CallOption) (*Operation, err
 	//     "subnetwork"
 	//   ],
 	//   "parameters": {
+	//     "drainTimeoutSeconds": {
+	//       "description": "The drain timeout specifies the upper bound in seconds on the amount of time allowed to drain connections from the current ACTIVE subnetwork to the current BACKUP subnetwork. The drain timeout is only applicable when the following conditions are true: - the subnetwork being patched has purpose = INTERNAL_HTTPS_LOAD_BALANCER - the subnetwork being patched has role = BACKUP - the patch request is setting the role to ACTIVE. Note that after this patch operation the roles of the ACTIVE and BACKUP subnetworks will be swapped.",
+	//       "format": "int32",
+	//       "location": "query",
+	//       "type": "integer"
+	//     },
 	//     "project": {
 	//       "description": "Project ID for this request.",
 	//       "location": "path",
@@ -114464,6 +124873,7 @@ func (c *SubnetworksSetIamPolicyCall) Header() http.Header {
 
 func (c *SubnetworksSetIamPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -114646,6 +125056,7 @@ func (c *SubnetworksSetPrivateIpGoogleAccessCall) Header() http.Header {
 
 func (c *SubnetworksSetPrivateIpGoogleAccessCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -114813,6 +125224,7 @@ func (c *SubnetworksTestIamPermissionsCall) Header() http.Header {
 
 func (c *SubnetworksTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -114925,6 +125337,259 @@ func (c *SubnetworksTestIamPermissionsCall) Do(opts ...googleapi.CallOption) (*T
 
 }
 
+// method id "compute.targetHttpProxies.aggregatedList":
+
+type TargetHttpProxiesAggregatedListCall struct {
+	s            *Service
+	project      string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// AggregatedList: Retrieves the list of all TargetHttpProxy resources,
+// regional and global, available to the specified project.
+func (r *TargetHttpProxiesService) AggregatedList(project string) *TargetHttpProxiesAggregatedListCall {
+	c := &TargetHttpProxiesAggregatedListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	return c
+}
+
+// Filter sets the optional parameter "filter": A filter expression that
+// filters resources listed in the response. The expression must specify
+// the field name, a comparison operator, and the value that you want to
+// use for filtering. The value must be a string, a number, or a
+// boolean. The comparison operator must be either =, !=, >, or <.
+//
+// For example, if you are filtering Compute Engine instances, you can
+// exclude instances named example-instance by specifying name !=
+// example-instance.
+//
+// You can also filter nested fields. For example, you could specify
+// scheduling.automaticRestart = false to include instances only if they
+// are not scheduled for automatic restarts. You can use filtering on
+// nested fields to filter based on resource labels.
+//
+// To filter on multiple expressions, provide each separate expression
+// within parentheses. For example, (scheduling.automaticRestart = true)
+// (cpuPlatform = "Intel Skylake"). By default, each expression is an
+// AND expression. However, you can include AND and OR expressions
+// explicitly. For example, (cpuPlatform = "Intel Skylake") OR
+// (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
+// true).
+func (c *TargetHttpProxiesAggregatedListCall) Filter(filter string) *TargetHttpProxiesAggregatedListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
+// MaxResults sets the optional parameter "maxResults": The maximum
+// number of results per page that should be returned. If the number of
+// available results is larger than maxResults, Compute Engine returns a
+// nextPageToken that can be used to get the next page of results in
+// subsequent list requests. Acceptable values are 0 to 500, inclusive.
+// (Default: 500)
+func (c *TargetHttpProxiesAggregatedListCall) MaxResults(maxResults int64) *TargetHttpProxiesAggregatedListCall {
+	c.urlParams_.Set("maxResults", fmt.Sprint(maxResults))
+	return c
+}
+
+// OrderBy sets the optional parameter "orderBy": Sorts list results by
+// a certain order. By default, results are returned in alphanumerical
+// order based on the resource name.
+//
+// You can also sort results in descending order based on the creation
+// timestamp using orderBy="creationTimestamp desc". This sorts results
+// based on the creationTimestamp field in reverse chronological order
+// (newest result first). Use this to sort resources like operations so
+// that the newest operation is returned first.
+//
+// Currently, only sorting by name or creationTimestamp desc is
+// supported.
+func (c *TargetHttpProxiesAggregatedListCall) OrderBy(orderBy string) *TargetHttpProxiesAggregatedListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": Specifies a page
+// token to use. Set pageToken to the nextPageToken returned by a
+// previous list request to get the next page of results.
+func (c *TargetHttpProxiesAggregatedListCall) PageToken(pageToken string) *TargetHttpProxiesAggregatedListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *TargetHttpProxiesAggregatedListCall) Fields(s ...googleapi.Field) *TargetHttpProxiesAggregatedListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *TargetHttpProxiesAggregatedListCall) IfNoneMatch(entityTag string) *TargetHttpProxiesAggregatedListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *TargetHttpProxiesAggregatedListCall) Context(ctx context.Context) *TargetHttpProxiesAggregatedListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *TargetHttpProxiesAggregatedListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *TargetHttpProxiesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/aggregated/targetHttpProxies")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.targetHttpProxies.aggregatedList" call.
+// Exactly one of *TargetHttpProxyAggregatedList or error will be
+// non-nil. Any non-2xx status code is an error. Response headers are in
+// either *TargetHttpProxyAggregatedList.ServerResponse.Header or (if a
+// response was returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *TargetHttpProxiesAggregatedListCall) Do(opts ...googleapi.CallOption) (*TargetHttpProxyAggregatedList, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &TargetHttpProxyAggregatedList{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Retrieves the list of all TargetHttpProxy resources, regional and global, available to the specified project.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.targetHttpProxies.aggregatedList",
+	//   "parameterOrder": [
+	//     "project"
+	//   ],
+	//   "parameters": {
+	//     "filter": {
+	//       "description": "A filter expression that filters resources listed in the response. The expression must specify the field name, a comparison operator, and the value that you want to use for filtering. The value must be a string, a number, or a boolean. The comparison operator must be either =, !=, \u003e, or \u003c.\n\nFor example, if you are filtering Compute Engine instances, you can exclude instances named example-instance by specifying name != example-instance.\n\nYou can also filter nested fields. For example, you could specify scheduling.automaticRestart = false to include instances only if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based on resource labels.\n\nTo filter on multiple expressions, provide each separate expression within parentheses. For example, (scheduling.automaticRestart = true) (cpuPlatform = \"Intel Skylake\"). By default, each expression is an AND expression. However, you can include AND and OR expressions explicitly. For example, (cpuPlatform = \"Intel Skylake\") OR (cpuPlatform = \"Intel Broadwell\") AND (scheduling.automaticRestart = true).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "maxResults": {
+	//       "default": "500",
+	//       "description": "The maximum number of results per page that should be returned. If the number of available results is larger than maxResults, Compute Engine returns a nextPageToken that can be used to get the next page of results in subsequent list requests. Acceptable values are 0 to 500, inclusive. (Default: 500)",
+	//       "format": "uint32",
+	//       "location": "query",
+	//       "minimum": "0",
+	//       "type": "integer"
+	//     },
+	//     "orderBy": {
+	//       "description": "Sorts list results by a certain order. By default, results are returned in alphanumerical order based on the resource name.\n\nYou can also sort results in descending order based on the creation timestamp using orderBy=\"creationTimestamp desc\". This sorts results based on the creationTimestamp field in reverse chronological order (newest result first). Use this to sort resources like operations so that the newest operation is returned first.\n\nCurrently, only sorting by name or creationTimestamp desc is supported.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "pageToken": {
+	//       "description": "Specifies a page token to use. Set pageToken to the nextPageToken returned by a previous list request to get the next page of results.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Name of the project scoping this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/aggregated/targetHttpProxies",
+	//   "response": {
+	//     "$ref": "TargetHttpProxyAggregatedList"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *TargetHttpProxiesAggregatedListCall) Pages(ctx context.Context, f func(*TargetHttpProxyAggregatedList) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
+}
+
 // method id "compute.targetHttpProxies.delete":
 
 type TargetHttpProxiesDeleteCall struct {
@@ -114991,6 +125656,7 @@ func (c *TargetHttpProxiesDeleteCall) Header() http.Header {
 
 func (c *TargetHttpProxiesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -115149,6 +125815,7 @@ func (c *TargetHttpProxiesGetCall) Header() http.Header {
 
 func (c *TargetHttpProxiesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -115314,6 +125981,7 @@ func (c *TargetHttpProxiesInsertCall) Header() http.Header {
 
 func (c *TargetHttpProxiesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -115532,6 +126200,7 @@ func (c *TargetHttpProxiesListCall) Header() http.Header {
 
 func (c *TargetHttpProxiesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -115733,6 +126402,7 @@ func (c *TargetHttpProxiesSetUrlMapCall) Header() http.Header {
 
 func (c *TargetHttpProxiesSetUrlMapCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -115889,6 +126559,7 @@ func (c *TargetHttpProxiesTestIamPermissionsCall) Header() http.Header {
 
 func (c *TargetHttpProxiesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -115992,6 +126663,259 @@ func (c *TargetHttpProxiesTestIamPermissionsCall) Do(opts ...googleapi.CallOptio
 
 }
 
+// method id "compute.targetHttpsProxies.aggregatedList":
+
+type TargetHttpsProxiesAggregatedListCall struct {
+	s            *Service
+	project      string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// AggregatedList: Retrieves the list of all TargetHttpsProxy resources,
+// regional and global, available to the specified project.
+func (r *TargetHttpsProxiesService) AggregatedList(project string) *TargetHttpsProxiesAggregatedListCall {
+	c := &TargetHttpsProxiesAggregatedListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	return c
+}
+
+// Filter sets the optional parameter "filter": A filter expression that
+// filters resources listed in the response. The expression must specify
+// the field name, a comparison operator, and the value that you want to
+// use for filtering. The value must be a string, a number, or a
+// boolean. The comparison operator must be either =, !=, >, or <.
+//
+// For example, if you are filtering Compute Engine instances, you can
+// exclude instances named example-instance by specifying name !=
+// example-instance.
+//
+// You can also filter nested fields. For example, you could specify
+// scheduling.automaticRestart = false to include instances only if they
+// are not scheduled for automatic restarts. You can use filtering on
+// nested fields to filter based on resource labels.
+//
+// To filter on multiple expressions, provide each separate expression
+// within parentheses. For example, (scheduling.automaticRestart = true)
+// (cpuPlatform = "Intel Skylake"). By default, each expression is an
+// AND expression. However, you can include AND and OR expressions
+// explicitly. For example, (cpuPlatform = "Intel Skylake") OR
+// (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
+// true).
+func (c *TargetHttpsProxiesAggregatedListCall) Filter(filter string) *TargetHttpsProxiesAggregatedListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
+// MaxResults sets the optional parameter "maxResults": The maximum
+// number of results per page that should be returned. If the number of
+// available results is larger than maxResults, Compute Engine returns a
+// nextPageToken that can be used to get the next page of results in
+// subsequent list requests. Acceptable values are 0 to 500, inclusive.
+// (Default: 500)
+func (c *TargetHttpsProxiesAggregatedListCall) MaxResults(maxResults int64) *TargetHttpsProxiesAggregatedListCall {
+	c.urlParams_.Set("maxResults", fmt.Sprint(maxResults))
+	return c
+}
+
+// OrderBy sets the optional parameter "orderBy": Sorts list results by
+// a certain order. By default, results are returned in alphanumerical
+// order based on the resource name.
+//
+// You can also sort results in descending order based on the creation
+// timestamp using orderBy="creationTimestamp desc". This sorts results
+// based on the creationTimestamp field in reverse chronological order
+// (newest result first). Use this to sort resources like operations so
+// that the newest operation is returned first.
+//
+// Currently, only sorting by name or creationTimestamp desc is
+// supported.
+func (c *TargetHttpsProxiesAggregatedListCall) OrderBy(orderBy string) *TargetHttpsProxiesAggregatedListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": Specifies a page
+// token to use. Set pageToken to the nextPageToken returned by a
+// previous list request to get the next page of results.
+func (c *TargetHttpsProxiesAggregatedListCall) PageToken(pageToken string) *TargetHttpsProxiesAggregatedListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *TargetHttpsProxiesAggregatedListCall) Fields(s ...googleapi.Field) *TargetHttpsProxiesAggregatedListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *TargetHttpsProxiesAggregatedListCall) IfNoneMatch(entityTag string) *TargetHttpsProxiesAggregatedListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *TargetHttpsProxiesAggregatedListCall) Context(ctx context.Context) *TargetHttpsProxiesAggregatedListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *TargetHttpsProxiesAggregatedListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *TargetHttpsProxiesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/aggregated/targetHttpsProxies")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.targetHttpsProxies.aggregatedList" call.
+// Exactly one of *TargetHttpsProxyAggregatedList or error will be
+// non-nil. Any non-2xx status code is an error. Response headers are in
+// either *TargetHttpsProxyAggregatedList.ServerResponse.Header or (if a
+// response was returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *TargetHttpsProxiesAggregatedListCall) Do(opts ...googleapi.CallOption) (*TargetHttpsProxyAggregatedList, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &TargetHttpsProxyAggregatedList{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Retrieves the list of all TargetHttpsProxy resources, regional and global, available to the specified project.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.targetHttpsProxies.aggregatedList",
+	//   "parameterOrder": [
+	//     "project"
+	//   ],
+	//   "parameters": {
+	//     "filter": {
+	//       "description": "A filter expression that filters resources listed in the response. The expression must specify the field name, a comparison operator, and the value that you want to use for filtering. The value must be a string, a number, or a boolean. The comparison operator must be either =, !=, \u003e, or \u003c.\n\nFor example, if you are filtering Compute Engine instances, you can exclude instances named example-instance by specifying name != example-instance.\n\nYou can also filter nested fields. For example, you could specify scheduling.automaticRestart = false to include instances only if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based on resource labels.\n\nTo filter on multiple expressions, provide each separate expression within parentheses. For example, (scheduling.automaticRestart = true) (cpuPlatform = \"Intel Skylake\"). By default, each expression is an AND expression. However, you can include AND and OR expressions explicitly. For example, (cpuPlatform = \"Intel Skylake\") OR (cpuPlatform = \"Intel Broadwell\") AND (scheduling.automaticRestart = true).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "maxResults": {
+	//       "default": "500",
+	//       "description": "The maximum number of results per page that should be returned. If the number of available results is larger than maxResults, Compute Engine returns a nextPageToken that can be used to get the next page of results in subsequent list requests. Acceptable values are 0 to 500, inclusive. (Default: 500)",
+	//       "format": "uint32",
+	//       "location": "query",
+	//       "minimum": "0",
+	//       "type": "integer"
+	//     },
+	//     "orderBy": {
+	//       "description": "Sorts list results by a certain order. By default, results are returned in alphanumerical order based on the resource name.\n\nYou can also sort results in descending order based on the creation timestamp using orderBy=\"creationTimestamp desc\". This sorts results based on the creationTimestamp field in reverse chronological order (newest result first). Use this to sort resources like operations so that the newest operation is returned first.\n\nCurrently, only sorting by name or creationTimestamp desc is supported.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "pageToken": {
+	//       "description": "Specifies a page token to use. Set pageToken to the nextPageToken returned by a previous list request to get the next page of results.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Name of the project scoping this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/aggregated/targetHttpsProxies",
+	//   "response": {
+	//     "$ref": "TargetHttpsProxyAggregatedList"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *TargetHttpsProxiesAggregatedListCall) Pages(ctx context.Context, f func(*TargetHttpsProxyAggregatedList) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
+}
+
 // method id "compute.targetHttpsProxies.delete":
 
 type TargetHttpsProxiesDeleteCall struct {
@@ -116057,6 +126981,7 @@ func (c *TargetHttpsProxiesDeleteCall) Header() http.Header {
 
 func (c *TargetHttpsProxiesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -116214,6 +127139,7 @@ func (c *TargetHttpsProxiesGetCall) Header() http.Header {
 
 func (c *TargetHttpsProxiesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -116378,6 +127304,7 @@ func (c *TargetHttpsProxiesInsertCall) Header() http.Header {
 
 func (c *TargetHttpsProxiesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -116595,6 +127522,7 @@ func (c *TargetHttpsProxiesListCall) Header() http.Header {
 
 func (c *TargetHttpsProxiesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -116795,6 +127723,7 @@ func (c *TargetHttpsProxiesSetQuicOverrideCall) Header() http.Header {
 
 func (c *TargetHttpsProxiesSetQuicOverrideCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -116968,6 +127897,7 @@ func (c *TargetHttpsProxiesSetSslCertificatesCall) Header() http.Header {
 
 func (c *TargetHttpsProxiesSetSslCertificatesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -117146,6 +128076,7 @@ func (c *TargetHttpsProxiesSetSslPolicyCall) Header() http.Header {
 
 func (c *TargetHttpsProxiesSetSslPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -117319,6 +128250,7 @@ func (c *TargetHttpsProxiesSetUrlMapCall) Header() http.Header {
 
 func (c *TargetHttpsProxiesSetUrlMapCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -117475,6 +128407,7 @@ func (c *TargetHttpsProxiesTestIamPermissionsCall) Header() http.Header {
 
 func (c *TargetHttpsProxiesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -117697,6 +128630,7 @@ func (c *TargetInstancesAggregatedListCall) Header() http.Header {
 
 func (c *TargetInstancesAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -117898,6 +128832,7 @@ func (c *TargetInstancesDeleteCall) Header() http.Header {
 
 func (c *TargetInstancesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -118067,6 +129002,7 @@ func (c *TargetInstancesGetCall) Header() http.Header {
 
 func (c *TargetInstancesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -118243,6 +129179,7 @@ func (c *TargetInstancesInsertCall) Header() http.Header {
 
 func (c *TargetInstancesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -118472,6 +129409,7 @@ func (c *TargetInstancesListCall) Header() http.Header {
 
 func (c *TargetInstancesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -118665,6 +129603,7 @@ func (c *TargetInstancesTestIamPermissionsCall) Header() http.Header {
 
 func (c *TargetInstancesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -118847,6 +129786,7 @@ func (c *TargetPoolsAddHealthCheckCall) Header() http.Header {
 
 func (c *TargetPoolsAddHealthCheckCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -119033,6 +129973,7 @@ func (c *TargetPoolsAddInstanceCall) Header() http.Header {
 
 func (c *TargetPoolsAddInstanceCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -119268,6 +130209,7 @@ func (c *TargetPoolsAggregatedListCall) Header() http.Header {
 
 func (c *TargetPoolsAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -119469,6 +130411,7 @@ func (c *TargetPoolsDeleteCall) Header() http.Header {
 
 func (c *TargetPoolsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -119638,6 +130581,7 @@ func (c *TargetPoolsGetCall) Header() http.Header {
 
 func (c *TargetPoolsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -119797,6 +130741,7 @@ func (c *TargetPoolsGetHealthCall) Header() http.Header {
 
 func (c *TargetPoolsGetHealthCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -119978,6 +130923,7 @@ func (c *TargetPoolsInsertCall) Header() http.Header {
 
 func (c *TargetPoolsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -120207,6 +131153,7 @@ func (c *TargetPoolsListCall) Header() http.Header {
 
 func (c *TargetPoolsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -120419,6 +131366,7 @@ func (c *TargetPoolsRemoveHealthCheckCall) Header() http.Header {
 
 func (c *TargetPoolsRemoveHealthCheckCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -120605,6 +131553,7 @@ func (c *TargetPoolsRemoveInstanceCall) Header() http.Header {
 
 func (c *TargetPoolsRemoveInstanceCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -120798,6 +131747,7 @@ func (c *TargetPoolsSetBackupCall) Header() http.Header {
 
 func (c *TargetPoolsSetBackupCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -120971,6 +131921,7 @@ func (c *TargetPoolsTestIamPermissionsCall) Header() http.Header {
 
 func (c *TargetPoolsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -121148,6 +132099,7 @@ func (c *TargetSslProxiesDeleteCall) Header() http.Header {
 
 func (c *TargetSslProxiesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -121305,6 +132257,7 @@ func (c *TargetSslProxiesGetCall) Header() http.Header {
 
 func (c *TargetSslProxiesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -121469,6 +132422,7 @@ func (c *TargetSslProxiesInsertCall) Header() http.Header {
 
 func (c *TargetSslProxiesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -121686,6 +132640,7 @@ func (c *TargetSslProxiesListCall) Header() http.Header {
 
 func (c *TargetSslProxiesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -121886,6 +132841,7 @@ func (c *TargetSslProxiesSetBackendServiceCall) Header() http.Header {
 
 func (c *TargetSslProxiesSetBackendServiceCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -122060,6 +133016,7 @@ func (c *TargetSslProxiesSetProxyHeaderCall) Header() http.Header {
 
 func (c *TargetSslProxiesSetProxyHeaderCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -122234,6 +133191,7 @@ func (c *TargetSslProxiesSetSslCertificatesCall) Header() http.Header {
 
 func (c *TargetSslProxiesSetSslCertificatesCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -122411,6 +133369,7 @@ func (c *TargetSslProxiesSetSslPolicyCall) Header() http.Header {
 
 func (c *TargetSslProxiesSetSslPolicyCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -122566,6 +133525,7 @@ func (c *TargetSslProxiesTestIamPermissionsCall) Header() http.Header {
 
 func (c *TargetSslProxiesTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -122734,6 +133694,7 @@ func (c *TargetTcpProxiesDeleteCall) Header() http.Header {
 
 func (c *TargetTcpProxiesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -122891,6 +133852,7 @@ func (c *TargetTcpProxiesGetCall) Header() http.Header {
 
 func (c *TargetTcpProxiesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -123055,6 +134017,7 @@ func (c *TargetTcpProxiesInsertCall) Header() http.Header {
 
 func (c *TargetTcpProxiesInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -123272,6 +134235,7 @@ func (c *TargetTcpProxiesListCall) Header() http.Header {
 
 func (c *TargetTcpProxiesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -123472,6 +134436,7 @@ func (c *TargetTcpProxiesSetBackendServiceCall) Header() http.Header {
 
 func (c *TargetTcpProxiesSetBackendServiceCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -123646,6 +134611,7 @@ func (c *TargetTcpProxiesSetProxyHeaderCall) Header() http.Header {
 
 func (c *TargetTcpProxiesSetProxyHeaderCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -123871,6 +134837,7 @@ func (c *TargetVpnGatewaysAggregatedListCall) Header() http.Header {
 
 func (c *TargetVpnGatewaysAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -124071,6 +135038,7 @@ func (c *TargetVpnGatewaysDeleteCall) Header() http.Header {
 
 func (c *TargetVpnGatewaysDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -124239,6 +135207,7 @@ func (c *TargetVpnGatewaysGetCall) Header() http.Header {
 
 func (c *TargetVpnGatewaysGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -124414,6 +135383,7 @@ func (c *TargetVpnGatewaysInsertCall) Header() http.Header {
 
 func (c *TargetVpnGatewaysInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -124642,6 +135612,7 @@ func (c *TargetVpnGatewaysListCall) Header() http.Header {
 
 func (c *TargetVpnGatewaysListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -124854,6 +135825,7 @@ func (c *TargetVpnGatewaysSetLabelsCall) Header() http.Header {
 
 func (c *TargetVpnGatewaysSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -125021,6 +135993,7 @@ func (c *TargetVpnGatewaysTestIamPermissionsCall) Header() http.Header {
 
 func (c *TargetVpnGatewaysTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -125133,6 +136106,259 @@ func (c *TargetVpnGatewaysTestIamPermissionsCall) Do(opts ...googleapi.CallOptio
 
 }
 
+// method id "compute.urlMaps.aggregatedList":
+
+type UrlMapsAggregatedListCall struct {
+	s            *Service
+	project      string
+	urlParams_   gensupport.URLParams
+	ifNoneMatch_ string
+	ctx_         context.Context
+	header_      http.Header
+}
+
+// AggregatedList: Retrieves the list of all UrlMap resources, regional
+// and global, available to the specified project.
+func (r *UrlMapsService) AggregatedList(project string) *UrlMapsAggregatedListCall {
+	c := &UrlMapsAggregatedListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
+	c.project = project
+	return c
+}
+
+// Filter sets the optional parameter "filter": A filter expression that
+// filters resources listed in the response. The expression must specify
+// the field name, a comparison operator, and the value that you want to
+// use for filtering. The value must be a string, a number, or a
+// boolean. The comparison operator must be either =, !=, >, or <.
+//
+// For example, if you are filtering Compute Engine instances, you can
+// exclude instances named example-instance by specifying name !=
+// example-instance.
+//
+// You can also filter nested fields. For example, you could specify
+// scheduling.automaticRestart = false to include instances only if they
+// are not scheduled for automatic restarts. You can use filtering on
+// nested fields to filter based on resource labels.
+//
+// To filter on multiple expressions, provide each separate expression
+// within parentheses. For example, (scheduling.automaticRestart = true)
+// (cpuPlatform = "Intel Skylake"). By default, each expression is an
+// AND expression. However, you can include AND and OR expressions
+// explicitly. For example, (cpuPlatform = "Intel Skylake") OR
+// (cpuPlatform = "Intel Broadwell") AND (scheduling.automaticRestart =
+// true).
+func (c *UrlMapsAggregatedListCall) Filter(filter string) *UrlMapsAggregatedListCall {
+	c.urlParams_.Set("filter", filter)
+	return c
+}
+
+// MaxResults sets the optional parameter "maxResults": The maximum
+// number of results per page that should be returned. If the number of
+// available results is larger than maxResults, Compute Engine returns a
+// nextPageToken that can be used to get the next page of results in
+// subsequent list requests. Acceptable values are 0 to 500, inclusive.
+// (Default: 500)
+func (c *UrlMapsAggregatedListCall) MaxResults(maxResults int64) *UrlMapsAggregatedListCall {
+	c.urlParams_.Set("maxResults", fmt.Sprint(maxResults))
+	return c
+}
+
+// OrderBy sets the optional parameter "orderBy": Sorts list results by
+// a certain order. By default, results are returned in alphanumerical
+// order based on the resource name.
+//
+// You can also sort results in descending order based on the creation
+// timestamp using orderBy="creationTimestamp desc". This sorts results
+// based on the creationTimestamp field in reverse chronological order
+// (newest result first). Use this to sort resources like operations so
+// that the newest operation is returned first.
+//
+// Currently, only sorting by name or creationTimestamp desc is
+// supported.
+func (c *UrlMapsAggregatedListCall) OrderBy(orderBy string) *UrlMapsAggregatedListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
+// PageToken sets the optional parameter "pageToken": Specifies a page
+// token to use. Set pageToken to the nextPageToken returned by a
+// previous list request to get the next page of results.
+func (c *UrlMapsAggregatedListCall) PageToken(pageToken string) *UrlMapsAggregatedListCall {
+	c.urlParams_.Set("pageToken", pageToken)
+	return c
+}
+
+// Fields allows partial responses to be retrieved. See
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
+// for more information.
+func (c *UrlMapsAggregatedListCall) Fields(s ...googleapi.Field) *UrlMapsAggregatedListCall {
+	c.urlParams_.Set("fields", googleapi.CombineFields(s))
+	return c
+}
+
+// IfNoneMatch sets the optional parameter which makes the operation
+// fail if the object's ETag matches the given value. This is useful for
+// getting updates only after the object has changed since the last
+// request. Use googleapi.IsNotModified to check whether the response
+// error from Do is the result of In-None-Match.
+func (c *UrlMapsAggregatedListCall) IfNoneMatch(entityTag string) *UrlMapsAggregatedListCall {
+	c.ifNoneMatch_ = entityTag
+	return c
+}
+
+// Context sets the context to be used in this call's Do method. Any
+// pending HTTP request will be aborted if the provided context is
+// canceled.
+func (c *UrlMapsAggregatedListCall) Context(ctx context.Context) *UrlMapsAggregatedListCall {
+	c.ctx_ = ctx
+	return c
+}
+
+// Header returns an http.Header that can be modified by the caller to
+// add HTTP headers to the request.
+func (c *UrlMapsAggregatedListCall) Header() http.Header {
+	if c.header_ == nil {
+		c.header_ = make(http.Header)
+	}
+	return c.header_
+}
+
+func (c *UrlMapsAggregatedListCall) doRequest(alt string) (*http.Response, error) {
+	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
+	for k, v := range c.header_ {
+		reqHeaders[k] = v
+	}
+	reqHeaders.Set("User-Agent", c.s.userAgent())
+	if c.ifNoneMatch_ != "" {
+		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
+	}
+	var body io.Reader = nil
+	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
+	urls := googleapi.ResolveRelative(c.s.BasePath, "{project}/aggregated/urlMaps")
+	urls += "?" + c.urlParams_.Encode()
+	req, err := http.NewRequest("GET", urls, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+	googleapi.Expand(req.URL, map[string]string{
+		"project": c.project,
+	})
+	return gensupport.SendRequest(c.ctx_, c.s.client, req)
+}
+
+// Do executes the "compute.urlMaps.aggregatedList" call.
+// Exactly one of *UrlMapsAggregatedList or error will be non-nil. Any
+// non-2xx status code is an error. Response headers are in either
+// *UrlMapsAggregatedList.ServerResponse.Header or (if a response was
+// returned at all) in error.(*googleapi.Error).Header. Use
+// googleapi.IsNotModified to check whether the returned error was
+// because http.StatusNotModified was returned.
+func (c *UrlMapsAggregatedListCall) Do(opts ...googleapi.CallOption) (*UrlMapsAggregatedList, error) {
+	gensupport.SetOptions(c.urlParams_, opts...)
+	res, err := c.doRequest("json")
+	if res != nil && res.StatusCode == http.StatusNotModified {
+		if res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, &googleapi.Error{
+			Code:   res.StatusCode,
+			Header: res.Header,
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer googleapi.CloseBody(res)
+	if err := googleapi.CheckResponse(res); err != nil {
+		return nil, err
+	}
+	ret := &UrlMapsAggregatedList{
+		ServerResponse: googleapi.ServerResponse{
+			Header:         res.Header,
+			HTTPStatusCode: res.StatusCode,
+		},
+	}
+	target := &ret
+	if err := gensupport.DecodeResponse(target, res); err != nil {
+		return nil, err
+	}
+	return ret, nil
+	// {
+	//   "description": "Retrieves the list of all UrlMap resources, regional and global, available to the specified project.",
+	//   "httpMethod": "GET",
+	//   "id": "compute.urlMaps.aggregatedList",
+	//   "parameterOrder": [
+	//     "project"
+	//   ],
+	//   "parameters": {
+	//     "filter": {
+	//       "description": "A filter expression that filters resources listed in the response. The expression must specify the field name, a comparison operator, and the value that you want to use for filtering. The value must be a string, a number, or a boolean. The comparison operator must be either =, !=, \u003e, or \u003c.\n\nFor example, if you are filtering Compute Engine instances, you can exclude instances named example-instance by specifying name != example-instance.\n\nYou can also filter nested fields. For example, you could specify scheduling.automaticRestart = false to include instances only if they are not scheduled for automatic restarts. You can use filtering on nested fields to filter based on resource labels.\n\nTo filter on multiple expressions, provide each separate expression within parentheses. For example, (scheduling.automaticRestart = true) (cpuPlatform = \"Intel Skylake\"). By default, each expression is an AND expression. However, you can include AND and OR expressions explicitly. For example, (cpuPlatform = \"Intel Skylake\") OR (cpuPlatform = \"Intel Broadwell\") AND (scheduling.automaticRestart = true).",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "maxResults": {
+	//       "default": "500",
+	//       "description": "The maximum number of results per page that should be returned. If the number of available results is larger than maxResults, Compute Engine returns a nextPageToken that can be used to get the next page of results in subsequent list requests. Acceptable values are 0 to 500, inclusive. (Default: 500)",
+	//       "format": "uint32",
+	//       "location": "query",
+	//       "minimum": "0",
+	//       "type": "integer"
+	//     },
+	//     "orderBy": {
+	//       "description": "Sorts list results by a certain order. By default, results are returned in alphanumerical order based on the resource name.\n\nYou can also sort results in descending order based on the creation timestamp using orderBy=\"creationTimestamp desc\". This sorts results based on the creationTimestamp field in reverse chronological order (newest result first). Use this to sort resources like operations so that the newest operation is returned first.\n\nCurrently, only sorting by name or creationTimestamp desc is supported.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "pageToken": {
+	//       "description": "Specifies a page token to use. Set pageToken to the nextPageToken returned by a previous list request to get the next page of results.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
+	//     "project": {
+	//       "description": "Name of the project scoping this request.",
+	//       "location": "path",
+	//       "pattern": "(?:(?:[-a-z0-9]{1,63}\\.)*(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?):)?(?:[0-9]{1,19}|(?:[a-z0-9](?:[-a-z0-9]{0,61}[a-z0-9])?))",
+	//       "required": true,
+	//       "type": "string"
+	//     }
+	//   },
+	//   "path": "{project}/aggregated/urlMaps",
+	//   "response": {
+	//     "$ref": "UrlMapsAggregatedList"
+	//   },
+	//   "scopes": [
+	//     "https://www.googleapis.com/auth/cloud-platform",
+	//     "https://www.googleapis.com/auth/compute",
+	//     "https://www.googleapis.com/auth/compute.readonly"
+	//   ]
+	// }
+
+}
+
+// Pages invokes f for each page of results.
+// A non-nil error returned from f will halt the iteration.
+// The provided context supersedes any context provided to the Context method.
+func (c *UrlMapsAggregatedListCall) Pages(ctx context.Context, f func(*UrlMapsAggregatedList) error) error {
+	c.ctx_ = ctx
+	defer c.PageToken(c.urlParams_.Get("pageToken")) // reset paging to original point
+	for {
+		x, err := c.Do()
+		if err != nil {
+			return err
+		}
+		if err := f(x); err != nil {
+			return err
+		}
+		if x.NextPageToken == "" {
+			return nil
+		}
+		c.PageToken(x.NextPageToken)
+	}
+}
+
 // method id "compute.urlMaps.delete":
 
 type UrlMapsDeleteCall struct {
@@ -125199,6 +136425,7 @@ func (c *UrlMapsDeleteCall) Header() http.Header {
 
 func (c *UrlMapsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -125357,6 +136584,7 @@ func (c *UrlMapsGetCall) Header() http.Header {
 
 func (c *UrlMapsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -125522,6 +136750,7 @@ func (c *UrlMapsInsertCall) Header() http.Header {
 
 func (c *UrlMapsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -125688,6 +136917,7 @@ func (c *UrlMapsInvalidateCacheCall) Header() http.Header {
 
 func (c *UrlMapsInvalidateCacheCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -125915,6 +137145,7 @@ func (c *UrlMapsListCall) Header() http.Header {
 
 func (c *UrlMapsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -126118,6 +137349,7 @@ func (c *UrlMapsPatchCall) Header() http.Header {
 
 func (c *UrlMapsPatchCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -126274,6 +137506,7 @@ func (c *UrlMapsTestIamPermissionsCall) Header() http.Header {
 
 func (c *UrlMapsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -126446,6 +137679,7 @@ func (c *UrlMapsUpdateCall) Header() http.Header {
 
 func (c *UrlMapsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -126604,6 +137838,7 @@ func (c *UrlMapsValidateCall) Header() http.Header {
 
 func (c *UrlMapsValidateCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -126824,6 +138059,7 @@ func (c *VpnGatewaysAggregatedListCall) Header() http.Header {
 
 func (c *VpnGatewaysAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -127024,6 +138260,7 @@ func (c *VpnGatewaysDeleteCall) Header() http.Header {
 
 func (c *VpnGatewaysDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -127192,6 +138429,7 @@ func (c *VpnGatewaysGetCall) Header() http.Header {
 
 func (c *VpnGatewaysGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -127358,6 +138596,7 @@ func (c *VpnGatewaysGetStatusCall) Header() http.Header {
 
 func (c *VpnGatewaysGetStatusCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -127533,6 +138772,7 @@ func (c *VpnGatewaysInsertCall) Header() http.Header {
 
 func (c *VpnGatewaysInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -127761,6 +139001,7 @@ func (c *VpnGatewaysListCall) Header() http.Header {
 
 func (c *VpnGatewaysListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -127973,6 +139214,7 @@ func (c *VpnGatewaysSetLabelsCall) Header() http.Header {
 
 func (c *VpnGatewaysSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -128207,6 +139449,7 @@ func (c *VpnTunnelsAggregatedListCall) Header() http.Header {
 
 func (c *VpnTunnelsAggregatedListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -128407,6 +139650,7 @@ func (c *VpnTunnelsDeleteCall) Header() http.Header {
 
 func (c *VpnTunnelsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -128575,6 +139819,7 @@ func (c *VpnTunnelsGetCall) Header() http.Header {
 
 func (c *VpnTunnelsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -128750,6 +139995,7 @@ func (c *VpnTunnelsInsertCall) Header() http.Header {
 
 func (c *VpnTunnelsInsertCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -128978,6 +140224,7 @@ func (c *VpnTunnelsListCall) Header() http.Header {
 
 func (c *VpnTunnelsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -129190,6 +140437,7 @@ func (c *VpnTunnelsSetLabelsCall) Header() http.Header {
 
 func (c *VpnTunnelsSetLabelsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -129357,6 +140605,7 @@ func (c *VpnTunnelsTestIamPermissionsCall) Header() http.Header {
 
 func (c *VpnTunnelsTestIamPermissionsCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -129518,6 +140767,7 @@ func (c *ZoneOperationsDeleteCall) Header() http.Header {
 
 func (c *ZoneOperationsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -129653,6 +140903,7 @@ func (c *ZoneOperationsGetCall) Header() http.Header {
 
 func (c *ZoneOperationsGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -129882,6 +141133,7 @@ func (c *ZoneOperationsListCall) Header() http.Header {
 
 func (c *ZoneOperationsListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -130083,6 +141335,7 @@ func (c *ZonesGetCall) Header() http.Header {
 
 func (c *ZonesGetCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
@@ -130301,6 +141554,7 @@ func (c *ZonesListCall) Header() http.Header {
 
 func (c *ZonesListCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders := make(http.Header)
+	reqHeaders.Set("x-goog-api-client", "gl-go/1.11.0 gdcl/20190802")
 	for k, v := range c.header_ {
 		reqHeaders[k] = v
 	}
