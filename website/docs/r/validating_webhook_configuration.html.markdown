@@ -46,7 +46,7 @@ resource "kubernetes_validating_webhook_configuration" "example" {
 
 ## API version support
 
-The provider supports clusters running either `v1` or `v1beta` of the Admission Registration API.
+The provider supports clusters running either `v1` or `v1beta1` of the Admission Registration API.
 
 ## Argument Reference
 
