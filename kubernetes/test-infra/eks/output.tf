@@ -1,5 +1,5 @@
 output "kubeconfig_path" {
-  value = abspath(module.cluster.kubeconfig_filename)
+  value = abspath("${path.root}/kubeconfig")
 }
 
 output "cluster_name" {
