@@ -52,6 +52,7 @@ func TestAccKubernetesStatefulSetV1_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			skipIfClusterVersionLessThan(t, "1.27.0")
+			skipIfRunningInEks(t)
 		},
 		IDRefreshName: resourceName,
 		IDRefreshIgnore: []string{
@@ -134,6 +135,7 @@ func TestAccKubernetesStatefulSetV1_basic_idempotency(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			skipIfClusterVersionLessThan(t, "1.27.0")
+			skipIfRunningInEks(t)
 		},
 		IDRefreshName: resourceName,
 		IDRefreshIgnore: []string{
@@ -172,6 +174,7 @@ func TestAccKubernetesStatefulSetV1_Update(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			skipIfClusterVersionLessThan(t, "1.27.0")
+			skipIfRunningInEks(t)
 		},
 		IDRefreshName: resourceName,
 		IDRefreshIgnore: []string{
@@ -322,7 +325,7 @@ func TestAccKubernetesStatefulSetV1_waitForRollout(t *testing.T) {
 	resourceName := "kubernetes_stateful_set_v1.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:      func() { testAccPreCheck(t) },
+		PreCheck:      func() { testAccPreCheck(t); skipIfRunningInEks(t) },
 		IDRefreshName: resourceName,
 		IDRefreshIgnore: []string{
 			"spec.0.template.0.spec.0.container.0.resources.0.limits",
