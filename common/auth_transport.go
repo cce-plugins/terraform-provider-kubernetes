@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -49,19 +48,11 @@ type HuaweiCloudCredential struct {
 }
 
 func (c *HuaweiCloudCredential) Validation() error {
-	if len(c.ProjectId) == 0 && (len(c.AccessKey) != 0 || len(c.SecretKey) != 0) {
-		return fmt.Errorf(`"hw_project_id", "hw_access_key" and "hw_secret_key" are required`)
-	}
 	return nil
 }
 
 func (c *HuaweiCloudCredential) TransportWrapper(rt http.RoundTripper) http.RoundTripper {
 	if err := c.Validation(); err != nil {
-		return rt
-	}
-
-	if c.ProjectId == "" {
-		log.Printf("[TRACE] do not use Huawei Cloud Certification transport for request")
 		return rt
 	}
 
@@ -78,7 +69,6 @@ type HuaweiCloudAuthTransport struct {
 }
 
 func (d *HuaweiCloudAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Add(ProjectIdHeaderKey, d.hcc.ProjectId)
 	if len(d.hcc.SecurityToken) != 0 {
 		req.Header.Add(SecurityTokenHeaderKey, d.hcc.SecurityToken)
 	}
