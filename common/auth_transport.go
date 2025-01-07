@@ -69,6 +69,9 @@ type HuaweiCloudAuthTransport struct {
 }
 
 func (d *HuaweiCloudAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if len(d.hcc.ProjectId) != 0 {
+		req.Header.Add(ProjectIdHeaderKey, d.hcc.ProjectId)
+	}
 	if len(d.hcc.SecurityToken) != 0 {
 		req.Header.Add(SecurityTokenHeaderKey, d.hcc.SecurityToken)
 	}
