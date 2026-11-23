@@ -201,3 +201,8 @@ The following arguments are supported:
 * `env` - (Optional) Map of environment variables to set when executing the plugin.
 * `ignore_annotations` - (Optional) List of Kubernetes metadata annotations to ignore across all resources handled by this provider for situations where external systems are managing certain resource annotations. This option does not affect annotations within a template block. Each item is a regular expression.
 * `ignore_labels` - (Optional) List of Kubernetes metadata labels to ignore across all resources handled by this provider for situations where external systems are managing certain resource labels. This option does not affect annotations within a template block. Each item is a regular expression.
+* `hw_access_key` - (Optional) Access key for k8s managed in Huawei Cloud CCE. When set together with `hw_secret_key`, every request to the cluster API is signed with the Huawei Cloud signature (SDK-HMAC-SHA256) instead of using token-based authentication. Can be sourced from `HW_ACCESS_KEY`.
+* `hw_secret_key` - (Optional) Secret key for k8s managed in Huawei Cloud CCE. Can be sourced from `HW_SECRET_KEY`.
+* `hw_project_id` - (Optional) Project which contains the k8s cluster instance; sent as the `X-Project-Id` header with every signed request. Can be sourced from `HW_PROJECT_ID`.
+* `hw_security_token` - (Optional) Security token for k8s managed in Huawei Cloud CCE, used with temporary AK/SK credentials; sent as the `X-Security-Token` header with every signed request. Can be sourced from `HW_SECURITY_TOKEN`.
+* `external_headers` - (Optional) Map of additional headers to attach to every request sent to the Kubernetes API server.

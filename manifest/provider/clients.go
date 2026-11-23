@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
@@ -75,27 +76,88 @@ func (ps *RawProviderServer) getRestClient() (rest.Interface, error) {
 	})
 }
 
-// getOAPIv2Foundry returns an interface to request tftype types from an OpenAPIv2 spec
+// getOAPIv2Foundry returns an interface to request tftype types from an OpenAPIv2 spec.
+//
+// The spec source is controlled with the KUBE_OPEN_API_V2 environment variable:
+//
+//	unset (default)  the spec is fetched from the API server; if that fails
+//	                  (for example on CCE clusters accessed through the
+//	                  Huawei Cloud API gateway, which only forwards the
+//	                  documented Kubernetes resource paths and answers 404
+//	                  for /openapi/v2) the copy embedded in the provider
+//	                  binary is used instead
+//	"server"         the spec is only fetched from the API server; errors
+//	                  are not masked by the embedded fallback
+//	"embedded"       the spec embedded in the provider binary is used
+//	anything else    interpreted as a path to a local OpenAPI v2 spec file,
+//	                  e.g. a dump produced by
+//	                  `kubectl get --raw /openapi/v2 > spec.json`
 func (ps *RawProviderServer) getOAPIv2Foundry() (openapi.Foundry, error) {
 	return ps.OAPIFoundry.Get(func() (openapi.Foundry, error) {
-		rc, err := ps.getRestClient()
-		if err != nil {
-			return nil, fmt.Errorf("failed get OpenAPI spec: %s", err)
+		switch src, _ := os.LookupEnv("KUBE_OPEN_API_V2"); src {
+		case "server":
+			return ps.getOAPIv2FoundryFromServer()
+		case "embedded":
+			return ps.getOAPIv2FoundryFromData()
+		case "":
+			foundry, err := ps.getOAPIv2FoundryFromServer()
+			if err == nil {
+				return foundry, nil
+			}
+			ps.logger.Warn("[OpenAPI]", "failed to fetch the OpenAPI spec from the API server, falling back to the spec embedded in the provider binary", "error", err)
+			return ps.getOAPIv2FoundryFromData()
+		default:
+			return ps.getOAPIv2FoundryFromFile(src)
 		}
-
-		rq := rc.Verb("GET").Timeout(30*time.Second).AbsPath("openapi", "v2")
-		rs, err := rq.DoRaw(context.TODO())
-		if err != nil {
-			return nil, fmt.Errorf("failed get OpenAPI spec: %s", err)
-		}
-
-		oapif, err := openapi.NewFoundryFromSpecV2(rs)
-		if err != nil {
-			return nil, fmt.Errorf("failed construct OpenAPI foundry: %s", err)
-		}
-
-		return oapif, nil
 	})
+}
+
+// getOAPIv2FoundryFromServer fetches the OpenAPI v2 spec from the API server.
+func (ps *RawProviderServer) getOAPIv2FoundryFromServer() (openapi.Foundry, error) {
+	rc, err := ps.getRestClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed get OpenAPI spec: %s", err)
+	}
+
+	rq := rc.Verb("GET").Timeout(30*time.Second).AbsPath("openapi", "v2")
+	rs, err := rq.DoRaw(context.TODO())
+	if err != nil {
+		return nil, fmt.Errorf("failed get OpenAPI spec: %s", err)
+	}
+
+	oapif, err := openapi.NewFoundryFromSpecV2(rs)
+	if err != nil {
+		return nil, fmt.Errorf("failed construct OpenAPI foundry: %s", err)
+	}
+
+	return oapif, nil
+}
+
+// getOAPIv2FoundryFromData builds the foundry from the OpenAPI spec embedded
+// in the provider binary.
+func (ps *RawProviderServer) getOAPIv2FoundryFromData() (openapi.Foundry, error) {
+	b, err := openapi.LoadV2data()
+	if err != nil {
+		return nil, err
+	}
+	oapif, err := openapi.NewFoundryFromSpecV2(b)
+	if err != nil {
+		return nil, fmt.Errorf("failed construct OpenAPI foundry: %s", err)
+	}
+	return oapif, nil
+}
+
+// getOAPIv2FoundryFromFile builds the foundry from a local OpenAPI v2 spec file.
+func (ps *RawProviderServer) getOAPIv2FoundryFromFile(fp string) (openapi.Foundry, error) {
+	b, err := os.ReadFile(fp)
+	if err != nil {
+		return nil, err
+	}
+	oapif, err := openapi.NewFoundryFromSpecV2(b)
+	if err != nil {
+		return nil, fmt.Errorf("failed construct OpenAPI foundry: %s", err)
+	}
+	return oapif, nil
 }
 
 func loggingTransport(rt http.RoundTripper) http.RoundTripper {

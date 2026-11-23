@@ -65,6 +65,13 @@ type KubernetesProviderModel struct {
 	IgnoreAnnotations types.List `tfsdk:"ignore_annotations"`
 	IgnoreLabels      types.List `tfsdk:"ignore_labels"`
 
+	HWAccessKey     types.String `tfsdk:"hw_access_key"`
+	HWSecretKey     types.String `tfsdk:"hw_secret_key"`
+	HWProjectID     types.String `tfsdk:"hw_project_id"`
+	HWSecurityToken types.String `tfsdk:"hw_security_token"`
+
+	ExternalHeaders types.Map `tfsdk:"external_headers"`
+
 	Exec []struct {
 		APIVersion types.String            `tfsdk:"api_version"`
 		Command    types.String            `tfsdk:"command"`
@@ -154,6 +161,33 @@ func (p *KubernetesProvider) Schema(ctx context.Context, req provider.SchemaRequ
 			"ignore_labels": schema.ListAttribute{
 				ElementType: types.StringType,
 				Description: "List of Kubernetes metadata labels to ignore across all resources handled by this provider for situations where external systems are managing certain resource labels. Each item is a regular expression.",
+				Optional:    true,
+			},
+
+			// Huawei Cloud CCE (IAM authentication) support. These attributes
+			// are consumed by the SDKv2 side of the muxed provider, which
+			// builds the shared API clients; they are declared here (and in
+			// the manifest provider schema) to keep the provider schema
+			// identical across all muxed servers.
+			"hw_access_key": schema.StringAttribute{
+				Description: "Access key for k8s managed in Huawei Cloud CCE. Can be set with HW_ACCESS_KEY.",
+				Optional:    true,
+			},
+			"hw_secret_key": schema.StringAttribute{
+				Description: "Secret key for k8s managed in Huawei Cloud CCE. Can be set with HW_SECRET_KEY.",
+				Optional:    true,
+			},
+			"hw_project_id": schema.StringAttribute{
+				Description: "Project which contains k8s cluster instance. Can be set with HW_PROJECT_ID.",
+				Optional:    true,
+			},
+			"hw_security_token": schema.StringAttribute{
+				Description: "Security token for k8s managed in Huawei Cloud CCE. Can be set with HW_SECURITY_TOKEN.",
+				Optional:    true,
+			},
+			"external_headers": schema.MapAttribute{
+				ElementType: types.StringType,
+				Description: "Additional headers to attach to every request sent to the Kubernetes API server.",
 				Optional:    true,
 			},
 		},

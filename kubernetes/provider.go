@@ -26,7 +26,10 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/transport"
 	"k8s.io/utils/ptr"
+
+	"github.com/hashicorp/terraform-provider-kubernetes/common"
 
 	apimachineryschema "k8s.io/apimachinery/pkg/runtime/schema"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -212,6 +215,38 @@ func Provider() *schema.Provider {
 				},
 				Optional:    true,
 				Description: "List of Kubernetes metadata labels to ignore across all resources handled by this provider for situations where external systems are managing certain resource labels. Each item is a regular expression.",
+			},
+
+			// Huawei Cloud CCE (IAM authentication) support
+			common.AccessKeyConfiguration: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("HW_ACCESS_KEY", ""),
+				Description: "Access key for k8s managed in Huawei Cloud CCE. Can be set with HW_ACCESS_KEY.",
+			},
+			common.SecretKeyConfiguration: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("HW_SECRET_KEY", ""),
+				Description: "Secret key for k8s managed in Huawei Cloud CCE. Can be set with HW_SECRET_KEY.",
+			},
+			common.ProjectIdConfiguration: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("HW_PROJECT_ID", ""),
+				Description: "Project which contains k8s cluster instance. Can be set with HW_PROJECT_ID.",
+			},
+			common.SecurityTokenConfiguration: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("HW_SECURITY_TOKEN", ""),
+				Description: "Security token for k8s managed in Huawei Cloud CCE. Can be set with HW_SECURITY_TOKEN.",
+			},
+			common.ExternalHeadersConfiguration: {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "Additional headers to attach to every request sent to the Kubernetes API server.",
 			},
 		},
 
@@ -479,12 +514,30 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 
 	cfg.UserAgent = fmt.Sprintf("HashiCorp/1.0 Terraform/%s", terraformVersion)
 
+	var debugTransport transport.WrapperFunc
 	if logging.IsDebugOrHigher() {
 		log.Printf("[DEBUG] Enabling HTTP requests/responses tracing")
-		cfg.WrapTransport = func(rt http.RoundTripper) http.RoundTripper {
+		debugTransport = func(rt http.RoundTripper) http.RoundTripper {
 			return logging.NewSubsystemLoggingHTTPTransport("Kubernetes", rt)
 		}
 	}
+
+	// Huawei Cloud CCE (IAM authentication) support: when AK/SK are provided
+	// every request to the cluster is signed with the Huawei Cloud signature.
+	// transport.Wrappers keeps the debug transport outermost so request
+	// tracing is unaffected, and returns nil when nothing is configured,
+	// leaving the transport chain untouched for non-CCE clusters.
+	cc := &common.HuaweiCloudCredential{
+		AccessKey:     d.Get(common.AccessKeyConfiguration).(string),
+		SecretKey:     d.Get(common.SecretKeyConfiguration).(string),
+		ProjectId:     d.Get(common.ProjectIdConfiguration).(string),
+		SecurityToken: d.Get(common.SecurityTokenConfiguration).(string),
+	}
+	wt, err := common.BuildWrappers(cc, buildExternalHeaderTransport(d))
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+	cfg.WrapTransport = transport.Wrappers(wt, debugTransport)
 
 	ignoreAnnotations := []string{}
 	ignoreLabels := []string{}
@@ -504,6 +557,24 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData, terraformVer
 		IgnoreLabels:        ignoreLabels,
 	}
 	return m, diag.Diagnostics{}
+}
+
+// buildExternalHeaderTransport collects the external_headers provider
+// attribute into an ExternalHeaderTransport, returning nil when unset.
+func buildExternalHeaderTransport(d *schema.ResourceData) *common.ExternalHeaderTransport {
+	headers := make(map[string]string)
+	if extHeaders, ok := d.Get(common.ExternalHeadersConfiguration).(map[string]any); ok {
+		for k, v := range extHeaders {
+			if ev, ok := v.(string); ok {
+				headers[k] = ev
+			}
+		}
+	}
+	if len(headers) == 0 {
+		return nil
+	}
+
+	return common.NewExternalHeaderTransport(headers)
 }
 
 func initializeConfiguration(d *schema.ResourceData) (*restclient.Config, diag.Diagnostics) {

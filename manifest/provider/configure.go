@@ -16,6 +16,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/hashicorp/terraform-provider-kubernetes/common"
 	"github.com/mitchellh/go-homedir"
 	"golang.org/x/mod/semver"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -24,6 +25,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/transport"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
@@ -571,10 +573,51 @@ func (s *RawProviderServer) ConfigureProvider(ctx context.Context, req *tfprotov
 		}
 	}
 
-	cc := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides)
-	clientConfig, err := cc.ClientConfig()
+	// Handle the Huawei Cloud authentication attributes ('hw_*') and the
+	// 'external_headers' attribute. This mirrors what the SDKv2 side of the
+	// provider does in kubernetes/provider.go so the manifest resource (which
+	// builds its own API clients) also signs requests with the Huawei Cloud
+	// signature when AK/SK credentials are configured.
+	//
+	cc := &common.HuaweiCloudCredential{
+		AccessKey:     stringValue(providerConfig, common.AccessKeyConfiguration, "HW_ACCESS_KEY"),
+		SecretKey:     stringValue(providerConfig, common.SecretKeyConfiguration, "HW_SECRET_KEY"),
+		ProjectId:     stringValue(providerConfig, common.ProjectIdConfiguration, "HW_PROJECT_ID"),
+		SecurityToken: stringValue(providerConfig, common.SecurityTokenConfiguration, "HW_SECURITY_TOKEN"),
+	}
+
+	extHeaders := make(map[string]string)
+	if v, ok := providerConfig[common.ExternalHeadersConfiguration]; ok && !v.IsNull() && v.IsFullyKnown() {
+		var headersMap map[string]tftypes.Value
+		err = v.As(&headersMap)
+		if err == nil {
+			for k, hv := range headersMap {
+				var headerValue string
+				if err := hv.As(&headerValue); err == nil {
+					extHeaders[k] = headerValue
+				}
+			}
+		}
+	}
+	var externalHeader *common.ExternalHeaderTransport
+	if len(extHeaders) > 0 {
+		externalHeader = common.NewExternalHeaderTransport(extHeaders)
+	}
+
+	huaweiWrapper, err := common.BuildWrappers(cc, externalHeader)
 	if err != nil {
-		s.logger.Error("[Configure]", "Failed to load config:", dump(cc))
+		response.Diagnostics = append(response.Diagnostics, &tfprotov5.Diagnostic{
+			Severity: tfprotov5.DiagnosticSeverityError,
+			Summary:  "Invalid attribute in provider configuration",
+			Detail:   err.Error(),
+		})
+		return response, nil
+	}
+
+	ccConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides)
+	clientConfig, err := ccConfig.ClientConfig()
+	if err != nil {
+		s.logger.Error("[Configure]", "Failed to load config:", dump(ccConfig))
 		if errors.Is(err, clientcmd.ErrEmptyConfig) {
 			// this is a terrible fix for if the configuration is a calculated value
 			return response, nil
@@ -589,6 +632,11 @@ func (s *RawProviderServer) ConfigureProvider(ctx context.Context, req *tfprotov
 
 	if s.logger.IsTrace() {
 		clientConfig.WrapTransport = loggingTransport
+	}
+	if huaweiWrapper != nil {
+		// transport.Wrappers applies functions in order; the debug transport
+		// set above stays outermost so tracing is unaffected.
+		clientConfig.WrapTransport = transport.Wrappers(huaweiWrapper, clientConfig.WrapTransport)
 	}
 
 	codec := runtime.NoopEncoder{Decoder: scheme.Codecs.UniversalDecoder()}
@@ -609,4 +657,20 @@ func (s *RawProviderServer) canExecute() (resp []*tfprotov5.Diagnostic) {
 		})
 	}
 	return
+}
+
+// stringValue reads a string attribute from the raw provider configuration
+// map, falling back to an environment variable when the attribute is null or
+// unknown. It mirrors the EnvDefaultFunc behaviour of the SDKv2 schema.
+func stringValue(providerConfig map[string]tftypes.Value, attr, env string) string {
+	if v, ok := providerConfig[attr]; ok && !v.IsNull() && v.IsKnown() {
+		var s string
+		if err := v.As(&s); err == nil {
+			return s
+		}
+	}
+	if v, ok := os.LookupEnv(env); ok {
+		return v
+	}
+	return ""
 }
